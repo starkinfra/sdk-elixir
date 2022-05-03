@@ -14,12 +14,17 @@ defmodule StarkInfra.Utils.API do
     |> cast_json_to_api_format()
   end
 
+  def cast_json_to_api_format(struct) when is_struct(struct) do
+    struct
+    |> Map.from_struct()
+    |> cast_json_to_api_format()
+  end
+
   def cast_json_to_api_format(map) when is_map(map) do
     map
     |> Enum.filter(fn {_field, value} -> !is_nil(value) end)
     |> Enum.map(fn {field, value} ->
-      {Case.snake_to_camel(to_string(field)), coerce_types(value)}
-    end)
+      {Case.snake_to_camel(to_string(field)), coerce_types(value)} end)
     |> Enum.into(%{})
   end
 
