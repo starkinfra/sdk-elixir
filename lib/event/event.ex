@@ -1,16 +1,12 @@
 defmodule StarkInfra.Event do
     alias __MODULE__, as: Event
-    alias EllipticCurve.Signature
-    alias EllipticCurve.PublicKey
-    alias EllipticCurve.Ecdsa
     alias StarkInfra.Utils.Rest
     alias StarkInfra.Utils.Check
-    alias StarkInfra.Utils.JSON
     alias StarkInfra.Utils.API
     alias StarkInfra.User.Project
     alias StarkInfra.User.Organization
     alias StarkInfra.Error
-    alias StarkInfra.Utils.Request
+    alias StarkInfra.Utils.Parse
     alias StarkInfra.CreditNote.Log, as: CreditNote
     alias StarkInfra.IssuingCard.Log, as: IssuingCard
     alias StarkInfra.IssuingInvoice.Log, as: IssuingInvoice
