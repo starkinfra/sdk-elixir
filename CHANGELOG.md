@@ -12,6 +12,8 @@ Given a version number MAJOR.MINOR.PATCH, increment:
 - PATCH version when backwards compatible bug **fixes** are implemented.
 
 ## [Unreleased]
+
+## [0.0.1] - 2022-05-27
 ### Added
 - CreditNote resource for money lending with Stark Infra's endorsement
 - PixRequest resource for Indirect and Direct Participants
