@@ -344,7 +344,7 @@ defmodule StarkInfra.PixRequest do
             signature: signature,
             cache_pid: cache_pid,
             key: nil,
-            resource_maker:  &resource_maker/1,
+            resource_maker: &resource_maker/1,
             user: user
         )
     end
@@ -369,7 +369,7 @@ defmodule StarkInfra.PixRequest do
             signature: signature,
             cache_pid: cache_pid,
             key: nil,
-            resource_maker:  &resource_maker/1,
+            resource_maker: &resource_maker/1,
             user: user
         )
     end

@@ -76,7 +76,7 @@ defmodule StarkInfraTest.PixKey do
         assert !is_nil(pix_key.id)
         assert byte_size(pix_key.id) > 0
 
-        {:ok, pix_key} = StarkInfra.PixKey.update(pix_key.id, "reconciliation", %{name: "starkinfra"})
+        {:ok, pix_key} = StarkInfra.PixKey.update(pix_key.id, "reconciliation", name: "starkinfra")
         assert !is_nil(pix_key.id)
         assert byte_size(pix_key.id) > 0
         assert pix_key.name == "starkinfra"
@@ -91,7 +91,7 @@ defmodule StarkInfraTest.PixKey do
         assert !is_nil(pix_key.id)
         assert byte_size(pix_key.id) > 0
 
-        pix_key = StarkInfra.PixKey.update!(pix_key.id, "reconciliation", %{name: "starkinfra"})
+        pix_key = StarkInfra.PixKey.update!(pix_key.id, "reconciliation", name: "starkinfra")
         assert !is_nil(pix_key.id)
         assert byte_size(pix_key.id) > 0
         assert pix_key.name == "starkinfra"

@@ -260,7 +260,7 @@ defmodule StarkInfra.PixInfraction do
         - `:id` [string]: PixInfraction id. ex: '5656565656565656'
         - `:result` [string]: result after the analysis of the PixInfraction. Options: "agreed", "disagreed"
 
-    ## Options:
+    ## Parameters (optional):
         - `:analysis` [string, default nil]: analysis that led to the result.
         - `:user` [Organization/Project, default nil]: Organization or Project struct returned from StarkInfra.project(). Only necessary if default project or organization has not been set in configs.
 
@@ -275,8 +275,8 @@ defmodule StarkInfra.PixInfraction do
     ) ::
         {:ok, PixInfraction.t()} |
         {:error, Error.t()}
-    def update(id, result, parameters \\ %{}) do
-        parameters = Map.put(parameters, "result", result)
+    def update(id, result, parameters \\ []) do
+        parameters = [result: result] ++ parameters
         Rest.patch_id(
             resource(),
             id,
@@ -293,8 +293,8 @@ defmodule StarkInfra.PixInfraction do
         analysis: binary | nil,
         user: Organization.t() | Project.t() | nil
     ) :: any
-    def update!(id, result, parameters \\ %{}) do
-        parameters = Map.put(parameters, "result", result)
+    def update!(id, result, parameters \\ []) do
+        parameters = [result: result] ++ parameters
         Rest.patch_id!(
             resource(),
             id,

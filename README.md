@@ -21,6 +21,15 @@ This SDK version is compatible with the Stark Infra API v2.
     - [Resource listing and manual pagination](#6-resource-listing-and-manual-pagination)
 - [Testing in Sandbox](#testing-in-sandbox) 
 - [Usage](#usage)
+     - [Issuing](#issuing)
+        - [BINs](#query-issuingbins): View available sub-issuer BINs (a.k.a. card number ranges)
+        - [Holders](#create-issuingholders): Manage card holders
+        - [Cards](#create-issuingcards): Create virtual and/or physical cards
+        - [Purchases](#process-purchase-authorizations): Authorize and view your past purchases
+        - [Invoices](#create-issuinginvoices): Add money to your issuing balance
+        - [Withdrawals](#create-issuingwithdrawals): Send money back to your Workspace from your issuing balance
+        - [Balance](#get-your-issuingbalance): View your issuing balance
+        - [Transactions](#query-issuingtransactions): View the transactions that have affected your issuing balance
     - [Pix](#pix)
         - [PixRequests](#create-pixrequests): Create Pix transactions
         - [PixReversals](#create-pixreversals): Reverse Pix transactions
@@ -34,6 +43,11 @@ This SDK version is compatible with the Stark Infra API v2.
         - [PixDomain](#query-pixdomains): View registered SPI participants certificates
     - [Credit Note](#credit-note)
         - [CreditNote](#create-creditnotes): Create credit notes
+    - [Webhook](#webhook):
+        - [Webhook](#create-a-webhook-subscription): Configure your webhook endpoints and subscriptions
+    - [Webhook Events](#webhook-events):
+        - [WebhookEvents](#process-webhook-events): Manage Webhook events
+        - [WebhookEventAttempts](#query-failed-webhook-event-delivery-attempts-information): Query failed webhook event deliveries
 - [Handling errors](#handling-errors)
 - [Help and Feedback](#help-and-feedback)
 
@@ -295,6 +309,409 @@ for the value to be credited to your account.
 
 Here are a few examples on how to use the SDK.
 
+Here are a few examples on how to use the SDK. If you have any doubts, use the built-in
+`h()` function to get more info on the desired functionality
+(for example: `StarkInfra.CreditNote |> h`)
+
+**Note**: Almost all SDK functions also provide a bang (!) version. To simplify the examples, they will be used the most throughout this README.
+
+## Issuing
+
+### Query IssuingBins
+
+To take a look at the sub-issuer BINs available to you, just run the following:
+
+```elixir
+StarkInfra.IssuingBin.query!() 
+|> Enum.take(10) 
+|> IO.inspect
+```
+
+This will tell which card products and card number prefixes you have at your disposal.
+
+### Create IssuingHolders
+
+You can create card holders to which your cards will be bound.
+They support spending rules that will apply to all underlying cards.
+
+```elixir
+StarkInfra.IssuingHolder.create!([
+    %StarkInfra.IssuingHolder{
+        name: "Iron Bank S.A.",
+        taxId: "012.345.678-90"
+        external_id: "1234",
+        tags: ["Traveler Employee"],
+        rules: [
+            %StarkInfra.IssuingRule{
+                name: "General USD",
+                interval: "day"
+                amount: "100000",
+                currencyCode: "USD"
+            }
+        ]
+    }
+])
+|> IO.inspect
+```
+
+**Note**: Instead of using IssuingHolder structs, you can also pass each transfer element in dictionary format
+
+### Query IssuingHolders
+
+You can query multiple holders according to filters.
+
+```elixir
+StarkInfra.IssuingHolder.query!() 
+|> Enum.take(10) 
+|> IO.inspect
+```
+
+### Cancel an IssuingHolder
+
+To cancel a single Issuing Holder by its id, run:
+
+```elixir
+StarkInfra.IssuingHolder.cancel!("5155165527080960") 
+|> IO.inspect
+```
+
+### Get an IssuingHolder
+
+To get a single Issuing Holder by its id, run:
+
+```elixir
+StarkInfra.IssuingHolder.get!("5155165527080960") 
+|> IO.inspect
+```
+
+### Query IssuingHolder logs
+
+You can query holder logs to better understand holder life cycles.
+
+```elixir
+StarkInfra.IssuingHolder.Log.query!(
+    limit: 10,
+    after: Date.utc_today |> Date.add(-30),
+    before: Date.utc_today |> Date.add(-1)
+)
+|> Enum.take(10) 
+|> IO.inspect
+```
+
+### Get an IssuingHolder log
+
+You can also get a specific log by its id.
+
+```elixir
+StarkInfra.IssuingHolder.Log.get!("5155165527080960")
+|> IO.inspect
+```
+
+### Create IssuingCards
+
+You can issue cards with specific spending rules.
+
+```elixir
+StarkInfra.IssuingCard.create!([
+    %StarkInfra.IssuingCard{
+        holder_name: "Developers",
+        holder_tax_id: "012.345.678-90"
+        holder_external_id: "1234",
+        rules: [
+            %StarkInfra.IssuingRule{
+                name: "General",
+                interval: "week"
+                amount: "100000",
+                currencyCode: "USD"
+            }
+        ]
+    }
+]) 
+|> IO.inspect
+```
+
+### Query IssuingCards
+
+You can get a list of created cards given some filters.
+
+```elixir
+StarkInfra.IssuingCard.query!(
+    limit: 10,
+    after: Date.utc_today |> Date.add(-30),
+    before: Date.utc_today |> Date.add(-1),
+) 
+|> Enum.take(10)
+|> IO.inspect
+```
+
+### Get an IssuingCard
+
+After its creation, information on a card may be retrieved by its id.
+
+```elixir
+StarkInfra.IssuingCard.get!("5155165527080960") 
+|> IO.inspect
+```
+
+### Update an IssuingCard
+
+You can update a specific card by its id.
+
+```elixir
+StarkInfra.IssuingCard.update!(
+    "5155165527080960", 
+    status: "blocked"
+) 
+|> IO.inspect
+```
+
+### Cancel an IssuingCard
+
+You can also cancel a card by its id.
+
+```elixir
+StarkInfra.IssuingCard.cancel!("5511989898989")
+|> IO.inspect
+```
+
+### Query IssuingCard logs
+
+Logs are pretty important to understand the life cycle of a card.
+
+```elixir
+StarkInfra.IssuingCard.Log.query!(
+    limit: 10,
+    after: Date.utc_today |> Date.add(-30),
+    before: Date.utc_today |> Date.add(-1)
+) 
+|> Enum.take(10) 
+|> IO.inspect
+```
+
+### Get an IssuingCard log
+
+You can get a single log by its id.
+
+```elixir
+StarkInfra.IssuingCard.Log.get!("5155165527080960") 
+|> IO.inspect
+```
+
+### Process Purchase authorizations
+
+It's easy to process purchase authorizations delivered to your endpoint.
+If you do not approve or decline the authorization within 2 seconds, the authorization will be denied.
+
+```elixir
+request = listen()  # this is the method you made to get the events posted to your webhook
+
+{authorization, _cache_pid} = StarkInfra.IssuingAuthorization.parse!(
+    content: request.content,
+    signature: request.headers["Digital-Signature"]
+)
+
+send_response(  # you should also implement this method
+    StarkInfra.IssuingAuthorization.response!(
+          status: "accepted",
+          amount: authorization.amount,
+          tags: ["my-purchase-id/123"]
+    )
+)
+
+# or
+
+send_response(
+    StarkInfra.IssuingAuthorization.response!(
+          status: "denied",
+          reason: "other",
+          tags: ["other-id/456"]
+    )
+)
+```
+
+### Query IssuingPurchases
+
+You can get a list of created purchases given some filters.
+
+```elixir
+StarkInfra.IssuingPurchase.query!(
+    limit: 10,
+    after: Date.utc_today |> Date.add(-30),
+    before: Date.utc_today |> Date.add(-1),
+) 
+|> Enum.take(10)
+|> IO.inspect
+```
+
+### Get an IssuingPurchase
+
+After its creation, information on a purchase may be retrieved by its id. 
+
+```elixir
+StarkInfra.IssuingPurchase.get!("5155165527080960") 
+|> IO.inspect
+```
+
+### Query IssuingPurchase logs
+
+Logs are pretty important to understand the life cycle of a purchase.
+
+```elixir
+StarkInfra.IssuingPurchase.Log.query!(
+    limit: 50,
+    after: Date.utc_today |> Date.add(-30),
+    before: Date.utc_today |> Date.add(-1)
+) 
+|> Enum.take(50) 
+|> IO.inspect
+```
+
+### Get an IssuingPurchase log
+
+You can get a single log by its id.
+
+```elixir
+StarkInfra.IssuingPurchase.Log.get!("5155165527080960") 
+|> IO.inspect
+```
+
+### Create IssuingInvoices
+
+Issuing invoices are requests to transfer money to your Issuing Balance. When an Issuing Invoice you created is paid, the amount will be added to your Issuing Balance.
+
+```elixir
+StarkInfra.IssuingInvoice.create!([
+    %StarkInfra.IssuingInvoice{
+        amount: 1000
+    }
+]) 
+    |> IO.inspect
+```
+
+**Note**: Instead of using Invoice structs, you can also pass each invoice element in dictionary format
+
+### Get an IssuingInvoice
+
+After its creation, information on an invoice may be retrieved by its id. 
+Its status indicates whether it's been paid.
+
+```elixir
+StarkInfra.IssuingInvoice.get!("5155165527080960") 
+|> IO.inspect
+```
+
+### Query IssuingInvoices
+
+You can get a list of created invoices given some filters.
+
+```elixir
+StarkInfra.IssuingInvoice.query!(
+    limit: 10,
+    after: Date.utc_today |> Date.add(-30),
+    before: Date.utc_today |> Date.add(-1),
+) 
+|> Enum.take(10) 
+|> IO.inspect
+```
+
+### Query IssuingInvoice logs
+
+Logs are pretty important to understand the life cycle of an invoice.
+
+```elixir
+StarkInfra.IssuingInvoice.Log.query!(
+    limit: 50,
+    after: Date.utc_today |> Date.add(-30),
+    before: Date.utc_today |> Date.add(-1)
+) 
+|> Enum.take(10) 
+|> IO.inspect
+```
+
+### Get an IssuingInvoice log
+
+You can get a single log by its id.
+
+```elixir
+StarkInfra.IssuingInvoice.Log.get!("5155165527080960") 
+|> IO.inspect
+```
+
+### Create IssuingWithdrawals
+
+You can create withdrawals to send cash back from your Issuing balance to your Banking balance
+by using the Withdrawal resource.
+
+```elixir
+StarkInfra.IssuingWithdrawal.create!(
+    %StarkInfra.IssuingWithdrawal{
+        amount: 10000,
+        external_id: "123"
+        description: "Sending back",
+    }
+) 
+|> IO.inspect
+```
+
+**Note**: Instead of using Withdrawal structs, you can also pass each withdrawal element in dictionary format
+
+### Get an IssuingWithdrawal
+
+After its creation, information on a withdrawal may be retrieved by its id.
+
+```elixir
+StarkInfra.IssuingWithdrawal.get!("5155165527080960") 
+|> IO.inspect
+```
+
+### Query IssuingWithdrawals
+
+You can get a list of created invoices given some filters.
+
+```elixir
+StarkInfra.IssuingWithdrawal.query!(
+    limit: 10,
+    after: Date.utc_today |> Date.add(-30),
+    before: Date.utc_today |> Date.add(-1),
+) 
+|> Enum.take(10) 
+|> IO.inspect
+```
+
+### Get your IssuingBalance
+
+To know how much money you have available to run authorizations, run:
+
+```elixir
+StarkInfra.IssuingBalance.get!() 
+|> IO.inspect
+```
+
+### Query IssuingTransactions
+
+To understand your balance changes (issuing statement), you can query
+transactions. Note that our system creates transactions for you when
+you make purchases, withdrawals, receive issuing invoice payments, for example.
+
+```elixir
+StarkInfra.IssuingTransaction.query!(
+    limit: 10,
+    after: Date.utc_today |> Date.add(-30),
+    before: Date.utc_today |> Date.add(-1),
+) 
+|> Enum.take(10) 
+|> IO.inspect
+```
+
+### Get an IssuingTransaction
+
+You can get a specific transaction by its id:
+
+```elixir
+StarkInfra.IssuingTransaction.get!("5155165527080960") 
+|> IO.inspect
+```
+
 ## Pix
 
 ### Create PixRequests
@@ -303,22 +720,22 @@ You can create a Pix request to transfer money from one of your users to anyone 
 
 ```elixir
 StarkInfra.PixRequest.create!([
-  %StarkInfra.PixRequest{
-    amount: 100,
-    external_id: "141234121",
-    sender_account_number: "00000-0",
-    sender_branch_code: "0001",
-    sender_account_type: "checking",
-    sender_name: "Tyrion Lannister",
-    sender_tax_id: "012.345.678-90",
-    receiver_bank_code: "00000001",
-    receiver_account_number: "00000-0",
-    receiver_branch_code: "0001",
-    receiver_account_type: "checking",
-    receiver_name: "Jamie Lannister",
-    receiver_tax_id: "012.345.678-90",
-    end_to_end_id: StarkInfra.Utils.EndToEndId.generate("00000001") # Pass your bank code to create an end to end ID
-  }
+    %StarkInfra.PixRequest{
+        amount: 100,
+        external_id: "141234121",
+        sender_account_number: "00000-0",
+        sender_branch_code: "0001",
+        sender_account_type: "checking",
+        sender_name: "Tyrion Lannister",
+        sender_tax_id: "012.345.678-90",
+        receiver_bank_code: "00000001",
+        receiver_account_number: "00000-0",
+        receiver_branch_code: "0001",
+        receiver_account_type: "checking",
+        receiver_name: "Jamie Lannister",
+        receiver_tax_id: "012.345.678-90",
+        end_to_end_id: StarkInfra.Utils.EndToEndId.generate("00000001") # Pass your bank code to create an end to end ID
+    }
 ]) |> IO.inspect
 ```
 
@@ -329,13 +746,15 @@ StarkInfra.PixRequest.create!([
 You can query multiple Pix requests according to filters.
 
 ```elixir
-requests = StarkInfra.PixRequest.query!(
-  after: Date.utc_today |> Date.add(-30),
-  before: Date.utc_today |> Date.add(-1),
-  status: ["success"],
-  tags: ["iron", "suit"],
-  end_to_end_ids: ["E79457883202101262140HHX553UPqeq"]
-) |> Enum.take(10) |> IO.inspect
+StarkInfra.PixRequest.query!(
+    after: Date.utc_today |> Date.add(-30),
+    before: Date.utc_today |> Date.add(-1),
+    status: ["success"],
+    tags: ["iron", "suit"],
+    end_to_end_ids: ["E79457883202101262140HHX553UPqeq"]
+) 
+|> Enum.take(10) 
+|> IO.inspect
 ```
 
 ### Get a PixRequest
@@ -343,7 +762,7 @@ requests = StarkInfra.PixRequest.query!(
 After its creation, information on a Pix request may be retrieved by its id. Its status indicates whether it has been paid.
 
 ```elixir
-request = StarkInfra.PixRequest.get!("5155165527080960") |> IO.inspect
+StarkInfra.PixRequest.get!("5155165527080960") |> IO.inspect
 ```
 
 ### Query PixRequest logs
@@ -352,9 +771,11 @@ You can query Pix request logs to better understand Pix request life cycles.
 
 ```elixir
 logs = StarkInfra.PixRequest.Log.query!(
-  after: Date.utc_today |> Date.add(-30),
-  before: Date.utc_today |> Date.add(-1)
-) |> Enum.take(10) |> IO.inspect
+    after: Date.utc_today |> Date.add(-30),
+    before: Date.utc_today |> Date.add(-1)
+) 
+|> Enum.take(10)
+|> IO.inspect
 ```
 
 ### Get a PixRequest log
@@ -362,7 +783,7 @@ logs = StarkInfra.PixRequest.Log.query!(
 You can also get a specific log by its id.
 
 ```elixir
-log = StarkInfra.PixRequest.Log.get!("5155165527080960") |> IO.inspect
+StarkInfra.PixRequest.Log.get!("5155165527080960") |> IO.inspect
 ```
 
 ### Create PixReversals
@@ -371,11 +792,13 @@ You can reverse a PixRequest either partially or totally using a PixReversal.
 
 ```elixir
 StarkInfra.PixReversal.create!([
-  %StarkInfra.PixReversal{
-    amount: 100,
-    external_id: "my_unique_id",
-    end_to_end_id: "E00000000202201060100rzsJzG9PzMg",
-  }]) |> IO.inspect
+    %StarkInfra.PixReversal{
+        amount: 100,
+        external_id: "my_unique_id",
+        end_to_end_id: "E00000000202201060100rzsJzG9PzMg",
+    }
+]) 
+|> IO.inspect
 ```
 
 ### Query PixReversals 
@@ -383,14 +806,16 @@ StarkInfra.PixReversal.create!([
 You can query multiple Pix reversals according to filters. 
 
 ```elixir
-reversals = StarkInfra.PixReversal.query!(
-  limit: 10,
-  after: Date.utc_today |> Date.add(-30),
-  before: Date.utc_today |> Date.add(-1),
-  status: ["created"],
-  tags: ["iron", "suit"],
-  return_ids: ["D20018183202202030109X3OoBHG74wo"]
-) |> Enum.take(10) |> IO.inspect
+StarkInfra.PixReversal.query!(
+    limit: 10,
+    after: Date.utc_today |> Date.add(-30),
+    before: Date.utc_today |> Date.add(-1),
+    status: ["created"],
+    tags: ["iron", "suit"],
+    return_ids: ["D20018183202202030109X3OoBHG74wo"]
+) 
+|> Enum.take(10) 
+|> IO.inspect
 ```
 
 ### Get a PixReversal
@@ -399,7 +824,7 @@ After its creation, information on a Pix reversal may be retrieved by its id.
 Its status indicates whether it has been successfully processed.
 
 ```elixir
-reversal = StarkInfra.PixReversal.get!("5155165527080960") |> IO.inspect
+StarkInfra.PixReversal.get!("5155165527080960") |> IO.inspect
 ```
 
 ### Query PixReversal logs
@@ -407,11 +832,13 @@ reversal = StarkInfra.PixReversal.get!("5155165527080960") |> IO.inspect
 You can query Pix reversal logs to better understand their life cycles. 
 
 ```elixir
-logs = StarkInfra.PixReversal.Log.query!(
-  limit: 50,
-  after: Date.utc_today |> Date.add(-30),
-  before: Date.utc_today |> Date.add(-1)
-) |> Enum.take(10) |> IO.inspect
+StarkInfra.PixReversal.Log.query!(
+    limit: 50,
+    after: Date.utc_today |> Date.add(-30),
+    before: Date.utc_today |> Date.add(-1)
+)
+|> Enum.take(10)
+|> IO.inspect
 ```
 
 ### Get a PixReversal log
@@ -419,7 +846,7 @@ logs = StarkInfra.PixReversal.Log.query!(
 You can also get a specific log by its id.
 
 ```elixir
-log = StarkInfra.PixReversal.Log.get!("5155165527080960") |> IO.inspect
+StarkInfra.PixReversal.Log.get!("5155165527080960") |> IO.inspect
 ```
 
 ### Get your PixBalance 
@@ -427,7 +854,7 @@ log = StarkInfra.PixReversal.Log.get!("5155165527080960") |> IO.inspect
 To see how much money you have in your account, run:
 
 ```elixir
-balance = StarkInfra.PixBalance.get!() |> IO.inspect
+StarkInfra.PixBalance.get!() |> IO.inspect
 ```
 
 ### Create a PixStatement
@@ -437,10 +864,11 @@ To create a statement of all the transactions that happened on your account duri
 
 ```elixir
 statement = StarkInfra.PixStatement.create!(
-  after: Date.utc_today |> Date.add(-1), # This is the date that you want to create a statement.
-  before: Date.utc_today |> Date.add(-1), # After and before must be the same date.
-  type: "transaction"  # Options are "interchange", "interchangeTotal", "transaction".
-) |> IO.inspect
+    after: Date.utc_today |> Date.add(-1), # This is the date that you want to create a statement.
+    before: Date.utc_today |> Date.add(-1), # After and before must be the same date.
+    type: "transaction"  # Options are "interchange", "interchangeTotal", "transaction".
+)
+|> IO.inspect
 ```
 
 ### Query PixStatements
@@ -449,8 +877,10 @@ You can query multiple Pix statements according to filters.
 
 ```elixir
 statements = StarkInfra.PixStatement.query!(
-  limit: 50,
-) |> Enum.take(10) |> IO.inspect
+    limit: 50,
+)
+|> Enum.take(10)
+|> IO.inspect
 ```
 
 ### Get a PixStatement
@@ -472,136 +902,144 @@ IO.binwrite(file, statement_csv)
 File.close(file)
 ```
 
-## Create a PixKey
+### Create a PixKey
 
 You can create a Pix Key to link a bank account information to a key id:
 
 ```elixir
 key = StarkInfra.PixKey.create!(
-  %StarkInfra.PixKey{
-    key_id: "+5511989898989",
-    bank_code: "34052649",
-    account_number: "052649",
-    branch_code: "0001",
-    account_type: "checking",
-    name: "Tyrion Lannister",
-    tax_id: "012.345.678-90",
-  }
+    %StarkInfra.PixKey{
+        key_id: "+5511989898989",
+        bank_code: "34052649",
+        account_number: "052649",
+        branch_code: "0001",
+        account_type: "checking",
+        name: "Tyrion Lannister",
+        tax_id: "012.345.678-90",
+    }
 ) |> IO.inspect
 ```
 
-## Query PixKeys
+### Query PixKeys
 
 You can query multiple Pix keys you own according to filters.
 
 ```elixir
 keys = StarkInfra.PixKey.query!(
-  limit: 1,
-  after: Date.utc_today |> Date.add(-30),
-  before: Date.utc_today |> Date.add(-1),
-  status: ["registered"],
-  tags: ["iron", "suit"],
-  ids: ["+5511989898989"],
-) |> Enum.take(10) |> IO.inspect
+    limit: 1,
+    after: Date.utc_today |> Date.add(-30),
+    before: Date.utc_today |> Date.add(-1),
+    status: ["registered"],
+    tags: ["iron", "suit"],
+    ids: ["+5511989898989"],
+)
+|> Enum.take(10) 
+|> IO.inspect
 ```
 
-## Get a PixKey
+### Get a PixKey
 
 Information on a Pix key may be retrieved by its id and the tax ID of the consulting agent.
 An endToEndId must be informed so you can link any resulting purchases to this query,
 avoiding sweep blocks by the Central Bank.
 
 ```elixir
-key = StarkInfra.PixKey.get!("+5511989898989", payer_id: "012.345.678-90") |> IO.inspect
+StarkInfra.PixKey.get!("+5511989898989", payer_id: "012.345.678-90") |> IO.inspect
 ```
 
-## Patch a PixKey
+### Patch a PixKey
 
 Update the account information linked to a Pix Key.
 
 ```elixir
-key = StarkInfra.PixKey.update!(
-  "+5511989898989", 
-  "reason": "reconciliation",
-  %{"name": "Tyrion Lannister"}
-) |> IO.inspect
+StarkInfra.PixKey.update!(
+    "+5511989898989", 
+    reason: "reconciliation",
+    name: "Tyrion Lannister"
+)
+|> IO.inspect
 ```
 
-## Cencel a PixKey
+### Cencel a PixKey
 
 Cancel a specific Pix Key using its id.
 
 ```elixir
-key = StarkInfra.PixKey.cancel!("+5511989898989") |> IO.inspect
+StarkInfra.PixKey.cancel!("+5511989898989") |> IO.inspect
 ```
 
-## Query PixKey logs
+### Query PixKey logs
 
 You can query Pix key logs to better understand a Pix key life cycle. 
 
 ```elixir
-logs = StarkInfra.PixKey.Log.query!(
-  limit: 50,
-  ids: ["5729405850615808"],
-  after: Date.utc_today |> Date.add(-30),
-  before: Date.utc_today |> Date.add(-1),
-  types: ["created"],
-  key_ids: ["+5511989898989"]
-) |> Enum.take(10) |> IO.inspect
+StarkInfra.PixKey.Log.query!(
+    limit: 50,
+    ids: ["5729405850615808"],
+    after: Date.utc_today |> Date.add(-30),
+    before: Date.utc_today |> Date.add(-1),
+    types: ["created"],
+    key_ids: ["+5511989898989"]
+)
+|> Enum.take(10)
+|> IO.inspect
 ```
 
-## Get a PixKey log
+### Get a PixKey log
 
 You can also get a specific log by its id.
 
 ```elixir
-log = StarkInfra.PixKey.Log.get!("5729405850615808") |> IO.inspect
+StarkInfra.PixKey.Log.get!("5729405850615808") |> IO.inspect
 ```
 
-## Create a PixClaim
+### Create a PixClaim
 
 You can create a Pix claim to request the transfer of a Pix key from another bank to one of your accounts:
 
 ```elixir
-claim = StarkInfra.PixClaim.create!(
-  %StarkInfra.PixClaim{
-    account_created: DateTime.utc_now(),
-    account_number: "123456789",
-    account_type: "checking",
-    branch_code: "0001",
-    name: "Jamie Lanister",
-    tax_id: "012.345.678-90",
-    key_id: "+5511933571793",
-  }
-) |> IO.inspect
+StarkInfra.PixClaim.create!(
+    %StarkInfra.PixClaim{
+        account_created: DateTime.utc_now(),
+        account_number: "123456789",
+        account_type: "checking",
+        branch_code: "0001",
+        name: "Jamie Lanister",
+        tax_id: "012.345.678-90",
+        key_id: "+5511933571793",
+    }
+)
+|> IO.inspect
 ```
 
-## Query PixClaims
+### Query PixClaims
 
 You can query multiple Pix claims according to filters.
 
 ```elixir
-claims = StarkInfra.PixClaim.query!(
-  limit: 1,
-  after: Date.utc_today |> Date.add(-30),
-  before: Date.utc_today |> Date.add(-1),
-  status: ["registered"],
-  type: "ownership",
-  agent: "claimed",
-  key_type: "phone",
-  key_id: "+5511989898989"
-) |> Enum.take(10) |> IO.inspect
+StarkInfra.PixClaim.query!(
+    limit: 1,
+    after: Date.utc_today |> Date.add(-30),
+    before: Date.utc_today |> Date.add(-1),
+    status: ["registered"],
+    type: "ownership",
+    agent: "claimed",
+    key_type: "phone",
+    key_id: "+5511989898989"
+)
+|> Enum.take(10)
+|> IO.inspect
 ```
 
-## Get a PixClaim
+### Get a PixClaim
 
 After its creation, information on a Pix claim may be retrieved by its id.
 
 ```elixir
-claim = StarkInfra.PixClaim.get!("5729405850615808") |> IO.inspect
+StarkInfra.PixClaim.get!("5729405850615808") |> IO.inspect
 ```
 
-## Patch a PixClaim
+### Patch a PixClaim
 
 A Pix Claim can be confirmed or canceled by patching its status.
 A received Pix Claim must be confirmed by the donor to be completed.
@@ -609,43 +1047,50 @@ Ownership Pix Claims can only be canceled by the donor if the reason is "fraud".
 A sent Pix Claim can also be canceled.
 
 ```elixir
-claim = StarkInfra.PixClaim.update!("5729405850615808", "confirmed") |> IO.inspect
+StarkInfra.PixClaim.update!(
+    "5729405850615808", 
+    status: "confirmed"
+) |> IO.inspect
 ```
 
-## Query PixClaim logs
+### Query PixClaim logs
 
 You can query Pix claim logs to better understand Pix claim life cycles.
 
 ```elixir
 logs = StarkInfra.PixClaim.Log.query!(
-  limit: 50,
-  after: Date.utc_today |> Date.add(-30),
-  before: Date.utc_today |> Date.add(-1),
-  types: ["registered"],
-  claim_ids: ["5719405850615809"]
-) |> Enum.take(10) |> IO.inspect
+    limit: 50,
+    after: Date.utc_today |> Date.add(-30),
+    before: Date.utc_today |> Date.add(-1),
+    types: ["registered"],
+    claim_ids: ["5719405850615809"]
+)
+|> Enum.take(10)
+|> IO.inspect
 ```
 
-## Get a PixClaim log
+### Get a PixClaim log
 
 You can also get a specific log by its id.
 
 ```elixir
-log = StarkInfra.PixClaim.Log.get!("5719405850615809") |> IO.inspect
+StarkInfra.PixClaim.Log.get!("5719405850615809") |> IO.inspect
 ```
+
 ### Create a PixDirector
 
 To register the Pix director contact information at the Central Bank, run the following:
 
 ```elixir
-director = StarkInfra.PixDirector.create!(
-  %StarkInfra.PixDirector{
-    name: "Tyrion Lannister",
-    email: "tyrion@lannister.com",
-    phone: "+5511989898989",
-    tax_id: "012.345.678-90",
-  }
-) |> IO.inspect
+StarkInfra.PixDirector.create!(
+    %StarkInfra.PixDirector{
+        name: "Tyrion Lannister",
+        email: "tyrion@lannister.com",
+        phone: "+5511989898989",
+        tax_id: "012.345.678-90",
+    }
+) 
+|> IO.inspect
 ```
 
 ### Create PixInfractions
@@ -654,12 +1099,13 @@ Pix infractions are used to report transactions that raise fraud suspicion, to r
 reverse a refund. Pix infractions can be created by either participant of a transaction.
 
 ```elixir
-infraction = StarkInfra.PixInfraction.create!([
-  %StarkInfra.PixInfraction{
-    reference_id: "E20018183202201201450u34sDGd19lz",
-    type: "fraud",
-  }
-]) |> IO.inspect
+StarkInfra.PixInfraction.create!([
+    %StarkInfra.PixInfraction{
+        reference_id: "E20018183202201201450u34sDGd19lz",
+        type: "fraud",
+    }
+])
+|> IO.inspect
 ```
 
 ### Query PixInfractions
@@ -667,13 +1113,15 @@ infraction = StarkInfra.PixInfraction.create!([
 You can query multiple Pix infractions according to filters.
 
 ```elixir
-infractions = StarkInfra.PixInfraction.query!(
-  limit: 10,
-  after: "2022-01-01",
-  before: "2022-01-12",
-  status: ["delivered"],
-  ids: ["5729405850615808"],
-) |> Enum.take(10) |> IO.inspect
+StarkInfra.PixInfraction.query!(
+    limit: 10,
+    after: "2022-01-01",
+    before: "2022-01-12",
+    status: ["delivered"],
+    ids: ["5729405850615808"],
+)
+|> Enum.take(10)
+|> IO.inspect
 ```
 
 ### Get a PixInfraction
@@ -681,7 +1129,7 @@ infractions = StarkInfra.PixInfraction.query!(
 After its creation, information on a Pix Infraction may be retrieved by its id.
 
 ```elixir
-infraction = StarkInfra.PixInfraction.get!("5155165527080960") |> IO.inspect
+StarkInfra.PixInfraction.get!("5155165527080960") |> IO.inspect
 ```
 
 ### Update a PixInfraction
@@ -690,7 +1138,10 @@ A received Pix Infraction can be confirmed or declined by patching its status.
 After a Pix Infraction is patched, its status changes to closed.
 
 ```elixir
-infraction = StarkInfra.PixInfraction.update!("5155165527080960", result: "agreed") |> IO.inspect
+StarkInfra.PixInfraction.update!(
+    "5155165527080960", 
+    result: "agreed"
+) |> IO.inspect
 ```
 
 ### Cancel a PixInfraction
@@ -698,7 +1149,7 @@ infraction = StarkInfra.PixInfraction.update!("5155165527080960", result: "agree
 Cancel a specific Pix Infraction using its id.
 
 ```elixir
-infraction = StarkInfra.PixInfraction.cancel!("5155165527080960") |> IO.inspect
+StarkInfra.PixInfraction.cancel!("5155165527080960") |> IO.inspect
 ```
 
 ### Query PixInfraction logs
@@ -706,14 +1157,16 @@ infraction = StarkInfra.PixInfraction.cancel!("5155165527080960") |> IO.inspect
 You can query Pix infractions logs to better understand their life cycles. 
 
 ```elixir
-logs = StarkInfra.PixInfraction.Log.query!(
-  limit: 50,
-  ids: ["5729405850615808"],
-  after: "2022-01-01",
-  before: "2022-01-20",
-  types: ["created"],
-  infraction_ids: ["5155165527080960"]
-) |> Enum.take(50) |> IO.inspect
+StarkInfra.PixInfraction.Log.query!(
+    limit: 50,
+    ids: ["5729405850615808"],
+    after: "2022-01-01",
+    before: "2022-01-20",
+    types: ["created"],
+    infraction_ids: ["5155165527080960"]
+)
+|> Enum.take(50)
+|> IO.inspect
 ```
 
 ### Get a PixInfraction log
@@ -721,7 +1174,7 @@ logs = StarkInfra.PixInfraction.Log.query!(
 You can also get a specific log by its id.
 
 ```elixir
-log = StarkInfra.PixInfraction.Log.get!("5155165527080960") |> IO.inspect
+StarkInfra.PixInfraction.Log.get!("5155165527080960") |> IO.inspect
 ```
 
 ### Create PixChargebacks
@@ -730,13 +1183,15 @@ A Pix chargeback can be created when fraud is detected on a transaction or a sys
 results in an erroneous transaction.
 
 ```elixir
-chargebacks = StarkInfra.PixChargeback.create!(
-  %StarkInfra.PixChargeback{
-    amount: 100,
-    reference_id: "E20018183202201201450u34sDGd19lz",
-    reason: "fraud",
-  }
-) |> Enum.take(100) |> IO.inspect
+StarkInfra.PixChargeback.create!(
+    %StarkInfra.PixChargeback{
+        amount: 100,
+        reference_id: "E20018183202201201450u34sDGd19lz",
+        reason: "fraud",
+    }
+)
+|> Enum.take(100)
+|> IO.inspect
 ```
 
 ### Query PixChargebacks
@@ -745,12 +1200,14 @@ You can query multiple Pix chargebacks according to filters.
 
 ```elixir
 chargebacks = StarkInfra.PixChargeback.query!(
-  limit: 1,
-  after: "2022-01-01",
-  before: "2022-01-12",
-  status: ["registered"],
-  ids: ["5155165527080960"]
-) |> Enum.take(1) |> IO.inspect
+    limit: 1,
+    after: "2022-01-01",
+    before: "2022-01-12",
+    status: ["registered"],
+    ids: ["5155165527080960"]
+)
+|> Enum.take(1)
+|> IO.inspect
 ```
 
 ### Get a PixChargeback
@@ -758,7 +1215,7 @@ chargebacks = StarkInfra.PixChargeback.query!(
 After its creation, information on a Pix Chargeback may be retrieved by its.
 
 ```elixir
-chargeback = StarkInfra.PixChargeback.get!("5155165527080960") |> IO.inspect
+StarkInfra.PixChargeback.get!("5155165527080960") |> IO.inspect
 ```
 
 ### Update a PixChargeback
@@ -767,10 +1224,10 @@ A received Pix Chargeback can be accepted or rejected by patching its status.
 After a Pix Chargeback is patched, its status changes to closed.
 
 ```elixir
-chargeback = StarkInfra.PixChargeback.update!(
-  "5155165527080960", 
-  result: "accepted",
-  %{"reversal_reference_id": StarkInfra.Utils.ReturnId.create!("20018183")}
+StarkInfra.PixChargeback.update!(
+    "5155165527080960", 
+    result: "accepted",
+    reversal_reference_id: StarkInfra.Utils.ReturnId.create!("20018183")
 ) |> IO.inspect
 ```
 
@@ -779,7 +1236,7 @@ chargeback = StarkInfra.PixChargeback.update!(
 Cancel a specific Pix Chargeback using its id.
 
 ```elixir
-chargeback = StarkInfra.PixChargeback.cancel!("5155165527080960") |> IO.inspect
+StarkInfra.PixChargeback.cancel!("5155165527080960") |> IO.inspect
 ```
 
 ### Query PixChargeback logs
@@ -787,21 +1244,23 @@ chargeback = StarkInfra.PixChargeback.cancel!("5155165527080960") |> IO.inspect
 You can query Pix chargeback logs to better understand Pix chargeback life cycles. 
 
 ```elixir
-logs = StarkInfra.PixChargeback.Log.query!(
-  limit: 50,
-  ids: ["5729405850615808"],
-  after: "2022-01-01",
-  before: "2022-01-20",
-  types: ["created"],
-  chargeback_ids: ["5155165527080960"]
-) |> Enum.take(50) |> IO.inspect
+StarkInfra.PixChargeback.Log.query!(
+    limit: 50,
+    ids: ["5729405850615808"],
+    after: "2022-01-01",
+    before: "2022-01-20",
+    types: ["created"],
+    chargeback_ids: ["5155165527080960"]
+)
+|> Enum.take(50)
+|> IO.inspect
 ```
 ### Get a PixChargeback log
 
 You can also get a specific log by its id.
 
 ```elixir
-log = StarkInfra.PixChargeback.Log.get!("5155165527080960") |> IO.inspect
+StarkInfra.PixChargeback.Log.get!("5155165527080960") |> IO.inspect
 ```
 
 ### Query PixDomains
@@ -809,7 +1268,7 @@ log = StarkInfra.PixChargeback.Log.get!("5155165527080960") |> IO.inspect
 You can query for domains of registered SPI participants able to issue dynamic QR Codes.
 
 ```elixir
-domains = StarkInfra.PixDomain.query!() |> IO.inspect
+StarkInfra.PixDomain.query!() |> IO.inspect
 ```
 
 ## Credit Note
@@ -819,38 +1278,39 @@ domains = StarkInfra.PixDomain.query!() |> IO.inspect
 You can create a Credit Note to generate a CCB contract:
 
 ```elixir
-creditnote = StarkInfra.CreditNote.create!([
-  %StarkInfra.CreditNote{
-    template_id: "5686220801703936",
-    name: "Jamie Lannister",
-    tax_id: "012.345.678-90",
-    nominal_amount: 100000,
-    scheduled: "2022-04-28",
-    invoices: [
-      %StarkInfra.CreditNote.Invoice{
-          due: "2023-06-25",
-          amount: 120000,
-          fine: 10,
-          interest: 2
-      }
-    ],
-    tags: ["test", "testing"],
-    payment: %StarkInfra.CreditNote.Transfer{
-      due: "2023-06-25",
-      amount: 120000,
-      fine: 10,
-      interest: 2
+StarkInfra.CreditNote.create!([
+    %StarkInfra.CreditNote{
+        template_id: "5686220801703936",
+        name: "Jamie Lannister",
+        tax_id: "012.345.678-90",
+        nominal_amount: 100000,
+        scheduled: "2022-04-28",
+        invoices: [
+            %StarkInfra.CreditNote.Invoice{
+                due: "2023-06-25",
+                amount: 120000,
+                fine: 10,
+                interest: 2
+            }
+        ],
+        tags: ["test", "testing"],
+        payment: %StarkInfra.CreditNote.Transfer{
+            due: "2023-06-25",
+            amount: 120000,
+            fine: 10,
+            interest: 2
+        }
+        signers: [
+            %StarkInfra.CreditNote.Transfer{
+                due: "2023-06-25",
+                amount: 120000,
+                fine: 10,
+                interest: 2
+            }
+        ]
     }
-    signers: [
-      %StarkInfra.CreditNote.Transfer{
-        due: "2023-06-25",
-        amount: 120000,
-        fine: 10,
-        interest: 2
-      }
-    ]
-  }
-]) |> IO.inspect
+])
+|> IO.inspect
 ```
 
 **Note**: Instead of using CreditNote structs, you can also pass each CreditNote element in map format
@@ -860,13 +1320,15 @@ creditnote = StarkInfra.CreditNote.create!([
 You can query multiple credit notes according to filters.
 
 ```elixir
-credit_note = StarkInfra.CreditNote.query!(
+StarkInfra.CreditNote.query!(
   limit: 10,
   after: Date.utc_today |> Date.add(-30),
   before: Date.utc_today |> Date.add(-1),
   status: ["success"],
   tags: ["iron", "suit"]
-) |> Enum.take(10) |> IO.inspect
+)
+|> Enum.take(10)
+|> IO.inspect
 ```
 
 ### Get a CreditNote
@@ -874,7 +1336,7 @@ credit_note = StarkInfra.CreditNote.query!(
 After its creation, information on a credit note may be retrieved by its id.
 
 ```elixir
-transaction = StarkInfra.CreditNote.get!("5155165527080960") |> IO.inspect
+StarkInfra.CreditNote.get!("5155165527080960") |> IO.inspect
 ```
 
 ## Cancel a CreditNote
@@ -882,7 +1344,7 @@ transaction = StarkInfra.CreditNote.get!("5155165527080960") |> IO.inspect
 You can cancel a credit note if it has not been signed yet.
 
 ```elixir
-note = StarkInfra.CreditNote.cancel!("5155165527080960") |> IO.inspect
+StarkInfra.CreditNote.cancel!("5155165527080960") |> IO.inspect
 ```
   
 ### Query CreditNote logs
@@ -890,11 +1352,13 @@ note = StarkInfra.CreditNote.cancel!("5155165527080960") |> IO.inspect
 You can query credit note logs to better understand credit note life cycles. 
 
 ```elixir
-logs = StarkInfra.CreditNote.Log.query!(
+StarkInfra.CreditNote.Log.query!(
   limit: 10,
   after: "2020-11-01",
   before: "2020-11-02"
-) |> Enum.take(10) |> IO.inspect
+)
+|> Enum.take(10)
+|> IO.inspect
 ```
 
 ### Get a CreditNote log
@@ -902,14 +1366,144 @@ logs = StarkInfra.CreditNote.Log.query!(
 You can also get a specific log by its id.
 
 ```elixir
-log = StarkInfra.CreditNote.log.get!("5155165527080960") |> IO.inspect
+StarkInfra.CreditNote.log.get!("5155165527080960") |> IO.inspect
 ```
 
-Here are a few examples on how to use the SDK. If you have any doubts, use the built-in
-`h()` function to get more info on the desired functionality
-(for example: `StarkInfra.CreditNote |> h`)
+## Webhook
 
-**Note**: Almost all SDK functions also provide a bang (!) version. To simplify the examples, they will be used the most throughout this README.
+### Create a Webhook subscription
+
+To create a webhook subscription and be notified whenever an event occurs, run:
+
+```elixir
+StarkInfra.Webhook.create!(
+    url: "https://webhook.site/dd784f26-1d6a-4ca6-81cb-fda0267761ec",
+    subscriptions: ["contract", "credit-note", "signer", "issuing-card", "issuing-invoice", "issuing-purchase", "pix-request.in", "pix-request.out", "pix-reversal.in", "pix-reversal.out", "pix-claim", "pix-key", "pix-chargeback", "pix-infraction"]
+) |> IO.inspect
+```
+
+### Query Webhooks
+
+To search for registered webhooks, run:
+
+```elixir
+for webhook <- StarkInfra.Webhook.query!() do
+    webhook |> IO.inspect
+end
+```
+
+### Get a Webhook subscription
+
+You can get a specific webhook by its id.
+
+```elixir
+StarkInfra.Webhook.get!("6178044066660352")
+|> IO.inspect
+```
+
+### Delete a Webhook subscription
+
+You can also delete a specific webhook by its id.
+
+```elixir
+StarkInfra.Webhook.delete!("6178044066660352")
+|> IO.inspect
+```
+
+## Webhook events
+
+### Process Webhook events
+
+It's easy to process events delivered to your Webhook endpoint.
+Remember to pass the signature header so the SDK can make sure it was StarkInfra that sent you the event.
+
+```elixir
+response = listen()  # this is the function you made to get the events posted to your webhook
+
+{event, _cache_pid} = StarkInfra.Event.parse!(
+    content: response.content,
+    signature: response.headers["Digital-Signature"]
+) |> IO.inspect
+```
+
+To avoid making unnecessary requests to the API (/GET public-key), you can pass the `cache_pid` (returned on all requests)
+on your next parse. The process referred by the PID `cache_pid` will store the latest Stark Bank public key
+and automatically refresh it if an inconsistency is found between the content, signature and current public key.
+
+**Note**: If you don't send the cache_pid to the parser, a new cache process will be generated.
+
+```elixir
+{event, _cache_pid} = StarkInfra.Event.parse!(
+    content: response.content,
+    signature: response.headers["Digital-Signature"],
+    cache_pid: cache_pid
+) |> IO.inspect
+```
+
+If the data does not check out with the Stark Bank public-key, the function will automatically request the
+key from the API and try to validate the signature once more. If it still does not check out, it will raise an error.
+
+### Query Webhook events
+
+To search for webhooks events, run:
+
+```elixir
+StarkInfra.Event.query!(
+    after: "2020-03-20",
+    is_delivered: false,
+    limit: 10
+) 
+|> Enum.take(10)
+|> IO.inspect
+```
+
+### Get a Webhook event
+
+You can get a specific webhook event by its id.
+
+```elixir
+StarkInfra.Event.get!("4568139664719872")
+|> IO.inspect
+```
+
+### Delete a Webhook event
+
+You can also delete a specific webhook event by its id.
+
+```elixir
+StarkInfra.Event.delete!("4568139664719872")
+|> IO.inspect
+```
+
+### Set Webhook events as delivered
+
+This can be used in case you've lost events.
+With this function, you can manually set events retrieved from the API as
+"delivered" to help future event queries with `is_delivered: false`.
+
+```elixir
+StarkInfra.Event.update!("5764442407043072", is_delivered: true)
+|> IO.inspect
+```
+
+### Query failed Webhook event delivery attempts information
+
+You can also get information on failed webhook event delivery attempts.
+
+```elixir
+for attempt <- StarkInfra.Event.Attempt.query!(after: "2020-03-20") do
+    attempt |> IO.inspect attempt
+end
+```
+
+### Get a failed Webhook event delivery attempt information
+
+To retrieve information on a single attempt, use the following function:
+
+```elixir
+StarkInfra.Event.Attempt.get("1616161616161616")
+|> IO.inspect
+```
 
 # Handling errors
 

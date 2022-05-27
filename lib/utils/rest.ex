@@ -3,14 +3,14 @@ defmodule StarkInfra.Utils.Rest do
 
   alias StarkInfra.Utils.Request
   alias StarkInfra.Utils.Check
-  alias StarkInfra.Utils.QueryGenerator
+  alias StarkInfra.Utils.Querystream
   alias StarkInfra.Utils.API
   alias StarkInfra.Utils.JSON
 
   def get_page({resource_name, resource_maker}, options) do
     case Request.fetch(
-      :get, 
-      "#{API.endpoint(resource_name)}", 
+      :get,
+      "#{API.endpoint(resource_name)}",
       query: Enum.into(options, %{}) |> Map.delete(:user) |> API.cast_json_to_api_format(),
       user: options[:user]
     ) do
@@ -21,9 +21,9 @@ defmodule StarkInfra.Utils.Rest do
 
   def get_page!({resource_name, resource_maker}, options) do
     case Request.fetch(
-      :get, 
-      "#{API.endpoint(resource_name)}", 
-      query: Enum.into(options, %{}) |> Map.delete(:user) |> API.cast_json_to_api_format(), 
+      :get,
+      "#{API.endpoint(resource_name)}",
+      query: Enum.into(options, %{}) |> Map.delete(:user) |> API.cast_json_to_api_format(),
       user: options[:user]
     ) do
       {:ok, response} -> process_page_response(resource_name, resource_maker, response)
@@ -37,7 +37,7 @@ defmodule StarkInfra.Utils.Rest do
     Stream.resource(
       fn ->
         {:ok, pid} =
-          QueryGenerator.start_query(
+          Querystream.start_query(
             getter,
             API.last_name_plural(resource_name),
             query
@@ -45,7 +45,7 @@ defmodule StarkInfra.Utils.Rest do
         pid
       end,
       fn pid ->
-        case QueryGenerator.get(pid) do
+        case Querystream.get(pid) do
           :halt -> {:halt, pid}
           {:ok, element} -> {[{:ok, API.from_api_json(element, resource_maker)}], pid}
           {:error, error} -> {[{:error, error}], pid}
@@ -61,7 +61,7 @@ defmodule StarkInfra.Utils.Rest do
     Stream.resource(
       fn ->
         {:ok, pid} =
-          QueryGenerator.start_query(
+          Querystream.start_query(
             getter,
             API.last_name_plural(resource_name),
             query
@@ -69,7 +69,7 @@ defmodule StarkInfra.Utils.Rest do
         pid
       end,
       fn pid ->
-        case QueryGenerator.get(pid) do
+        case Querystream.get(pid) do
           :halt -> {:halt, pid}
           {:ok, element} -> {[API.from_api_json(element, resource_maker)], pid}
           {:error, errors} -> raise API.errors_to_string(errors)
@@ -252,7 +252,7 @@ defmodule StarkInfra.Utils.Rest do
     {
       decoded_response["cursor"],
       decoded_response[API.last_name_plural(resource_name)]
-        |> Enum.map(&(API.from_api_json(&1, resource_maker))) 
+        |> Enum.map(&(API.from_api_json(&1, resource_maker)))
     }
   end
 end

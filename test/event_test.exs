@@ -111,8 +111,8 @@ defmodule StarkInfraTest.WebhookEvent do
                 cache_pid: cache_pid_1
             )
 
-        assert Agent.get(cache_pid_1, fn map -> Map.get(map, :starkInfra_public_key) end) ==
-            Agent.get(cache_pid_2, fn map -> Map.get(map, :starkInfra_public_key) end)
+        assert Agent.get(cache_pid_1, fn map -> Map.get(map, :StarkInfra_public_key) end) ==
+            Agent.get(cache_pid_2, fn map -> Map.get(map, :StarkInfra_public_key) end)
 
         assert !is_nil(event.log)
     end
@@ -132,8 +132,8 @@ defmodule StarkInfraTest.WebhookEvent do
                 cache_pid: cache_pid_1
             )
 
-        assert Agent.get(cache_pid_1, fn map -> Map.get(map, :starkInfra_public_key) end) ==
-            Agent.get(cache_pid_2, fn map -> Map.get(map, :starkInfra_public_key) end)
+        assert Agent.get(cache_pid_1, fn map -> Map.get(map, :StarkInfra_public_key) end) ==
+            Agent.get(cache_pid_2, fn map -> Map.get(map, :StarkInfra_public_key) end)
 
         assert !is_nil(event.log)
     end

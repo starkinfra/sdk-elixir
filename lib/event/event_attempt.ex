@@ -39,8 +39,12 @@ defmodule StarkInfra.Event.Attempt do
     ## Return:
         - Event.Attempt struct with updated attributes
     """
-    @spec get(binary, user: Project.t() | Organization.t() | nil) ::
-        {:ok, Attempt.t()} | {:error, [%Error{}]}
+    @spec get(
+        binary,
+        user: Project.t() | Organization.t() | nil
+    ) ::
+        {:ok, Attempt.t()} |
+        {:error, [%Error{}]}
     def get(id, options \\ []) do
         Rest.get_id(resource(), id, options)
     end
@@ -75,12 +79,11 @@ defmodule StarkInfra.Event.Attempt do
         webhook_ids: [binary],
         user: Project.t() | Organization.t()
     ) ::
-        ({:cont, {:ok, [Attempt.t()]}}
-            | {:error, [Error.t()]}
-            | {:halt, any}
-            | {:suspend, any},
-            any ->
-                any)
+        ({:cont, {:ok, [Attempt.t()]}} |
+        {:error, [Error.t()]} |
+        {:halt, any} |
+        {:suspend, any},
+        any -> any)
     def query(options \\ []) do
         Rest.get_list(resource(), options)
     end
@@ -96,7 +99,10 @@ defmodule StarkInfra.Event.Attempt do
         webhook_ids: [binary],
         user: Project.t() | Organization.t()
     ) ::
-        ({:cont, [Attempt.t()]} | {:halt, any} | {:suspend, any}, any -> any)
+        ({:cont, [Attempt.t()]} |
+        {:halt, any} |
+        {:suspend, any},
+        any -> any)
     def query!(options \\ []) do
         Rest.get_list!(resource(), options)
     end
@@ -115,7 +121,7 @@ defmodule StarkInfra.Event.Attempt do
         - `:user` [Organization/Project, default nil]: Organization or Project struct returned from StarkInfra.project(). Only necessary if default project or organization has not been set in configs.
 
     ## Return:
-        - list of Attempt structs with updated attributes and cursor to retrieve the next page of Attempt objects
+        - list of Attempt structs with updated attributes and cursor to retrieve the next page of Attempt structs
     """
     @spec page(
         cursor: binary,
@@ -126,7 +132,8 @@ defmodule StarkInfra.Event.Attempt do
         webhook_ids: [binary],
         user: Project.t() | Organization.t()
     ) ::
-        {:ok, {binary, [Attempt.t()]}} | {:error, [%Error{}]}
+        {:ok, {binary, [Attempt.t()]}} |
+        {:error, [%Error{}]}
     def page(options \\ []) do
         Rest.get_page(resource(), options)
     end
@@ -142,8 +149,7 @@ defmodule StarkInfra.Event.Attempt do
         event_ids: [binary],
         webhook_ids: [binary],
         user: Project.t() | Organization.t()
-    ) ::
-        [Attempt.t()]
+    ) :: [Attempt.t()]
     def page!(options \\ []) do
         Rest.get_page!(resource(), options)
     end

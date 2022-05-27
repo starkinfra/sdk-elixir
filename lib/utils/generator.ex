@@ -1,4 +1,4 @@
-defmodule StarkInfra.Utils.QueryGenerator do
+defmodule StarkInfra.Utils.Querystream do
   @moduledoc false
 
   alias StarkInfra.Utils.Check
