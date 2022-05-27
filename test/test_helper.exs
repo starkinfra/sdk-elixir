@@ -17,7 +17,7 @@ ExUnit.start(
         # :pix_claim_log,
         # :pix_chargeback,
         # :pix_chargeback_log,
-        :pix_infraction,
+        # :pix_infraction,
         # :pix_infraction_log,
         # :pix_domain,
         # :issuing_authorization,
