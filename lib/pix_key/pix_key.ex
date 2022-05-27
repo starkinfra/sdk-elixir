@@ -129,8 +129,8 @@ defmodule StarkInfra.PixKey do
     ) ::
         {:ok, PixKey.t()} |
         {:error, [error: Error.t()]}
-    def get(id, payer_id, options \\ %{}) do
-        options = Map.put(options, "payer_id", payer_id)
+    def get(id, payer_id, options \\ []) do
+        options = [payer_id: payer_id] ++ options
         Rest.get_id(resource(), id, options)
     end
 
@@ -143,8 +143,8 @@ defmodule StarkInfra.PixKey do
         end_to_end_id: binary | nil,
         user: Project.t() | Organization.t() | nil
     ) :: any
-    def get!(id, payer_id, options \\ %{}) do
-        options = Map.put(options, "payer_id", payer_id)
+    def get!(id, payer_id, options \\ []) do
+        options = [payer_id: payer_id] ++ options
         Rest.get_id!(resource(), id, options)
     end
 
@@ -253,6 +253,8 @@ defmodule StarkInfra.PixKey do
     ## Parameters (required):
         - `:id` [string]: PixKey id. ex: '5656565656565656'
         - `:reason` [string]: reason why the PixKey is being patched. Options: "branchTransfer", "reconciliation" or "userRequested".
+
+    ## Parameters (optional):
         - `:account_created` [Date, DateTime or string, default nil]: opening Date or DateTime for the account to be linked. ex: "2022-01-01.
         - `:account_number` [string, default nil]: number of the account to be linked. ex: "76543".
         - `:account_type` [string, default nil]: type of the account to be linked. Options: "checking", "savings", "salary" or "payment".
@@ -275,7 +277,7 @@ defmodule StarkInfra.PixKey do
         {:ok, PixKey.t()} |
         {:error, [error: Error.t()]}
     def update(id, reason, parameters \\ []) do
-        parameters = Map.put(parameters, "reason", reason)
+        parameters = [reason: reason] ++ parameters
         Rest.patch_id(
             resource(),
             id,
@@ -297,7 +299,7 @@ defmodule StarkInfra.PixKey do
         user: Project.t() | Organization.t() | nil
     ) :: any
     def update!(id, reason, parameters \\ []) do
-        parameters = Map.put(parameters, "reason", reason)
+        parameters = [reason: reason] ++ parameters
         Rest.patch_id!(
             resource(),
             id,

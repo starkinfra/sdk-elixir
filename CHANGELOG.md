@@ -24,4 +24,15 @@ Given a version number MAJOR.MINOR.PATCH, increment:
 - PixDomain resource for Indirect and Direct Participants
 - PixInfraction resource for Indirect and Direct Participants
 - PixChargeback resource for Indirect and Direct Participants
+- IssuingAuthorization resource for Sub Issuers
+- IssuingBalance resource for Sub Issuers
+- IssuingBin resource for Sub Issuers
+- IssuingCard resource for Sub Issuers
+- IssuingHolder resource for Sub Issuers
+- IssuingInvoice resource for Sub Issuers
+- IssuingPurchase resource for Sub Issuers
+- IssuingTransaction resource for Sub Issuers
+- IssuingWithdrawal resource for Sub Issuers
+- Webhook resource to receive Events
 - Event resource for webhook receptions
+- Event.Attempt sub-resource to allow retrieval of information on failed webhook event delivery attempts

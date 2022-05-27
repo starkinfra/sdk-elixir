@@ -70,15 +70,11 @@ defmodule StarkInfraTest.PixChargeback do
             |> Enum.take(1)
             |> hd()
 
-        parameters = %{
-            "rejection_reason" => Enum.take_random(["noBalance", "accountClosed", "unableToReverse"], 1) |> hd(),
-            "reversal_reference_id" => StarkInfra.Utils.ReturnId.create("35547753")
-        }
-
         {:ok, chargeback} = StarkInfra.PixChargeback.update(
             pix_chargeback.id,
             "rejected",
-            parameters
+            rejection_reason: Enum.take_random(["noBalance", "accountClosed", "unableToReverse"], 1) |> hd(),
+            reversal_reference_id: StarkInfra.Utils.ReturnId.create("35547753")
         )
 
         assert chargeback.status == "rejected"
@@ -91,15 +87,11 @@ defmodule StarkInfraTest.PixChargeback do
             |> Enum.take(1)
             |> hd()
 
-        parameters = %{
-            "rejection_reason" => Enum.take_random(["noBalance", "accountClosed", "unableToReverse"], 1) |> hd(),
-            "reversal_reference_id" => StarkInfra.Utils.ReturnId.create("35547753")
-        }
-
         chargeback = StarkInfra.PixChargeback.update!(
             pix_chargeback.id,
             "rejected",
-            parameters
+            rejection_reason: Enum.take_random(["noBalance", "accountClosed", "unableToReverse"], 1) |> hd(),
+            reversal_reference_id: StarkInfra.Utils.ReturnId.create("35547753")
         )
 
         assert chargeback.status == "rejected"

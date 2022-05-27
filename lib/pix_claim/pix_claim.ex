@@ -279,7 +279,7 @@ defmodule StarkInfra.PixClaim do
         - `:id` [string]: PixClaim id. ex: '5656565656565656'
         - `:status` [string]: patched status for Pix Claim. Options: "confirmed" and "canceled"
 
-    ## Options:
+    ## Parameters (optional):
         - `:reason` [string, default: "userRequested"]: reason why the PixClaim is being patched. Options: "fraud", "userRequested".
         - `:user` [Organization/Project, default nil]: Organization or Project struct returned from StarkInfra.project(). Only necessary if default project or organization has not been set in configs.
 
@@ -294,12 +294,12 @@ defmodule StarkInfra.PixClaim do
     ) ::
         {:ok, PixClaim.t()} |
         {:error, [error: Error.t()]}
-    def update(id, status, options \\ %{}) do
-        options = Map.put(options, "status", status)
+    def update(id, status, parameters \\ []) do
+        parameters = [status: status] ++ parameters
         Rest.patch_id(
             resource(),
             id,
-            options
+            parameters
         )
     end
 
@@ -312,12 +312,12 @@ defmodule StarkInfra.PixClaim do
         reason: binary,
         user: Project.t() | Organization.t() | nil
     ) :: any
-    def update!(id, status, options \\ %{}) do
-        options = Map.put(options, "status", status)
+    def update!(id, status, parameters \\ []) do
+        parameters = [status: status] ++ parameters
         Rest.patch_id!(
             resource(),
             id,
-            options
+            parameters
         )
     end
 

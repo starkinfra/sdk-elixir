@@ -254,8 +254,12 @@ defmodule StarkInfra.PixChargeback do
     ## Parameters (required):
         - `:id` [string]: PixChargeback id. ex: '5656565656565656'
         - `:result` [string]: result after the analysis of the PixChargeback. Options: "rejected", "accepted", "partiallyAccepted".
+
+    ## Parameters (conditionally required):
         - `rejection_reason` [string, default nil]: if the PixChargeback is rejected a reason is required. Options: "noBalance", "accountClosed", "unableToReverse",
         - `reversal_reference_id` [string, default nil]: return_id of the reversal transaction. ex: "D20018183202201201450u34sDGd19lz"
+
+    ## Parameters (optional):
         - `analysis` [string, default nil]: description of the analysis that led to the result.
         - `:user` [Organization/Project, default nil]: Organization or Project struct returned from StarkInfra.project(). Only necessary if default project or organization has not been set in configs.
 
@@ -272,8 +276,8 @@ defmodule StarkInfra.PixChargeback do
     ) ::
         {:ok, Workspace.t()} |
         {:error, [%Error{}]}
-    def update(id, result, parameters \\ %{}) do
-        parameters = Map.put(parameters, "result", result)
+    def update(id, result, parameters \\ []) do
+        parameters = [result: result] ++ parameters
         Rest.patch_id(
             resource(),
             id,
@@ -292,8 +296,8 @@ defmodule StarkInfra.PixChargeback do
         analysis: binary,
         user: Project.t() | Organization.t()
     ) :: any
-    def update!(id, result, parameters \\ %{}) do
-        parameters = Map.put(parameters, "result", result)
+    def update!(id, result, parameters \\ []) do
+        parameters = [result: result] ++ parameters
         Rest.patch_id!(
             resource(),
             id,

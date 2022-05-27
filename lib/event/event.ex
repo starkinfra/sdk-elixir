@@ -1,12 +1,20 @@
 defmodule StarkInfra.Event do
-    alias StarkInfra.Error
-    alias StarkInfra.Utils.API
     alias __MODULE__, as: Event
+    alias EllipticCurve.Signature
+    alias EllipticCurve.PublicKey
+    alias EllipticCurve.Ecdsa
     alias StarkInfra.Utils.Rest
     alias StarkInfra.Utils.Check
-    alias StarkInfra.Utils.Parse
+    alias StarkInfra.Utils.JSON
+    alias StarkInfra.Utils.API
     alias StarkInfra.User.Project
     alias StarkInfra.User.Organization
+    alias StarkInfra.Error
+    alias StarkInfra.Utils.Request
+    alias StarkInfra.CreditNote.Log, as: CreditNote
+    alias StarkInfra.IssuingCard.Log, as: IssuingCard
+    alias StarkInfra.IssuingInvoice.Log, as: IssuingInvoice
+    alias StarkInfra.IssuingPurchase.Log, as: IssuingPurchase
     alias StarkInfra.PixKey.Log, as: PixKey
     alias StarkInfra.PixClaim.Log, as: PixClaim
     alias StarkInfra.CreditNote.Log, as: CreditNote
@@ -30,7 +38,7 @@ defmodule StarkInfra.Event do
         - `:created` [DateTime]: creation datetime for the notification event. ex: ~U[2020-03-26 19:32:35.418698Z]
         - `:is_delivered` [bool]: true if the event has been successfully delivered to the user url. ex: false
         - `:subscription` [string]: service that triggered this event. ex: "transfer", "utility-payment"
-        - `workspace_id` [string]: ID of the Workspace that generated this event. Mostly used when multiple Workspaces have Webhooks registered to the same endpoint. ex: "4545454545454545"
+        - `:workspace_id` [string]: ID of the Workspace that generated this event. Mostly used when multiple Workspaces have Webhooks registered to the same endpoint. ex: "4545454545454545"
     """
     defstruct [:id, :log, :created, :is_delivered, :subscription, :workspace_id]
 
@@ -81,12 +89,11 @@ defmodule StarkInfra.Event do
         is_delivered: boolean,
         user: Project.t() | Organization.t()
     ) ::
-        ({:cont, {:ok, [Event.t()]}}
-        | {:error, [Error.t()]}
-        | {:halt, any}
-        | {:suspend, any},
-        any ->
-            any)
+        ({:cont, {:ok, [Event.t()]}} |
+        {:error, [Error.t()]} |
+        {:halt, any} |
+        {:suspend, any},
+        any -> any)
     def query(options \\ []) do
         Rest.get_list(resource(), options)
     end
@@ -101,7 +108,10 @@ defmodule StarkInfra.Event do
         is_delivered: boolean,
         user: Project.t() | Organization.t()
     ) ::
-        ({:cont, [Event.t()]} | {:halt, any} | {:suspend, any}, any -> any)
+        ({:cont, [Event.t()]} |
+        {:halt, any} |
+        {:suspend, any},
+        any -> any)
     def query!(options \\ []) do
         Rest.get_list!(resource(), options)
     end
@@ -119,7 +129,7 @@ defmodule StarkInfra.Event do
         - `:user` [Organization/Project, default nil]: Organization or Project struct returned from StarkInfra.project(). Only necessary if default project or organization has not been set in configs.
 
     ## Return:
-        - list of Event structs with updated attributes and cursor to retrieve the next page of Event objects
+        - list of Event structs with updated attributes and cursor to retrieve the next page of Event structs
     """
     @spec page(
         cursor: binary,
@@ -129,7 +139,8 @@ defmodule StarkInfra.Event do
         is_delivered: boolean,
         user: Project.t() | Organization.t()
     ) ::
-        {:ok, {binary, [Event.t()]}} | {:error, [%Error{}]}
+        {:ok, {binary, [Event.t()]}} |
+        {:error, [%Error{}]}
     def page(options \\ []) do
         Rest.get_page(resource(), options)
     end
@@ -144,8 +155,7 @@ defmodule StarkInfra.Event do
         before: Date.t() | binary,
         is_delivered: boolean,
         user: Project.t() | Organization.t()
-    ) ::
-        [Event.t()]
+    ) :: [Event.t()]
     def page!(options \\ []) do
         Rest.get_page!(resource(), options)
     end
@@ -189,8 +199,13 @@ defmodule StarkInfra.Event do
     ## Return:
         - target Event with updated attributes
     """
-    @spec update(binary, is_delivered: bool, user: Project.t() | Organization.t() | nil) ::
-        {:ok, Event.t()} | {:error, [%Error{}]}
+    @spec update(
+        binary,
+        is_delivered: bool,
+        user: Project.t() | Organization.t() | nil
+    ) ::
+        {:ok, Event.t()} |
+        {:error, [%Error{}]}
     def update(id, parameters \\ []) do
         Rest.patch_id(resource(), id, parameters |> Check.enforced_keys([:is_delivered]) |> Enum.into(%{}))
     end
@@ -198,7 +213,11 @@ defmodule StarkInfra.Event do
     @doc """
     Same as update(), but it will unwrap the error tuple and raise in case of errors.
     """
-    @spec update!(binary, is_delivered: bool, user: Project.t() | Organization.t() | nil) :: Event.t()
+    @spec update!(
+        binary,
+        is_delivered: bool,
+        user: Project.t() | Organization.t() | nil
+    ) :: Event.t()
     def update!(id, parameters \\ []) do
         Rest.patch_id!(resource(), id, parameters |> Check.enforced_keys([:is_delivered]) |> Enum.into(%{}))
     end
@@ -303,6 +322,9 @@ defmodule StarkInfra.Event do
             "pix-claim" -> &PixClaim.resource_maker/1
             "pix-infraction" -> &PixInfraction.resource_maker/1
             "pix-chargeback" -> &PixChargeback.resource_maker/1
+            "issuing-card" -> &IssuingCard.resource_maker/1
+            "issuing-invoice" -> &IssuingInvoice.resource_maker/1
+            "issuing-purchase" -> &IssuingPurchase.resource_maker/1
         end
     end
 end

@@ -44,7 +44,7 @@ defmodule StarkInfraTest.PixClaim do
         {:ok, claim} = StarkInfra.PixClaim.update(
             pix_claim.id,
             "canceled",
-            %{reason: Enum.take_random(["fraud", "userRequested", "accountClosure"], 1) |> hd()}
+            reason: Enum.take_random(["fraud", "userRequested", "accountClosure"])
         )
 
         assert !is_nil(claim.id)
@@ -59,7 +59,7 @@ defmodule StarkInfraTest.PixClaim do
         claim = StarkInfra.PixClaim.update!(
             pix_claim.id,
             "canceled",
-            %{reason: Enum.take_random(["fraud", "userRequested", "accountClosure"], 1) |> hd()}
+            reason: Enum.take_random(["fraud", "userRequested", "accountClosure"], 1) |> hd()
         )
 
         assert !is_nil(claim.id)
