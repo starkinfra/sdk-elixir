@@ -1,6 +1,6 @@
 defmodule StarkInfra do
   @moduledoc """
-  SDK to facilitate Elixir integrations with the Stark Bank API v2.
+  SDK to facilitate Elixir integrations with the Stark Infra API v2.
   """
 
   alias StarkInfra.Project
@@ -8,10 +8,10 @@ defmodule StarkInfra do
   alias StarkInfra.Utils.Check
 
   @doc """
-  The Project object is an authentication entity for the SDK that is permanently
+  The Project struct is an authentication entity for the SDK that is permanently
   linked to a specific Workspace.
-  All requests to the Stark Bank API must be authenticated via an SDK user,
-  which must have been previously created at the Stark Bank website
+  All requests to the Stark Infra API must be authenticated via an SDK user,
+  which must have been previously created at the Stark Infra website
   [https://web.sandbox.starkinfra.com] or [https://web.starkinfra.com]
   before you can use it in this SDK. Projects may be passed as the user parameter on
   each request or may be defined as the default user at the start (See README).
@@ -22,11 +22,10 @@ defmodule StarkInfra do
     - `private_key` [string]: PEM string of the private key linked to the project. ex: "-----BEGIN PUBLIC KEY-----\nMFYwEAYHKoZIzj0CAQYFK4EEAAoDQgAEyTIHK6jYuik6ktM9FIF3yCEYzpLjO5X/\ntqDioGM+R2RyW0QEo+1DG8BrUf4UXHSvCjtQ0yLppygz23z0yPZYfw==\n-----END PUBLIC KEY-----"
   """
   @spec project(
-          environment: :production | :sandbox,
-          id: binary,
-          private_key: binary
-        ) ::
-          Project.t()
+    environment: :production | :sandbox,
+    id: binary,
+    private_key: binary
+  ) :: Project.t()
   def project(parameters) do
     %{environment: environment, id: id, private_key: private_key} =
       Enum.into(
@@ -38,19 +37,19 @@ defmodule StarkInfra do
   end
 
   @doc """
-  The Organization object is an authentication entity for the SDK that
+  The Organization struct is an authentication entity for the SDK that
   represents your entire Organization, being able to access any Workspace
   underneath it and even create new Workspaces. Only a legal representative
   of your organization can register or change the Organization credentials.
-  All requests to the Stark Bank API must be authenticated via an SDK user,
-  which must have been previously created at the Stark Bank website
+  All requests to the Stark Infra API must be authenticated via an SDK user,
+  which must have been previously created at the Stark Infra website
   [https://web.sandbox.starkinfra.com] or [https://web.starkinfra.com]
   before you can use it in this SDK. Organizations may be passed as the user parameter on
   each request or may be defined as the default user at the start (See README).
   If you are accessing a specific Workspace using Organization credentials, you should
-  specify the workspace ID when building the Organization object or by request, using
+  specify the workspace ID when building the Organization struct or by request, using
   the Organization.replace(organization, workspace_id) method, which creates a copy of the organization
-  object with the altered workspace ID. If you are listing or creating new Workspaces, the
+  struct with the altered workspace ID. If you are listing or creating new Workspaces, the
   workspace_id should be nil.
 
   ## Parameters (required):
@@ -62,19 +61,17 @@ defmodule StarkInfra do
     - `:workspace_id` [string]: unique id of the accessed Workspace, if any. ex: nil or "4848484848484848"
   """
   @spec organization(
-          environment: :production | :sandbox,
-          id: binary,
-          private_key: binary,
-          workspace_id: binary | nil
-        ) ::
-          Organization.t()
+    environment: :production | :sandbox,
+    id: binary,
+    private_key: binary,
+    workspace_id: binary | nil
+  ) :: Organization.t()
   def organization(parameters) do
     %{environment: environment, id: id, private_key: private_key, workspace_id: workspace_id} =
       Enum.into(
         parameters |> Check.enforced_keys([:environment, :id, :private_key]),
         %{workspace_id: nil}
       )
-
     Organization.validate(environment, id, private_key, workspace_id)
   end
 end

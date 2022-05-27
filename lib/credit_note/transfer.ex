@@ -7,20 +7,18 @@ defmodule StarkInfra.CreditNote.Transfer do
     """
 
     @doc """
-    When you initialize a Transfer, the entity will not be automatically
-    created in the Stark Infra API. The 'create' function sends the structs
-    to the Stark Infra API and returns the list of created structs.
+    CreditNote signer's information.
 
-    ## Parameters (required):        
+    ## Parameters (required):
         - `:name` [string]: receiver full name. ex: "Anthony Edward Stark"
         - `:tax_id` [string]: receiver tax ID (CPF or CNPJ) with or without formatting. ex: "01234567890" or "20.018.183/0001-80"
-        - `:bank_code` [string]: code of the receiver Infra institution in Brazil. If an ISPB (8 digits) is informed, a PIX transfer will be created, else a TED will be issued. ex: "20018183" or "341"
-        - `:branch_code` [string]: receiver Infra account branch. Use '-' in case there is a verifier digit. ex: "1357-9"
-        - `:account_number` [string]: Receiver Infra account number. Use '-' before the verifier digit. ex: "876543-2"
+        - `:bank_code` [string]: code of the receiver Bank institution in Brazil. If an ISPB (8 digits) is informed, a PIX transfer will be created, else a TED will be issued. ex: "20018183" or "341"
+        - `:branch_code` [string]: receiver Bank account branch. Use '-' in case there is a verifier digit. ex: "1357-9"
+        - `:account_number` [string]: Receiver Bank account number. Use '-' before the verifier digit. ex: "876543-2"
 
-    ## Parameters (optional):
-        - `:account_type` [string, default "checking"]: Receiver Infra account type. This parameter only has effect on Pix Transfers. ex: "checking", "savings", "salary" or "payment"        
-        - `:scheduled` [Date, DateTime or string, default now]: date or datetime when the transfer will be processed. May be pushed to next business day if necessary. ex: ~U[2020-03-26 19:32:35.418698Z]        
+    ## Options:
+        - `:account_type` [string, default "checking"]: Receiver Bank account type. This parameter only has effect on Pix Transfers. ex: "checking", "savings", "salary" or "payment"
+        - `:scheduled` [Date, DateTime or string, default now]: date or datetime when the transfer will be processed. May be pushed to next business day if necessary. ex: ~U[2020-03-26 19:32:35.418698Z]
         - `:tags` [list of strings]: list of strings for reference when searching for transfers. ex: ["employees", "monthly"]
 
     Attributes (return-only):
@@ -28,28 +26,27 @@ defmodule StarkInfra.CreditNote.Transfer do
         - `:amount` [integer]: amount in cents to be transferred. ex: 1234 (= R$ 12.34)
         - `:status` [string, default nil]: current transfer status. ex: "success" or "failed"
     """
-
     @enforce_keys [
-       :bank_code,
-       :branch_code,
-       :account_number,
-       :name,
-       :tax_id
+        :bank_code,
+        :branch_code,
+        :account_number,
+        :name,
+        :tax_id
     ]
     defstruct [
-       :account_number,
-       :account_type,
-       :amount,
-       :bank_code,
-       :branch_code,
-       :id,
-       :name,
-       :scheduled,
-       :status,
-       :tags,
-       :tax_id
+        :account_number,
+        :account_type,
+        :amount,
+        :bank_code,
+        :branch_code,
+        :id,
+        :name,
+        :scheduled,
+        :status,
+        :tags,
+        :tax_id
     ]
-    
+
     @type t() :: %__MODULE__{}
 
     @doc false
@@ -68,5 +65,4 @@ defmodule StarkInfra.CreditNote.Transfer do
             tax_id: json[:tax_id]
         }
     end
-
 end

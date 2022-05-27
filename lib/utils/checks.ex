@@ -48,7 +48,7 @@ defmodule StarkInfra.Utils.Check do
   end
 
   def date_or_datetime(data) do
-    try do 
+    try do
       date(data)
     rescue
       ArgumentError -> datetime(data)

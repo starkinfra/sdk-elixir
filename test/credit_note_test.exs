@@ -17,7 +17,7 @@ defmodule StarkInfraTest.CreditNote do
     @tag :credit_note
     test "get credit note" do
         credit_note =
-            StarkInfra.CreditNote.query!()
+            StarkInfra.CreditNote.query!(limit: 1)
             |> Enum.take(1)
             |> hd()
 
@@ -29,26 +29,24 @@ defmodule StarkInfraTest.CreditNote do
     @tag :credit_note
     test "get! credit note" do
         credit_note =
-            StarkInfra.CreditNote.query!()
+            StarkInfra.CreditNote.query!(limit: 1)
             |> Enum.take(1)
             |> hd()
-       note = StarkInfra.CreditNote.get!(credit_note.id)
+        note = StarkInfra.CreditNote.get!(credit_note.id)
 
         assert !is_nil(note.id)
     end
 
     @tag :credit_note
     test "query credit note" do
-        credit_note =
-            StarkInfra.CreditNote.query!(limit: 101, before: DateTime.utc_now())
+        StarkInfra.CreditNote.query!(limit: 101, before: DateTime.utc_now())
             |> Enum.take(200)
             |> (fn list -> assert length(list) <= 101 end).()
     end
 
     @tag :credit_note
     test "query! credit note" do
-        credit_note =
-            StarkInfra.CreditNote.query!(limit: 101, before: DateTime.utc_now())
+        StarkInfra.CreditNote.query!(limit: 101, before: DateTime.utc_now())
             |> Enum.take(200)
             |> (fn list -> assert length(list) <= 101 end).()
     end
@@ -56,36 +54,39 @@ defmodule StarkInfraTest.CreditNote do
     @tag :credit_note
     test "page credit note" do
         {:ok, ids} = StarkInfraTest.Utils.Page.get(&StarkInfra.CreditNote.page/1, 2, limit: 5)
-        assert length(ids) == 10
+        assert length(ids) <= 10
     end
 
     @tag :credit_note
     test "page! credit note" do
         ids = StarkInfraTest.Utils.Page.get!(&StarkInfra.CreditNote.page!/1, 2, limit: 5)
-        assert length(ids) == 10
+        assert length(ids) <= 10
     end
 
     @tag :credit_note
-    test "create and delete credit note" do
-        credit_note = example_credit_note()
-        credit_note = StarkInfra.CreditNote.create!([credit_note]) |> hd
+    test "create and cancel credit note" do
+        credit_note = StarkInfra.CreditNote.create!([example_credit_note()]) |> hd
+
         assert !is_nil(credit_note)
-        note = StarkInfra.CreditNote.delete(credit_note.id)
+
+        {:ok, note} = StarkInfra.CreditNote.cancel(credit_note.id)
         assert !is_nil(note.id)
     end
 
     @tag :credit_note
-    test "create and delete! credit note" do
-        credit_note = example_credit_note()
-        credit_note = StarkInfra.CreditNote.create!([credit_note]) |> hd
+    test "create and cancel! credit note" do
+        credit_note = StarkInfra.CreditNote.create!([example_credit_note()]) |> hd
+
         assert !is_nil(credit_note)
-        note = StarkInfra.CreditNote.delete!(credit_note.id)
+
+        note = StarkInfra.CreditNote.cancel!(credit_note.id)
         assert !is_nil(note.id)
     end
 
     def example_credit_note() do
         %StarkInfra.CreditNote{
-            template_id: "5686220801703936",
+            template_id: "5707012469948416",
+            external_id: StarkInfraTest.Utils.Random.random_string(32),
             name: "Jamie Lannister",
             tax_id: "012.345.678-90",
             nominal_amount: 100000,
@@ -101,17 +102,24 @@ defmodule StarkInfraTest.CreditNote do
                     due: "2023-06-25",
                     amount: 59000,
                     fine: 10,
-                    interest: 1
+                    interest: 1,
+                    descriptions: [
+                        %StarkInfra.CreditNote.Invoice.Description{
+                            key: "key",
+                            value: "value"
+                        }
+                    ]
                 }
             ],
             tags: ["test", "testing"],
-            transfer: %StarkInfra.CreditNote.Transfer{
+            payment: %{
                 bank_code: "00000000",
                 branch_code: "1234",
                 account_number: "129340-1",
                 name: "Jamie Lannister",
                 tax_id: "012.345.678-90"
             },
+            payment_type: "transfer",
             signers: [
                 %{
                     name: "Jamie Lannister",
@@ -121,10 +129,4 @@ defmodule StarkInfraTest.CreditNote do
             ],
         }
     end
-    
-    def get_future_datetime(days) do
-        datetime = DateTime.utc_now
-        DateTime.add(datetime, days*24*60*60, :second)
-    end
-
 end

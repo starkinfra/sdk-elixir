@@ -14,3 +14,14 @@ Given a version number MAJOR.MINOR.PATCH, increment:
 ## [Unreleased]
 ### Added
 - CreditNote resource for money lending with Stark Infra's endorsement
+- PixRequest resource for Indirect and Direct Participants
+- PixReversal resource for Indirect and Direct Participants
+- PixDirector resource for Direct Participants
+- PixBalance resource for Indirect and Direct Participants
+- PixStatement resource for Direct Participants
+- PixClaim resource for Indirect and Direct Participants
+- PixKey resource for Indirect and Direct Participants
+- PixDomain resource for Indirect and Direct Participants
+- PixInfraction resource for Indirect and Direct Participants
+- PixChargeback resource for Indirect and Direct Participants
+- Event resource for webhook receptions
