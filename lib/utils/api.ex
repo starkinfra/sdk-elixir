@@ -61,6 +61,11 @@ defmodule StarkInfra.Utils.API do
     api_json(struct)
   end
 
+  defp coerce_types(map) when is_map(map) do
+    map
+    |> cast_json_to_api_format()
+  end
+
   defp coerce_types(value) do
     value
   end

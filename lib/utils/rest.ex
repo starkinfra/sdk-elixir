@@ -101,7 +101,12 @@ defmodule StarkInfra.Utils.Rest do
   def get_id({resource_name, resource_maker}, id, options) do
     user = options[:user]
 
-    case Request.fetch(:get, "#{API.endpoint(resource_name)}/#{id}", user: user) do
+    case Request.fetch(
+        :get, 
+        "#{API.endpoint(resource_name)}/#{id}", 
+        user: user,
+        query: Enum.into(options, %{}) |> Map.delete(:user) |> API.cast_json_to_api_format()
+      ) do
       {:ok, response} -> {:ok, process_single_response(response, resource_name, resource_maker)}
       {:error, errors} -> {:error, errors}
     end
@@ -190,7 +195,7 @@ defmodule StarkInfra.Utils.Rest do
     case Request.fetch(
       :patch,
       "#{API.endpoint(resource_name)}/#{id}",
-      payload: payload |> Map.delete(:user) |> API.cast_json_to_api_format(),
+      payload: Enum.into(payload, %{}) |> Map.delete(:user) |> API.cast_json_to_api_format(),
       user: payload[:user]
     ) do
       {:ok, response} -> {:ok, process_single_response(response, resource_name, resource_maker)}
