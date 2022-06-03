@@ -12,6 +12,8 @@ Given a version number MAJOR.MINOR.PATCH, increment:
 - PATCH version when backwards compatible bug **fixes** are implemented.
 
 ## [Unreleased]
+### Added
+- credit receiver's billing address on CreditNote
 
 ## [0.0.1] - 2022-05-27
 ### Added
