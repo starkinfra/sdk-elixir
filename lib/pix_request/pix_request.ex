@@ -116,7 +116,7 @@ defmodule StarkInfra.PixRequest do
     - `:user` [Organization/Project, default nil]: Organization or Project struct returned from StarkInfra.project(). Only necessary if default project or organization has not been set in configs.
 
   ## Return:
-    - `:list of PixRequest structs with updated attributes
+    - list of PixRequest structs with updated attributes
   """
   @spec create(
     [PixRequest.t() | map()],

@@ -78,7 +78,7 @@ To install the package with mix, add this to your deps and run `mix deps.get`:
 ```elixir
 def deps do
   [
-  {:starkinfra, "~> 0.0.1"}
+  {:starkinfra, "~> 0.1.0"}
   ]
 end
 ```

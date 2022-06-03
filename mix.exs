@@ -5,7 +5,7 @@ defmodule StarkInfra.MixProject do
     [
       app: :starkinfra,
       name: :starkinfra,
-      version: "0.0.1",
+      version: "0.1.0",
       homepage_url: "https://starkinfra.com",
       source_url: "https://github.com/starkinfra/sdk-elixir",
       description: description(),

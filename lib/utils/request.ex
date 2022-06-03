@@ -65,7 +65,7 @@ defmodule StarkInfra.Utils.Request do
     {'Access-Time', to_charlist(access_time)},
     {'Access-Signature', to_charlist(signature)},
     {'Content-Type', 'application/json'},
-    {'User-Agent', 'Elixir-#{System.version()}-SDK-Infra-0.0.1'},
+    {'User-Agent', 'Elixir-#{System.version()}-SDK-Infra-0.1.0'},
     {'Accept-Language', Check.language()}
   ]
   end
