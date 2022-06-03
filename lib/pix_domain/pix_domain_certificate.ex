@@ -1,26 +1,26 @@
 defmodule StarkInfra.PixDomain.Certificate do
-    alias __MODULE__, as: Certificate
+  alias __MODULE__, as: Certificate
 
-    @moduledoc """
-    Groups pixdomain.Certificate related functions
-    """
+  @moduledoc """
+  Groups pixdomain.Certificate related functions
+  """
 
-    @doc """
-    The Certificate struct displays the certificate information from a specific domain.
+  @doc """
+  The Certificate struct displays the certificate information from a specific domain.
 
-    ## Attributes (return-only):
-        - content [string]: certificate of the Pix participant in PEM format.
-    """
-    defstruct [
-        :content
-    ]
+  ## Attributes (return-only):
+    - content [string]: certificate of the Pix participant in PEM format.
+  """
+  defstruct [
+    :content
+  ]
 
-    @type t() :: %__MODULE__{}
+  @type t() :: %__MODULE__{}
 
-    @doc false
-    def resource_maker(json) do
-        %Certificate{
-            content: json[:content]
-        }
-    end
+  @doc false
+  def resource_maker(json) do
+    %Certificate{
+      content: json[:content]
+    }
+  end
 end

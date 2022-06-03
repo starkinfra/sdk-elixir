@@ -2,14 +2,14 @@ defmodule StarkInfra.Utils.JSON do
   @moduledoc false
 
   def encode!(value) when is_nil(value) do
-    nil
+  nil
   end
 
   def encode!(value) do
-    Jason.encode!(value)
+  Jason.encode!(value)
   end
 
   def decode!(json) do
-    Jason.decode!(json)
+  Jason.decode!(json)
   end
 end
