@@ -3,7 +3,10 @@ defmodule StarkInfraTest.IssuingHolder do
 
   @tag :issuing_holder
   test "create issuing holder test" do
-    {:ok, issuing_holder} = StarkInfra.IssuingHolder.create([StarkInfraTest.Utils.IssuingHolder.example_issuing_holder()])
+    {:ok, issuing_holder} = StarkInfra.IssuingHolder.create(
+      [StarkInfraTest.Utils.IssuingHolder.example_issuing_holder()],
+      expand: ["rules"]
+    )
     issuing_holder = issuing_holder |> Enum.take(1) |> hd
 
     {:ok, holder} = StarkInfra.IssuingHolder.get(issuing_holder.id)
@@ -13,7 +16,10 @@ defmodule StarkInfraTest.IssuingHolder do
 
   @tag :issuing_holder
   test "create! issuing holder test" do
-    issuing_holder = StarkInfra.IssuingHolder.create!([StarkInfraTest.Utils.IssuingHolder.example_issuing_holder()])
+    issuing_holder = StarkInfra.IssuingHolder.create!(
+      [StarkInfraTest.Utils.IssuingHolder.example_issuing_holder()],
+      expand: ["rules"]
+    )
     issuing_holder = issuing_holder |> Enum.take(1) |> hd
 
     {:ok, holder} = StarkInfra.IssuingHolder.get(issuing_holder.id)

@@ -12,6 +12,10 @@ Given a version number MAJOR.MINOR.PATCH, increment:
 - PATCH version when backwards compatible bug **fixes** are implemented.
 
 ## [Unreleased]
+### Added
+- IssuingRule missing parameters
+### Fixed
+- query parameters in post requests
 
 ## [0.1.0] - 2022-06-03
 ### Added
