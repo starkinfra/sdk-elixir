@@ -339,22 +339,25 @@ You can create card holders to which your cards will be bound.
 They support spending rules that will apply to all underlying cards.
 
 ```elixir
-StarkInfra.IssuingHolder.create!([
-  %StarkInfra.IssuingHolder{
-    name: "Iron Bank S.A.",
-    taxId: "012.345.678-90"
-    external_id: "1234",
-    tags: ["Traveler Employee"],
-    rules: [
-      %StarkInfra.IssuingRule{
-        name: "General USD",
-        interval: "day"
-        amount: "100000",
-        currencyCode: "USD"
-      }
-    ]
-  }
-]) |> IO.inspect
+StarkInfra.IssuingHolder.create!(
+  [
+    %StarkInfra.IssuingHolder{
+      name: "Iron Bank S.A.",
+      tax_id: "012.345.678-90",
+      external_id: "1234",
+      tags: ["Traveler Employee"],
+      rules: [
+        %StarkInfra.IssuingRule{
+          name: "General USD",
+          interval: "day",
+          amount: 100000,
+          currency_code: "USD"
+        }
+      ]
+    }
+  ],
+  expand: ["rules"]
+) |> IO.inspect
 ```
 
 **Note**: Instead of using IssuingHolder structs, you can also pass each transfer element in dictionary format
@@ -415,21 +418,24 @@ StarkInfra.IssuingHolder.Log.get!("5155165527080960")
 You can issue cards with specific spending rules.
 
 ```elixir
-StarkInfra.IssuingCard.create!([
-  %StarkInfra.IssuingCard{
-    holder_name: "Developers",
-    holder_tax_id: "012.345.678-90"
-    holder_external_id: "1234",
-    rules: [
-      %StarkInfra.IssuingRule{
-        name: "General",
-        interval: "week"
-        amount: "100000",
-        currencyCode: "USD"
-      }
-    ]
-  }
-]) |> IO.inspect
+StarkInfra.IssuingCard.create!(
+  [
+    %StarkInfra.IssuingCard{
+      holder_name: "Developers",
+      holder_tax_id: "012.345.678-90",
+      holder_external_id: "1234",
+      rules: [
+        %StarkInfra.IssuingRule{
+          name: "General",
+          interval: "week",
+          amount: 100000,
+          currency_code: "USD"
+        }
+      ]
+    }
+  ],
+  expand: ["rules", "securityCode", "number", "expiration"]
+) |> IO.inspect
 ```
 
 ### Query IssuingCards

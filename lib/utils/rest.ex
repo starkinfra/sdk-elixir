@@ -140,6 +140,7 @@ defmodule StarkInfra.Utils.Rest do
     :post,
     "#{API.endpoint(resource_name)}",
     payload: prepare_payload(resource_name, entities),
+    query: options,
     user: user
   ) do
     {:ok, response} -> {:ok, process_response(resource_name, resource_maker, response)}
@@ -161,6 +162,7 @@ defmodule StarkInfra.Utils.Rest do
     :post,
     "#{API.endpoint(resource_name)}",
     payload: API.api_json(entity),
+    query: options,
     user: user
   ) do
     {:ok, response} -> {:ok, process_single_response(response, resource_name, resource_maker)}

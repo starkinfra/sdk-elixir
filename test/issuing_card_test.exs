@@ -37,7 +37,10 @@ defmodule StarkInfraTest.IssuingCard do
 
   @tag :issuing_card
   test "create issuing card test" do
-    {:ok, issuing_card} = StarkInfra.IssuingCard.create([example_issuing_card()])
+    {:ok, issuing_card} = StarkInfra.IssuingCard.create(
+      [example_issuing_card()],
+      expand: ["rules", "securityCode", "number", "expiration"]
+    )
     issuing_card = issuing_card |> Enum.take(1) |> hd
 
     {:ok, card} = StarkInfra.IssuingCard.get(issuing_card.id)
@@ -47,7 +50,10 @@ defmodule StarkInfraTest.IssuingCard do
 
   @tag :issuing_card
   test "create! issuing card test" do
-    issuing_card = StarkInfra.IssuingCard.create!([example_issuing_card()])
+    issuing_card = StarkInfra.IssuingCard.create!(
+      [example_issuing_card()],
+      expand: ["rules", "securityCode", "number", "expiration"]
+    )
     issuing_card = issuing_card |> Enum.take(1) |> hd
 
     {:ok, card} = StarkInfra.IssuingCard.get(issuing_card.id)

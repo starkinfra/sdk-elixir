@@ -38,7 +38,13 @@ defmodule StarkInfra.IssuingRule do
     :currency_code,
     :id,
     :interval,
-    :name
+    :name,
+    :categories,
+    :countries,
+    :methods,
+    :counter_amount,
+    :currency_symbol,
+    :currency_name
   ]
 
   @type t() :: %__MODULE__{}
@@ -58,7 +64,13 @@ defmodule StarkInfra.IssuingRule do
       currency_code: json[:currency_code],
       id: json[:id],
       interval: json[:interval],
-      name: json[:name]
+      name: json[:name],
+      categories: json[:categories],
+      countries: json[:countries],
+      methods: json[:methods],
+      counter_amount: json[:counter_amount],
+      currency_symbol: json[:currency_symbol],
+      currency_name: json[:currency_name]
     }
   end
 
