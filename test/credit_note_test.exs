@@ -96,19 +96,15 @@ defmodule StarkInfraTest.CreditNote do
       name: "Jamie Lannister",
       tax_id: "012.345.678-90",
       nominal_amount: 100000,
-      scheduled: "2022-05-30",
+      scheduled: "2023-11-28",
       invoices: [
         %StarkInfra.CreditNote.Invoice{
-          due: "2023-06-25",
-          amount: 60000,
-          fine: 10,
-          interest: 2
+          due: "2023-12-29",
+          amount: 60000
         },
         %StarkInfra.CreditNote.Invoice{
-          due: "2023-06-25",
+          due: "2023-12-29",
           amount: 59000,
-          fine: 10,
-          interest: 1,
           descriptions: [
             %StarkInfra.CreditNote.Invoice.Description{
               key: "key",

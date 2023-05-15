@@ -12,14 +12,14 @@ defmodule StarkInfra.Webhook do
 
   @doc """
   A Webhook is used to subscribe to notification events on a user-selected endpoint.
-  Currently available services for subscription are contract, credit-note, signer, issuing-card, issuing-invoice, issuing-purchase, pix-request.in, pix-request.out, pix-reversal.in, pix-reversal.out, pix-claim, pix-key, pix-chargeback, pix-infraction.
+  Currently available services for subscription are credit-note, issuing-card, issuing-invoice, issuing-purchase, pix-request.in, pix-request.out, pix-reversal.in, pix-reversal.out, pix-claim, pix-key, pix-chargeback, pix-infraction.
 
   ## Parameters (required):
-    - `:url` [string]: Url that will be notified when an event occurs.
-    - `:subscriptions` [list of strings]: list of any non-empty combination of the available services. ex: ["contract", "credit-note", "signer", "issuing-card", "issuing-invoice", "issuing-purchase", "pix-request.in", "pix-request.out", "pix-reversal.in", "pix-reversal.out", "pix-claim", "pix-key", "pix-chargeback", "pix-infraction"]
+    - `:url` [binary]: URL that will be notified when an event occurs.
+    - `:subscriptions` [list of binaries]: list of any non-empty combination of the available services. ex: ["contract", "credit-note", "signer", "issuing-card", "issuing-invoice", "issuing-purchase", "pix-request.in", "pix-request.out", "pix-reversal.in", "pix-reversal.out", "pix-claim", "pix-key", "pix-chargeback", "pix-infraction"]
 
-  ## Attributes:
-    - `:id` [string, default nil]: unique id returned when the webhook is created. ex: "5656565656565656"
+  ## Attributes (return-only):
+    - `:id` [binary, default nil]: unique id returned when the Webhook is created. ex: "5656565656565656"
   """
   @enforce_keys [
     :url,
@@ -34,22 +34,22 @@ defmodule StarkInfra.Webhook do
   @type t() :: %__MODULE__{}
 
   @doc """
-  Send a single Webhook subscription for creation in the Stark Infra API
+  Send a single Webhook for creation in the Stark Infra API
 
   ## Parameters (required):
-    - `:url` [string]: url to which notification events will be sent to. ex: "https://webhook.site/60e9c18e-4b5c-4369-bda1-ab5fcd8e1b29"
-    - `:subscriptions` [list of strings]: list of any non-empty combination of the available services. ex: ["contract", "credit-note", "signer", "issuing-card", "issuing-invoice", "issuing-purchase", "pix-request.in", "pix-request.out", "pix-reversal.in", "pix-reversal.out", "pix-claim", "pix-key", "pix-chargeback", "pix-infraction"]
+    - `:url` [binary]: URL to which notification events will be sent to. ex: "https://webhook.site/60e9c18e-4b5c-4369-bda1-ab5fcd8e1b29"
+    - `:subscriptions` [list of binaries]: list of any non-empty combination of the available services. ex: ["contract", "credit-note", "signer", "issuing-card", "issuing-invoice", "issuing-purchase", "pix-request.in", "pix-request.out", "pix-reversal.in", "pix-reversal.out", "pix-claim", "pix-key", "pix-chargeback", "pix-infraction"]
 
-  ## Options:
-    - `:user` [Organization/Project, default nil]: Organization or Project struct returned from StarkInfra.project(). Only necessary if default project or organization has not been set in configs.
+  ## Parameters (optional):
+    - `:user` [Organization/Project, default nil]: Organization or Project object returned from StarkInfra.project(). Only necessary if default project or organization has not been set in configs.
 
   ## Return:
-    - Webhook struct with updated attributes
+    - Webhook object with updated attributes
   """
   @spec create(
-    user: Project.t() | Organization.t() | nil,
     url: binary,
-    subscriptions: [binary]
+    subscriptions: [binary],
+    user: Project.t() | Organization.t() | nil
   ) ::
     {:ok, Webhook.t()} |
     {:error, [Error.t()]}
@@ -86,16 +86,16 @@ defmodule StarkInfra.Webhook do
   end
 
   @doc """
-  Receive a single Webhook subscription struct previously created in the Stark Infra API by passing its id
+  Receive a single Webhook object previously created in the Stark Infra API by passing its id
 
   ## Parameters (required):
-    - `id` [string]: struct unique id. ex: "5656565656565656"
+    - `id` [binary]: object unique id. ex: "5656565656565656"
 
-  ## Options:
-    - `:user` [Organization/Project, default nil]: Organization or Project struct returned from StarkInfra.project(). Only necessary if default project or organization has not been set in configs.
+  ## Parameters (optional):
+    - `:user` [Organization/Project, default nil]: Organization or Project object returned from StarkInfra.project(). Only necessary if default project or organization has not been set in configs.
 
   ## Return:
-    - Webhook struct with updated attributes
+    - Webhook object with that corresponds to the given id.
   """
   @spec get(
     binary,
@@ -116,14 +116,14 @@ defmodule StarkInfra.Webhook do
   end
 
   @doc """
-  Receive a stream of Webhook subcription structs previously created in the Stark Infra API
+  Receive a stream of Webhook objects previously created in the Stark Infra API
 
-  ## Options:
-    - `:limit` [integer, default nil]: maximum number of structs to be retrieved. Unlimited if nil. ex: 35
-    - `:user` [Organization/Project, default nil]: Organization or Project struct returned from StarkInfra.project(). Only necessary if default project or organization has not been set in configs.
+  ## Parameters (optional):
+    - `:limit` [integer, default nil]: maximum number of objects to be retrieved. Unlimited if nil. ex: 35
+    - `:user` [Organization/Project, default nil]: Organization or Project object returned from StarkInfra.project(). Only necessary if default project or organization has not been set in configs.
 
   ## Return:
-    - stream of Webhook structs with updated attributes
+    - stream of Webhook objects with updated attributes
   """
   @spec query(
     limit: integer,
@@ -161,13 +161,13 @@ defmodule StarkInfra.Webhook do
   Receive a list of up to 100 Webhook objects previously created in the Stark Infra API and the cursor to the next page.
   Use this function instead of query if you want to manually page your requests.
 
-  ## Options:
-    - `:cursor` [string, default nil]: cursor returned on the previous page function call
-    - `:limit` [integer, default 100]: maximum number of structs to be retrieved. Max = 100. ex: 35
-    - `:user` [Organization/Project, default nil]: Organization or Project struct returned from StarkInfra.project(). Only necessary if default project or organization has not been set in configs.
+  ## Parameters (optional):
+    - `:cursor` [binary, default nil]: cursor returned on the previous page function call
+    - `:limit` [integer, default 100]: maximum number of objects to be retrieved. It must be an integer between 1 and 100. ex: 50
+    - `:user` [Organization/Project, default nil]: Organization or Project object returned from StarkInfra.project(). Only necessary if default project or organization has not been set in configs.
 
   ## Return:
-    - list of Webhook structs with updated attributes
+    - list of Webhook objects with updated attributes
     - cursor to retrieve the next page of Webhook objects
   """
   @spec page(
@@ -194,16 +194,16 @@ defmodule StarkInfra.Webhook do
   end
 
   @doc """
-  Delete a Webhook subscription entity previously created in the Stark Infra API
+  Delete a Webhook entity previously created in the Stark Infra API
 
   ## Parameters (required):
-    - `id` [string]: Webhook unique id. ex: "5656565656565656"
+    - `id` [binary]: object unique id. ex: "5656565656565656"
 
-  ## Options:
-    - `:user` [Organization/Project, default nil]: Organization or Project struct returned from StarkInfra.project(). Only necessary if default project or organization has not been set in configs.
+  ## Parameters (optional):
+    - `:user` [Organization/Project, default nil]: Organization or Project object returned from StarkInfra.project(). Only necessary if default project or organization has not been set in configs.
 
   ## Return:
-    - deleted Webhook struct
+    - deleted Webhook object
   """
   @spec delete(
     binary,

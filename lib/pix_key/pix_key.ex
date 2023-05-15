@@ -13,29 +13,30 @@ defmodule StarkInfra.PixKey do
   @doc """
   PixKeys link bank account information to key ids.
   Key ids are a convenient way to search and pass bank account information.
+
   When you initialize a Pix Key, the entity will not be automatically
-  created in the Stark Infra API. The 'create' function sends the structs
-  to the Stark Infra API and returns the created struct.
+  created in the Stark Infra API. The 'create' function sends the objects
+  to the Stark Infra API and returns the created object.
 
   ## Parameters (required):
-    - `:account_created` [Date, DateTime or string]: opening Date or DateTime for the linked account. ex: "2022-01-01".
-    - `:account_number` [string]: number of the linked account. ex: "76543".
-    - `:account_type` [string]: type of the linked account. Options: "checking", "savings", "salary" or "payment".
-    - `:branch_code` [string]: branch code of the linked account. ex: 1234.
-    - `:name` [string]: holder's name of the linked account. ex: "Jamie Lannister".
-    - `:tax_id` [string]: holder's taxId (CPF/CNPJ) of the linked account. ex: "012.345.678-90".
+    - `:account_created` [Date, DateTime or binary]: opening Date or DateTime for the linked account. ex: "2022-01-01".
+    - `:account_number` [binary]: number of the linked account. ex: "76543".
+    - `:account_type` [binary]: type of the linked account. ex: "checking", "savings", "salary" or "payment".
+    - `:branch_code` [binary]: branch code of the linked account. ex: 1234.
+    - `:name` [binary]: holder's name of the linked account. ex: "Jamie Lannister".
+    - `:tax_id` [binary]: holder's taxId (CPF/CNPJ) of the linked account. ex: "012.345.678-90".
 
   ## Parameters (optional):
-    - `:id` [string, default nil]: id of the registered PixKey. Allowed types are: CPF, CNPJ, phone number or email. If this parameter is not passed, an EVP will be created. ex: "+5511989898989";
-    - `:tags` [list of strings, default nil]: list of strings for reference when searching for PixKeys. ex: ["employees", "monthly"]
+    - `:id` [binary, default nil]: id of the registered PixKey. Allowed types are: CPF, CNPJ, phone number or email. If this parameter is not passed, an EVP will be created. ex: "+5511989898989";
+    - `:tags` [list of binaries, default []]: list of binaries for reference when searching for PixKeys. ex: ["employees", "monthly"]
 
   ## Attributes (return-only):
     - `:owned` [DateTime]: datetime when the key was owned by the holder. ex: ~U[2020-3-10 10:30:0:0]
-    - `:owner_type` [string]: type of the owner of the PixKey. Options: "business" or "individual".
-    - `:status` [string]: current PixKey status. Options: "created", "registered", "canceled", "failed"
-    - `:bank_code` [string]: bank_code of the account linked to the Pix Key. ex: "20018183".
-    - `:bank_name` [string]: name of the bank that holds the account linked to the PixKey. ex: "StarkBank"
-    - `:type` [string]: type of the PixKey. Options: "cpf", "cnpj", "phone", "email" and "evp",
+    - `:owner_type` [binary]: type of the owner of the PixKey. ex: "business" or "individual".
+    - `:status` [binary]: current PixKey status. ex: "created", "registered", "canceled", "failed"
+    - `:bank_code` [binary]: bank_code of the account linked to the Pix Key. ex: "20018183".
+    - `:bank_name` [binary]: name of the bank that holds the account linked to the PixKey. ex: "StarkBank"
+    - `:type` [binary]: type of the PixKey. ex: "cpf", "cnpj", "phone", "email" and "evp",
     - `:created` [DateTime]: creation datetime for the PixKey. ex: ~U[2020-03-10 10:30:0:0]
   """
   @enforce_keys [
@@ -69,14 +70,14 @@ defmodule StarkInfra.PixKey do
   @doc """
   Create a PixKey linked to a specific account in the Stark Infra API
 
-  ## Options:
-    - `:key` [PixKey struct]: PixKey struct to be created in the API.
+  ## Parameters (optional):
+    - `:key` [PixKey object]: PixKey object to be created in the API.
 
-  ## Options:
-    - `:user` [Organization/Project, default nil]: Organization or Project struct returned from StarkInfra.project(). Only necessary if default project or organization has not been set in configs.
+  ## Parameters (optional):
+    - `:user` [Organization/Project, default nil]: Organization or Project object returned from StarkInfra.project(). Only necessary if default project or organization has not been set in configs.
 
   ## Return:
-    - PixKey struct with updated attributes.
+    - PixKey object with updated attributes.
   """
   @spec create(
     PixKey.t() | map(),
@@ -108,18 +109,18 @@ defmodule StarkInfra.PixKey do
   end
 
   @doc """
-  Retrieve the PixKey struct linked to your Workspace in the Stark Infra API by its id.
+  Retrieve the PixKey object linked to your Workspace in the Stark Infra API by its id.
 
   ## Parameters (required):
-    - `:id` [string]: struct unique id. ex: "5656565656565656".
-    - `:payer_id` [string]: tax id (CPF/CNPJ) of the individual or business requesting the PixKey information. This id is used by the Central Bank to limit request rates. ex: "20.018.183/0001-80".
+    - `:id` [binary]: object unique id. ex: "5656565656565656".
+    - `:payer_id` [binary]: tax id (CPF/CNPJ) of the individual or business requesting the PixKey information. This id is used by the Central Bank to limit request rates. ex: "20.018.183/0001-80".
 
-  ## Options:
-    - `:end_to_end_id` [string, default nil]: central bank's unique transaction id. If the request results in the creation of a PixRequest, the same endToEndId should be used. If this parameter is not passed, one endToEndId will be automatically created. Example: "E00002649202201172211u34srod19le"
-    - `:user` [Organization/Project, default nil]: Organization or Project struct returned from StarkInfra.project(). Only necessary if default project or organization has not been set in configs.
+  ## Parameters (optional):
+    - `:end_to_end_id` [binary, default nil]: central bank's unique transaction id. If the request results in the creation of a PixRequest, the same endToEndId should be used. If this parameter is not passed, one endToEndId will be automatically created. Example: "E00002649202201172211u34srod19le"
+    - `:user` [Organization/Project, default nil]: Organization or Project object returned from StarkInfra.project(). Only necessary if default project or organization has not been set in configs.
 
   ## Return:
-    - PixKey struct that corresponds to the given id.
+    - PixKey object that corresponds to the given id.
   """
   @spec get(
     binary,
@@ -149,20 +150,20 @@ defmodule StarkInfra.PixKey do
   end
 
   @doc """
-  Receive a stream of PixKeys structs previously created in the Stark Infra API
+  Receive a stream of PixKey objects previously created in the Stark Infra API
 
-  ## Options:
-    - `:limit` [integer, default nil]: maximum number of structs to be retrieved. Unlimited if nil. ex: 35
-    - `:after` [Date or string, default nil]: date filter for structs created after a specified date. ex: ~D[2020, 3, 10]
-    - `:before` [Date or string, default nil]: date filter for structs created before a specified date. ex: ~D[2020, 3, 10]
-    - `:status` [list of strings, default nil]: filter for status of retrieved structs. Options: "created", "registered", "canceled", "failed".
-    - `:tags` [list of strings, default nil]: tags to filter retrieved structs. ex: ["tony", "stark"]
-    - `:ids` [list of strings, default nil]: list of ids to filter retrieved structs. ex: ["5656565656565656", "4545454545454545"]
-    - `:type` [list of strings, default nil]: filter for the type of retrieved PixKeys. Options: "cpf", "cnpj", "phone", "email", "evp".
-    - `:user` [Organization/Project, default nil]: Organization or Project struct returned from StarkInfra.project(). Only necessary if default project or organization has not been set in configs.
+  ## Parameters (optional):
+    - `:limit` [integer, default nil]: maximum number of objects to be retrieved. Unlimited if nil. ex: 35
+    - `:after` [Date or binary, default nil]: date filter for objects created after a specified date. ex: ~D[2020, 3, 10]
+    - `:before` [Date or binary, default nil]: date filter for objects created before a specified date. ex: ~D[2020, 3, 10]
+    - `:status` [list of binaries, default nil]: filter for status of retrieved objects. ex: "created", "registered", "canceled", "failed".
+    - `:tags` [list of binaries, default nil]: tags to filter retrieved objects. ex: ["tony", "stark"]
+    - `:ids` [list of binaries, default nil]: list of ids to filter retrieved objects. ex: ["5656565656565656", "4545454545454545"]
+    - `:type` [list of binaries, default nil]: filter for the type of retrieved PixKeys. ex: "cpf", "cnpj", "phone", "email", "evp".
+    - `:user` [Organization/Project, default nil]: Organization or Project object returned from StarkInfra.project(). Only necessary if default project or organization has not been set in configs.
 
   ## Return:
-    - stream of PixKey structs with updated attributes
+    - stream of PixKey objects with updated attributes
   """
   @spec query(
     limit: integer,
@@ -197,22 +198,23 @@ defmodule StarkInfra.PixKey do
   end
 
   @doc """
-  Receive a stream of PixKeys structs previously created in the Stark Infra API
+  Receive a list of up to 100 PixKey objects previously created in the Stark Infra API and the cursor to the next page.
+  Use this function instead of query if you want to manually page your requests.
 
-  ## Options:
-    - `:cursor` [string, default nil]: cursor returned on the previous page function call.
-    - `:limit` [integer, default 100]: maximum number of structs to be retrieved. Max = 100. ex: 35
-    - `:after` [Date or string, default nil]: date filter for structs created after a specified date. ex: ~D[2020, 3, 10]
-    - `:before` [Date or string, default nil]: date filter for structs created before a specified date. ex: ~D[2020, 3, 10]
-    - `:status` [list of strings, default nil]: filter for status of retrieved structs. Options: "created", "failed", "delivered", "confirmed", "success", "canceled"
-    - `:tags` [list of strings, default nil]: tags to filter retrieved structs. ex: ["tony", "stark"]
-    - `:ids` [list of strings, default nil]: list of ids to filter retrieved structs. ex: ["5656565656565656", "4545454545454545"]
-    - `:type` [list of strings, default nil]: filter for the type of retrieved PixKeys. Options: "cpf", "cnpj", "phone", "email", "evp".
-    - `:user` [Organization/Project, default nil]: Organization or Project struct returned from StarkInfra.project(). Only necessary if default project or organization has not been set in configs.
+  ## Parameters (optional):
+    - `:cursor` [binary, default nil]: cursor returned on the previous page function call.
+    - `:limit` [integer, default 100]: maximum number of objects to be retrieved. It must be an integer between 1 and 100. ex: 50
+    - `:after` [Date or binary, default nil]: date filter for objects created after a specified date. ex: ~D[2020, 3, 10]
+    - `:before` [Date or binary, default nil]: date filter for objects created before a specified date. ex: ~D[2020, 3, 10]
+    - `:status` [list of binaries, default nil]: filter for status of retrieved objects. ex: "created", "failed", "delivered", "confirmed", "success", "canceled"
+    - `:tags` [list of binaries, default nil]: tags to filter retrieved objects. ex: ["tony", "stark"]
+    - `:ids` [list of binaries, default nil]: list of ids to filter retrieved objects. ex: ["5656565656565656", "4545454545454545"]
+    - `:type` [list of binaries, default nil]: filter for the type of retrieved PixKeys. ex: "cpf", "cnpj", "phone", "email", "evp".
+    - `:user` [Organization/Project, default nil]: Organization or Project object returned from StarkInfra.project(). Only necessary if default project or organization has not been set in configs.
 
   ## Return:
-    - cursor to retrieve the next page of PixKey structs
-    - stream of PixKey structs with updated attributes
+    - list of PixKey objects with updated attributes
+    - cursor to retrieve the next page of PixKey objects
   """
   @spec page(
     cursor: binary,
@@ -251,15 +253,16 @@ defmodule StarkInfra.PixKey do
   Update a PixKey parameters by passing id.
 
   ## Parameters (required):
-    - `:id` [string]: PixKey id. ex: '5656565656565656'
-    - `:reason` [string]: reason why the PixKey is being patched. Options: "branchTransfer", "reconciliation" or "userRequested".
+    - `:id` [binary]: PixKey id. ex: '5656565656565656'
+    - `:reason` [binary]: reason why the PixKey is being patched. ex: "branchTransfer", "reconciliation" or "userRequested".
 
   ## Parameters (optional):
-    - `:account_created` [Date, DateTime or string, default nil]: opening Date or DateTime for the account to be linked. ex: "2022-01-01.
-    - `:account_number` [string, default nil]: number of the account to be linked. ex: "76543".
-    - `:account_type` [string, default nil]: type of the account to be linked. Options: "checking", "savings", "salary" or "payment".
-    - `:branch_code` [string, default nil]: branch code of the account to be linked. ex: 1234".
-    - `:name` [string, default nil]: holder's name of the account to be linked. ex: "Jamie Lannister".
+    - `:account_created` [Date, DateTime or binary, default nil]: opening Date or DateTime for the account to be linked. ex: "2022-01-01.
+    - `:account_number` [binary, default nil]: number of the account to be linked. ex: "76543".
+    - `:account_type` [binary, default nil]: type of the account to be linked. ex: "checking", "savings", "salary" or "payment".
+    - `:branch_code` [binary, default nil]: branch code of the account to be linked. ex: 1234".
+    - `:name` [binary, default nil]: holder's name of the account to be linked. ex: "Jamie Lannister".
+    - `:user` [Organization/Project, default nil]: Organization or Project object returned from StarkInfra.project(). Only necessary if default project or organization has not been set in configs.
 
   ## Return:
     - PixKey with updated attributes
@@ -308,16 +311,16 @@ defmodule StarkInfra.PixKey do
   end
 
   @doc """
-  Delete a pixKey entity previously created in the Stark Infra API
+  Cancel a PixKey entity previously created in the Stark Infra API
 
   ## Parameters (required):
-    - `:id` [string]: struct unique id. ex: "5656565656565656"
+    - `:id` [binary]: object unique id. ex: "5656565656565656"
 
-  ## Options:
-    - `:user` [Organization/Project, default nil]: Organization or Project struct returned from StarkInfra.project(). Only necessary if default project or organization has not been set in configs.
+  ## Parameters (optional):
+    - `:user` [Organization/Project, default nil]: Organization or Project object returned from StarkInfra.project(). Only necessary if default project or organization has not been set in configs.
 
   ## Return:
-    - canceled pixKey struct
+    - canceled PixKey object
   """
   @spec cancel(
     id: binary,

@@ -6,10 +6,10 @@ defmodule StarkInfra.PixDomain.Certificate do
   """
 
   @doc """
-  The Certificate struct displays the certificate information from a specific domain.
+  The Certificate object displays the certificate information from a specific domain.
 
   ## Attributes (return-only):
-    - content [string]: certificate of the Pix participant in PEM format.
+    - content [binary]: certificate of the Pix participant in PEM format.
   """
   defstruct [
     :content

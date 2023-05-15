@@ -13,9 +13,61 @@ Given a version number MAJOR.MINOR.PATCH, increment:
 
 ## [Unreleased]
 ### Added
-- IssuingRule missing parameters
-### Fixed
-- query parameters in post requests
+- StaticBrcode resource
+- BrcodePreview resource
+- DynamicBrcode resource
+- IndividualDocument resource
+- IndividualDocument.Log resource
+- IndividualIdentity resource
+- IndividualIdentity.Log resource
+- CreditHolmes resource
+- CreditHolmes.Log resource
+- IssuingDesign resource
+- IssuingEmbossingKit resource
+- IssuingEmbossingRequest resource
+- IssuingEmbossingRequest.Log resource
+- IssuingRestock resource
+- IssuingRestock.Log resource
+- IssuingStock resource
+- IssuingStock.Log resource
+- CardMethod sub-resource
+- MerchantCountry sub-resource
+- MerchantCategory sub-resource
+- CreditPreview sub-resource
+- CreditNotePreview sub-resource
+- flow attribute to PixChargeback and PixInfraction resources
+- tags parameter to PixClaim, PixInfraction, PixChargeback resources
+- tags parameter to query and page methods in PixChargeback, PixClaim and PixInfraction resources
+- agent parameter to query and page methods in PixInfraction and PixChargeback resources
+- expand parameter to create, get, query and page methods in IssuingHolder resource
+- pin parameter to update method in IssuingCard resource
+- nominal_interest attributes to return only in CreditNote resource
+- code attribute to IssuingProduct resource
+- parse method in IssuingPurchase resource
+- response method in IssuingPurchas, PixRequest and PixReversal resources
+- zip_code, is_partial_allowed, card_tags and holder_tags attributes to IssuingPurchase resource
+- brcode, link and due attributes to IssuingInvoice resource
+- payerId and endToEndId parameter to BrcodePreview resource
+- cashierBankCode and description parameter to StaticBrcode resource
+### Changed
+- CreditNote.Signer to CreditSigner sub-resource
+- PixDirector resource to sub-resource
+- IssuingBin resource to IssuingProduct
+- fine and interest attributes to return only in CreditNote.Invoice sub-resource
+- expiration from returned-only attribute to optional parameter in the CreditNote resource
+- settlement parameter to funding_type and client parameter to holder_type in Issuing Product resource
+- bank_code parameter to claimer_bank_code in PixClaim resource
+- agent parameter to flow in PixClaim and PixInfraction resources
+- agent parameter to flow on query and page methods in PixClaim resource
+- CreditNote.Signer sub-resource to CreditSigner resource
+- change nominal_amount and amount parameter to conditionally required to CreditNote resource
+### Removed
+- IssuingAuthorization resource
+- category parameter from IssuingProduct resource
+- bank_code attribute from PixReversal resource
+- agent parameter from PixClaim.Log
+- bacen_id attribute from PixChargeback and PixInfraction resources
+- cardDesignId and envelopeDesignId attributes to IssuingEmbossingRequest resource
 
 ## [0.1.0] - 2022-06-03
 ### Added

@@ -7,53 +7,53 @@ defmodule StarkInfra.IssuingTransaction do
   alias StarkInfra.Error
 
   @moduledoc """
-    # IssuingTransaction struct
+    # IssuingTransaction object
   """
 
   @doc """
-  The IssuingTransaction structs created in your Workspace to represent each balance shift.
+  The IssuingTransaction objects created in your Workspace to represent each balance shift.
 
   ## Attributes (return-only):
-    - `:id` [string]: unique id returned when IssuingTransaction is created. ex: "5656565656565656"
+    - `:id` [binary]: unique id returned when IssuingTransaction is created. ex: "5656565656565656"
     - `:amount` [integer]: IssuingTransaction value in cents. ex: 1234 (= R$ 12.34)
     - `:balance` [integer]: balance amount of the Workspace at the instant of the Transaction in cents. ex: 200 (= R$ 2.00)
-    - `:description` [string]: IssuingTransaction description. ex: "Buying food"
-    - `:source` [string]: source of the transaction. ex: "issuing-purchase/5656565656565656"
-    - `:tags` [string]: list of strings inherited from the source resource. ex: ["tony", "stark"]
+    - `:description` [binary]: IssuingTransaction description. ex: "Buying food"
+    - `:source` [binary]: source of the transaction. ex: "issuing-purchase/5656565656565656"
+    - `:tags` [list of binaries]: list of binaries inherited from the source resource. ex: ["tony", "stark"]
     - `:created` [DateTime]: creation datetime for the IssuingTransaction. ex: ~U[2020-03-10 10:30:0:0]
   """
   @enforce_keys [
+    :id,
     :amount,
-    :description,
     :balance,
+    :description,
     :source,
     :tags,
-    :id,
     :created
   ]
   defstruct [
+    :id,
     :amount,
-    :description,
     :balance,
+    :description,
     :source,
     :tags,
-    :id,
     :created
   ]
 
   @type t() :: %__MODULE__{}
 
   @doc """
-  Receive a single IssuingTransaction struct previously created in the Stark Infra API by its id
+  Receive a single IssuingTransaction object previously created in the Stark Infra API by its id
 
-  ## Options:
-    - `:id` [string]: struct unique id. ex: "5656565656565656"
+  ## Parameters (optional):
+    - `:id` [binary]: object unique id. ex: "5656565656565656"
 
-  ## Options:
-    - `:user` [Organization/Project, default nil]: Organization or Project struct returned from StarkInfra.project(). Only necessary if default project or organization has not been set in configs.
+  ## Parameters (optional):
+    - `:user` [Organization/Project, default nil]: Organization or Project object returned from StarkInfra.project(). Only necessary if default project or organization has not been set in configs.
 
   ## Return:
-    - IssuingTransaction struct with updated attributes
+    - IssuingTransaction object that corresponds to the given id.
   """
   @spec get(
     id: binary,
@@ -85,29 +85,27 @@ defmodule StarkInfra.IssuingTransaction do
   end
 
   @doc """
-  Receive a stream of IssuingTransaction structs previously created in the Stark Infra API
+  Receive a stream of IssuingTransaction objects previously created in the Stark Infra API
 
-  ## Options:
-    - `:tags` [list of strings, default nil]: tags to filter retrieved structs. ex: ["tony", "stark"]
-    - `:external_ids` [list of strings, default []]: external IDs. ex: ["5656565656565656", "4545454545454545"]
-    - `:after` [Date or string, default nil]: date filter for structs created only after specified date. ex: ~D[2020-03-25]
-    - `:before` [Date or string, default nil]: date filter for structs created only before specified date. ex: ~D[2020-03-25]
-    - `:status` [string, default nil]: filter for status of retrieved structs. ex: "approved", "canceled", "denied", "confirmed" or "voided"
-    - `:ids` [list of strings, default [], default nil]: purchase IDs
-    - `:limit` [integer, default nil]: maximum number of structs to be retrieved. Unlimited if nil. ex: 35
-    - `:user` [Organization/Project, default nil]: Organization or Project struct returned from StarkInfra.project(). Only necessary if default project or organization has not been set in configs.
+  ## Parameters (optional):
+    - `:limit` [integer, default nil]: maximum number of objects to be retrieved. Unlimited if nil. ex: 35
+    - `:after` [Date or binary, default nil]: date filter for objects created only after specified date. ex: ~D[2020-03-25]
+    - `:before` [Date or binary, default nil]: date filter for objects created only before specified date. ex: ~D[2020-03-25]
+    - `:tags` [list of binaries, default nil]: tags to filter retrieved objects. ex: ["tony", "stark"]
+    - `:external_ids` [list of binaries, default nil]: external IDs. ex: ["5656565656565656", "4545454545454545"]
+    - `:ids` [list of binaries, default nil, default nil]: purchase IDs
+    - `:user` [Organization/Project, default nil]: Organization or Project object returned from StarkInfra.project(). Only necessary if default project or organization has not been set in configs.
 
   ## Return:
-    - stream of IssuingTransaction structs with updated attributes
+    - stream of IssuingTransaction objects with updated attributes
   """
   @spec query(
-    tags: [binary] | nil,
-    external_ids: [binary] | nil,
+    limit: integer | nil,
     after: Date.t() | binary | nil,
     before: Date.t() | binary | nil,
-    status: binary | nil,
+    tags: [binary] | nil,
+    external_ids: [binary] | nil,
     ids: [binary] | nil,
-    limit: integer | nil,
     user: Organization.t() | Project.t() | nil
   ) ::
     {:ok, {binary, [IssuingTransaction.t()]}} |
@@ -123,13 +121,12 @@ defmodule StarkInfra.IssuingTransaction do
   Same as query(), but it will unwrap the error tuple and raise in case of errors.
   """
   @spec query!(
-    tags: [binary] | nil,
-    external_ids: [binary] | nil,
+    limit: integer | nil,
     after: Date.t() | binary | nil,
     before: Date.t() | binary | nil,
-    status: binary | nil,
+    tags: [binary] | nil,
+    external_ids: [binary] | nil,
     ids: [binary] | nil,
-    limit: integer | nil,
     user: Organization.t() | Project.t() | nil
   ) :: any
   def query!(options \\ []) do
@@ -140,32 +137,30 @@ defmodule StarkInfra.IssuingTransaction do
   end
 
   @doc """
-  Receive a list of IssuingTransaction structs previously created in the Stark Infra API and the cursor to the next page.
+  Receive a list of IssuingTransaction objects previously created in the Stark Infra API and the cursor to the next page.
 
-  ## Options:
-    - `:tags` [list of strings, default nil]: tags to filter retrieved structs. ex: ["tony", "stark"]
-    - `:external_ids` [list of strings, default []]: external IDs. ex: ["5656565656565656", "4545454545454545"]
-    - `:after` [Date or string, default nil]: date filter for structs created only after specified date. ex: ~D[2020-03-25]
-    - `:before` [Date or string, default nil]: date filter for structs created only before specified date. ex: ~D[2020-03-25]
-    - `:status` [string, default nil]: filter for status of retrieved structs. ex: "approved", "canceled", "denied", "confirmed" or "voided"
-    - `:ids` [list of strings, default [], default nil]: purchase IDs
-    - `:limit` [integer, default 100]: maximum number of structs to be retrieved. Unlimited if nil. ex: 35
-    - `:cursor` [string, default nil]: cursor returned on the previous page function call
-    - `:user` [Organization/Project, default nil]: Organization or Project struct returned from StarkInfra.project(). Only necessary if default project or organization has not been set in configs.
+  ## Parameters (optional):
+    - `:cursor` [binary, default nil]: cursor returned on the previous page function call
+    - `:limit` [integer, default 100]: maximum number of objects to be retrieved. It must be an integer between 1 and 100. ex: 50
+    - `:after` [Date or binary, default nil]: date filter for objects created only after specified date. ex: ~D[2020-03-25]
+    - `:before` [Date or binary, default nil]: date filter for objects created only before specified date. ex: ~D[2020-03-25]
+    - `:tags` [list of binaries, default nil]: tags to filter retrieved objects. ex: ["tony", "stark"]
+    - `:external_ids` [list of binaries, default nil]: external IDs. ex: ["5656565656565656", "4545454545454545"]
+    - `:ids` [list of binaries, default nil, default nil]: purchase IDs
+    - `:user` [Organization/Project, default nil]: Organization or Project object returned from StarkInfra.project(). Only necessary if default project or organization has not been set in configs.
 
   ## Return:
-    - list of IssuingTransaction structs with updated attributes
-    - cursor to retrieve the next page of IssuingPurchase structs
+    - list of IssuingTransaction objects with updated attributes
+    - cursor to retrieve the next page of IssuingPurchase objects
   """
   @spec page(
-    tags: [binary] | nil,
-    external_ids: [binary] | nil,
+    cursor: binary | nil,
+    limit: integer | nil,
     after: Date.t() | binary | nil,
     before: Date.t() | binary | nil,
-    status: binary | nil,
+    tags: [binary] | nil,
+    external_ids: [binary] | nil,
     ids: [binary] | nil,
-    limit: integer | nil,
-    cursor: binary | nil,
     user: Organization.t() | Project.t() | nil
   ) ::
     {:ok, {binary, [IssuingTransaction.t()]}} |
@@ -181,14 +176,13 @@ defmodule StarkInfra.IssuingTransaction do
   Same as page(), but it will unwrap the error tuple and raise in case of errors.
   """
   @spec page!(
-    tags: [binary] | nil,
-    external_ids: [binary] | nil,
+    cursor: binary | nil,
+    limit: integer | nil,
     after: Date.t() | binary | nil,
     before: Date.t() | binary | nil,
-    status: binary | nil,
+    tags: [binary] | nil,
+    external_ids: [binary] | nil,
     ids: [binary] | nil,
-    limit: integer | nil,
-    cursor: binary | nil,
     user: Organization.t() | Project.t() | nil
   ) :: any
   def page!(options \\ []) do
@@ -210,11 +204,11 @@ defmodule StarkInfra.IssuingTransaction do
   def resource_maker(json) do
     %IssuingTransaction{
       id: json[:id],
-      tags: json[:tags],
       amount: json[:amount],
-      source: json[:source],
       balance: json[:balance],
       description: json[:description],
+      source: json[:source],
+      tags: json[:tags],
       created: json[:created] |> Check.datetime()
     }
   end

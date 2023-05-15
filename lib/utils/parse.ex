@@ -12,20 +12,20 @@ defmodule StarkInfra.Utils.Parse do
   @moduledoc false
 
   @doc """
-  Create a single Event struct received from event listening at subscribed user endpoint.
+  Create a single Event object received from event listening at subscribed user endpoint.
   If the provided digital signature does not check out with the StarkInfra public key, an "invalidSignature"
   error will be returned.
 
   ## Parameters (required):
-    - `content` [string]: response content from request received at user endpoint (not parsed)
-    - `signature` [string]: base-64 digital signature received at response header "Digital-Signature"
+    - `:content` [binary]: response content from request received at user endpoint (not parsed)
+    - `:signature` [binary]: base-64 digital signature received at response header "Digital-Signature"
 
-  ## Options:
-    - `cache_pid` [PID, default nil]: PID of the process that holds the public key cache, returned on previous parses. If not provided, a new cache process will be generated.
-    - `user` [Organization/Project, default nil]: Organization or Project struct returned from StarkInfra.project(). Only necessary if default project or organization has not been set in configs.
+  ## Parameters (optional):
+    - `:cache_pid` [PID, default nil]: PID of the process that holds the public key cache, returned on previous parses. If not provided, a new cache process will be generated.
+    - `:user` [Organization/Project, default nil]: Organization or Project object returned from StarkInfra.project(). Only necessary if default project or organization has not been set in configs.
 
   ## Return:
-    - Event struct with updated attributes
+    - Event object with updated attributes
     - Cache PID that holds the Stark Infra public key in order to avoid unnecessary requests to the API on future parses
   """
   @spec parse_and_verify(
@@ -63,6 +63,23 @@ defmodule StarkInfra.Utils.Parse do
     end
   end
 
+  @spec verify(
+    content: binary,
+    signature: binary,
+    cache_pid: PID,
+    resource_maker: any,
+    user: Project.t() | Organization.t()
+  ) ::
+    {:ok, {Event.t(), binary}} | {:error, [Error.t()]}
+  def verify(parameters \\ []) do
+    parameters =
+    Enum.into(
+      parameters |> Check.enforced_keys([:content, :signature]),
+      %{cache_pid: nil, user: nil}
+    )
+    Parse.verify_signature(parameters.user, parameters.content, parameters.signature, parameters.cache_pid, parameters.resource_maker, parameters.key, 0)
+  end
+
   defp parse(user, content, signature, cache_pid, resource_maker, key, counter) when is_nil(cache_pid) do
     {:ok, new_cache_pid} = Agent.start_link(fn -> %{} end)
     parse(user, content, signature, new_cache_pid, resource_maker, key, counter)
@@ -94,7 +111,7 @@ defmodule StarkInfra.Utils.Parse do
     )
   end
 
-  defp verify_signature(_user, _content, _signature_base_64, _cache_pid, counter)
+  def verify_signature(_user, _content, _signature_base_64, _cache_pid, counter)
       when counter > 1 do
     {
     :error,
@@ -107,7 +124,7 @@ defmodule StarkInfra.Utils.Parse do
     }
   end
 
-  defp verify_signature(user, content, signature_base_64, cache_pid, counter)
+  def verify_signature(user, content, signature_base_64, cache_pid, counter)
       when is_binary(signature_base_64) and counter <= 1 do
     try do
       signature_base_64 |> Signature.fromBase64!()
@@ -132,7 +149,7 @@ defmodule StarkInfra.Utils.Parse do
     end
   end
 
-  defp verify_signature(user, content, signature, cache_pid, _counter) do
+  def verify_signature(user, content, signature, cache_pid, _counter) do
     case get_StarkInfra_public_key(user, cache_pid) do
     {:ok, public_key} ->
       {

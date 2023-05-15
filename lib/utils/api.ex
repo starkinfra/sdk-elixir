@@ -3,8 +3,8 @@ defmodule StarkInfra.Utils.API do
 
   alias StarkInfra.Utils.Case
 
-  def api_json(%{__struct__: _} = struct) do
-  struct
+  def api_json(%{__struct__: _} = object) do
+  object
   |> Map.from_struct()
   |> api_json()
   end
@@ -14,8 +14,8 @@ defmodule StarkInfra.Utils.API do
   |> cast_json_to_api_format()
   end
 
-  def cast_json_to_api_format(struct) when is_struct(struct) do
-  struct
+  def cast_json_to_api_format(object) when is_struct(object) do
+  object
   |> Map.from_struct()
   |> cast_json_to_api_format()
   end
@@ -57,8 +57,8 @@ defmodule StarkInfra.Utils.API do
   |> String.replace("Z", "+00:00")
   end
 
-  defp coerce_types(%{__struct__: _} = struct) do
-  api_json(struct)
+  defp coerce_types(%{__struct__: _} = object) do
+  api_json(object)
   end
 
   defp coerce_types(map) when is_map(map) do

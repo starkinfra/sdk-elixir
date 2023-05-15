@@ -9,7 +9,7 @@ defmodule StarkInfraTest.Utils.IssuingHolder do
     %StarkInfra.IssuingHolder{
       name: "Iron Bank S.A.",
       external_id: random_string(15),
-      tax_id: "012.345.678-90",
+      tax_id: "20.018.183/0001-80",
       tags: ["Traveler Employee"]
     }
   end

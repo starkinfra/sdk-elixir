@@ -9,10 +9,10 @@ defmodule StarkInfra.CreditNote.Invoice.Description do
   Invoice description information.
 
   ## Parameters (required):
-    - `:key` [string]: Description for the value. ex: "Taxes"
+    - `:key` [binary]: Description for the value. ex: "Taxes"
 
   ## Parameters (optional):
-    - `:value` [string, nil]: amount related to the described key. ex: "R$100,00"
+    - `:value` [binary, default nil]: amount related to the described key. ex: "R$100,00"
   """
   @enforce_keys [
     :key

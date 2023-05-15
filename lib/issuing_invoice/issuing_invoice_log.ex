@@ -16,10 +16,10 @@ defmodule StarkInfra.IssuingInvoice.Log do
   user, but it can be retrieved to check additional information
   on the IssuingInvoice.
 
-  ## Attributes:
-    - `:id` [string]: unique id returned when the log is created. ex: "5656565656565656"
+  ## Attributes (return-only):
+    - `:id` [binary]: unique id returned when the log is created. ex: "5656565656565656"
     - `:invoice` [IssuingInvoice]: IssuingInvoice entity to which the log refers to.
-    - `:type` [string]: type of the IssuingInvoice event which triggered the log creation. ex: "created", "credited", "expired", "overdue", "paid".
+    - `:type` [binary]: type of the IssuingInvoice event which triggered the log creation. Options: "created", "credited", "expired", "overdue", "paid".
     - `:created` [DateTime]: creation datetime for the log. ex: ~U[2020-03-10 10:30:0:0]
   """
   @enforce_keys [
@@ -38,22 +38,22 @@ defmodule StarkInfra.IssuingInvoice.Log do
   @type t() :: %__MODULE__{}
 
   @doc """
-  Receive a single IssuingInvoice.Log struct previously created by the Stark Infra API by its id.
+  Receive a single IssuingInvoice.Log object previously created by the Stark Infra API by its id.
 
   ## Parameters (required):
-    - `:id` [string]: struct unique id. ex: "5656565656565656"
+    - `:id` [binary]: object unique id. ex: "5656565656565656"
 
-  ## Options:
-    - `:user` [Organization/Project, default nil]: Organization or Project struct returned from StarkInfra.project(). Only necessary if default project or organization has not been set in configs.
+  ## Parameters (optional):
+    - `:user` [Organization/Project, default nil]: Organization or Project object returned from StarkInfra.project(). Only necessary if default project or organization has not been set in configs.
 
   ## Return:
-    - IssuingInvoice.Log struct with updated attributes
+    - IssuingInvoice.Log object that corresponds to the given id.
   """
   @spec get(
     id: binary,
     user: Project.t() | Organization.t() | nil
   ) ::
-    { :ok, Log.t() } |
+    {:ok, Log.t() } |
     { :error, [Error.t()] }
   def get(id, options \\ []) do
     Rest.get_id(
@@ -79,29 +79,28 @@ defmodule StarkInfra.IssuingInvoice.Log do
   end
 
   @doc """
-  Receive a stream of IssuingInvoice.Log structs previously created in the Stark Infra API
+  Receive a stream of IssuingInvoice.Log objects previously created in the Stark Infra API
 
-  ## Options:
-    - `:ids` [list of strings, default nil]: list of IssuingInvoice ids to filter logs. ex: ["5656565656565656", "4545454545454545"]
-    - `:limit` [integer, default nil]: maximum number of structs to be retrieved. Unlimited if nil. ex: 35
-    - `:after` [Date or string, default nil]: date filter for structs created only after specified date. ex: ~D[2020-03-25]
-    - `:before` [Date or string, default nil]: date filter for structs created only before specified date. ex: ~D[2020-03-25]
-    - `:types` [list of strings, default nil]: filter for log event types. ex: ["created", "credited", "expired", "overdue", "paid"]
-    - `:user` [Organization/Project, default nil]: Organization or Project struct returned from StarkInfra.project(). Only necessary if default project or organization has not been set in configs.
+  ## Parameters (optional):
+    - `:limit` [integer, default nil]: maximum number of objects to be retrieved. Unlimited if nil. ex: 35
+    - `:after` [Date or binary, default nil]: date filter for objects created only after specified date. ex: ~D[2020-03-25]
+    - `:before` [Date or binary, default nil]: date filter for objects created only before specified date. ex: ~D[2020-03-25]
+    - `:types` [list of binaries, default nil]: filter for log event types. ex: ["created", "credited", "expired", "overdue", "paid"]
+    - `:ids` [list of binaries, default nil]: list of IssuingInvoice ids to filter logs. ex: ["5656565656565656", "4545454545454545"]
+    - `:user` [Organization/Project, default nil]: Organization or Project object returned from StarkInfra.project(). Only necessary if default project or organization has not been set in configs.
 
   ## Return:
-    - stream of IssuingInvoice.Log structs with updated attributes
+    - stream of IssuingInvoice.Log objects with updated attributes
   """
   @spec query(
-    ids: [binary],
     limit: integer,
     after: Date.t() | binary,
     before: Date.t() | binary,
     types: [binary],
-    invoice_ids: [binary],
+    ids: [binary],
     user: Project.t() | Organization.t() | nil
   ) ::
-    { :ok, {binary, [Log.t()]} } |
+    {:ok, {binary, [Log.t()]} } |
     { :error, [Error.t()] }
   def query(options \\ []) do
     Rest.get_list(
@@ -111,15 +110,14 @@ defmodule StarkInfra.IssuingInvoice.Log do
   end
 
   @doc """
-  Same as query(), but it will unwrap the error tuple and raise in case of errors.
+  Same as query(), but it will unwrap the error tuple and raise  in case of errors.
   """
   @spec query!(
-    ids: [binary],
     limit: integer,
     after: Date.t() | binary,
     before: Date.t() | binary,
     types: [binary],
-    invoice_ids: [binary],
+    ids: [binary],
     user: Project.t() | Organization.t() | nil
   ) :: any
   def query!(options \\ []) do
@@ -130,33 +128,32 @@ defmodule StarkInfra.IssuingInvoice.Log do
   end
 
   @doc """
-  Receive a list of up to 100 IssuingInvoice.Log structs previously created in the Stark Infra API and the cursor to the next page.
+  Receive a list of up to 100 IssuingInvoice.Log objects previously created in the Stark Infra API and the cursor to the next page.
   Use this function instead of query if you want to manually page your requests.
 
-  ## Options:
-    - `:cursor` [string, default nil]: cursor returned on the previous page function call
-    - `:ids` [list of strings, default nil]: list of IssuingInvoice ids to filter logs. ex: ["5656565656565656", "4545454545454545"]
-    - `:limit` [integer, default 100]: maximum number of structs to be retrieved. It must be an integer between 1 and 100. ex: 50
-    - `:after` [Date or string, default nil]: date filter for structs created only after specified date. ex: ~D[2020-03-25]
-    - `:before` [Date or string, default nil]: date filter for structs created only before specified date. ex: ~D[2020-03-25]
-    - `:types` [list of strings, default nil]: filter for log event types. ex: ["created", "credited", "expired", "overdue", "paid"]
-    - `:user` [Organization/Project, default nil]: Organization or Project struct returned from StarkInfra.project(). Only necessary if default project or organization has not been set in configs.
+  ## Parameters (optional):
+    - `:cursor` [binary, default nil]: cursor returned on the previous page function call
+    - `:limit` [integer, default 100]: maximum number of objects to be retrieved. It must be an integer between 1 and 100. ex: 50
+    - `:after` [Date or binary, default nil]: date filter for objects created only after specified date. ex: ~D[2020-03-25]
+    - `:before` [Date or binary, default nil]: date filter for objects created only before specified date. ex: ~D[2020-03-25]
+    - `:types` [list of binaries, default nil]: filter for log event types. ex: ["created", "credited", "expired", "overdue", "paid"]
+    - `:ids` [list of binaries, default nil]: list of IssuingInvoice ids to filter logs. ex: ["5656565656565656", "4545454545454545"]
+    - `:user` [Organization/Project, default nil]: Organization or Project object returned from StarkInfra.project(). Only necessary if default project or organization has not been set in configs.
 
   ## Return:
-    - list of IssuingInvoice.Log structs with updated attributes
-    - cursor to retrieve the next page of IssuingInvoice.Log structs
+    - list of IssuingInvoice.Log objects with updated attributes
+    - cursor to retrieve the next page of IssuingInvoice.Log objects
   """
   @spec page(
     cursor: binary,
-    ids: [binary],
     limit: integer,
     after: Date.t() | binary,
     before: Date.t() | binary,
     types: [binary],
-    invoice_ids: [binary],
+    ids: [binary],
     user: Project.t() | Organization.t() | nil
   ) ::
-    { :ok, {binary, [Log.t()]} } |
+    {:ok, {binary, [Log.t()]} } |
     { :error, [Error.t()] }
   def page(options \\ []) do
     Rest.get_page(
@@ -170,12 +167,11 @@ defmodule StarkInfra.IssuingInvoice.Log do
   """
   @spec page!(
     cursor: binary,
-    ids: [binary],
     limit: integer,
     after: Date.t() | binary,
     before: Date.t() | binary,
     types: [binary],
-    invoice_ids: [binary],
+    ids: [binary],
     user: Project.t() | Organization.t() | nil
   ) :: any
   def page!(options \\ []) do
@@ -197,8 +193,8 @@ defmodule StarkInfra.IssuingInvoice.Log do
   def resource_maker(json) do
     %Log{
       id: json[:id],
-      type: json[:type],
       invoice: json[:invoice],
+      type: json[:type],
       created: json[:created] |> Check.datetime(),
     }
   end

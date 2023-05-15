@@ -61,7 +61,7 @@ defmodule StarkInfra.Utils.Check do
     :secp256k1 = parsed_key.curve.name
     parsed_key
   rescue
-    _e -> raise "private_key must be valid secp256k1 ECDSA string in pem format"
+    _e -> raise "private_key must be valid secp256k1 ECDSA binary in pem format"
   else
     parsed_key -> parsed_key
   end

@@ -102,10 +102,10 @@ defmodule StarkInfraTest.IssuingCard do
   end
 
   def example_issuing_card do
-    StarkInfra.IssuingHolder.query!(limit: 10)
-      |> Enum.take(1)
-      |> hd
-      |> build_example
+    StarkInfra.IssuingHolder.create!([StarkInfraTest.Utils.IssuingHolder.example_issuing_holder()])
+    |> Enum.take(1)
+    |> hd
+    |> build_example
   end
 
   def build_example(holder) do
