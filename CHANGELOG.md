@@ -49,6 +49,7 @@ Given a version number MAJOR.MINOR.PATCH, increment:
 - brcode, link and due attributes to IssuingInvoice resource
 - payerId and endToEndId parameter to BrcodePreview resource
 - cashierBankCode and description parameter to StaticBrcode resource
+- merchant_category_type, description, metadata and holder_id attributes to IssuingPurchase resource
 ### Changed
 - CreditNote.Signer to CreditSigner sub-resource
 - PixDirector resource to sub-resource

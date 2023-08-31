@@ -77,7 +77,7 @@ defmodule StarkInfra.Utils.Parse do
       parameters |> Check.enforced_keys([:content, :signature]),
       %{cache_pid: nil, user: nil}
     )
-    Parse.verify_signature(parameters.user, parameters.content, parameters.signature, parameters.cache_pid, parameters.resource_maker, parameters.key, 0)
+    parse(parameters.user, parameters.content, parameters.signature, parameters.cache_pid, parameters.resource_maker, parameters.key, 0)
   end
 
   defp parse(user, content, signature, cache_pid, resource_maker, key, counter) when is_nil(cache_pid) do

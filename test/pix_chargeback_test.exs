@@ -3,14 +3,14 @@ defmodule StarkInfraTest.PixChargeback do
 
   @tag :pix_chargeback
   test "create pix chargeback" do
-    {:ok, pix_chargebacks} = StarkInfra.PixChargeback.create([generate_example_pix_chargeback()])
+    {:ok, pix_chargebacks} = StarkInfra.PixChargeback.create([StarkInfraTest.Utils.PixChargeback.generate_example_pix_chargeback()])
     pix_chargeback = pix_chargebacks |> hd
     assert !is_nil(pix_chargeback.id)
   end
 
   @tag :pix_chargeback
   test "create! pix chargeback" do
-    pix_chargeback = StarkInfra.PixChargeback.create!([generate_example_pix_chargeback()]) |> hd
+    pix_chargeback = StarkInfra.PixChargeback.create!([StarkInfraTest.Utils.PixChargeback.generate_example_pix_chargeback()]) |> hd
     assert !is_nil(pix_chargeback.id)
   end
 

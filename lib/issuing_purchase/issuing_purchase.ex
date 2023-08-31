@@ -15,7 +15,6 @@ defmodule StarkInfra.IssuingPurchase do
   Displays the IssuingPurchase objects created in your Workspace.
 
   ## Attributes (return-only):
-    - `:id` [binary]: unique id returned when IssuingPurchase is created. ex: "5656565656565656"
     - `:holder_name` [binary]: card holder name. ex: "Tony Stark"
     - `:product_id` [binary]: unique card product number (BIN) registered within the card network. ex: "53810200"
     - `:card_id` [binary]: unique id returned when IssuingCard is created. ex: "5656565656565656"
@@ -30,6 +29,7 @@ defmodule StarkInfra.IssuingPurchase do
     - `:merchant_currency_code` [binary]: merchant currency code. ex: "USD"
     - `:merchant_currency_symbol` [binary]: merchant currency symbol. ex: "$"
     - `:merchant_category_code` [binary]: merchant category code. ex: "fastFoodRestaurants"
+    - `:merchant_category_type` [binary]: merchant category type. ex "food"
     - `:merchant_country_code` [binary]: merchant country code. ex: "USA"
     - `:acquirer_id` [binary]: acquirer ID. ex: "5656565656565656"
     - `:merchant_id` [binary]: merchant ID. ex: "5656565656565656"
@@ -40,17 +40,21 @@ defmodule StarkInfra.IssuingPurchase do
     - `:score` [float]: internal score calculated for the authenticity of the purchase. nil in case of insufficient data. ex: 7.6
     - `:end_to_end_id` [binary]: Unique id used to identify the transaction through all of its life cycle, even before the purchase is denied or accepted and gets its usual id. ex: "679cd385-642b-49d0-96b7-89491e1249a5"
     - `:tags` [list of binaries]: list of binaries for tagging returned by the sub-issuer during the authorization. ex: ["travel", "food"]
-    - `:zip_code` [binary]: zip code of the merchant location. ex: "02101234"
 
     ## Attributes (IssuingPurchase only):
+    - `:id` [binary]: unique id returned when IssuingPurchase is created. ex: "5656565656565656"
     - `:issuing_transaction_ids` [binary]: ledger transaction ids linked to this Purchase
     - `:status` [binary]: current IssuingCard status. ex: "approved", "canceled", "denied", "confirmed", "voided"
+    - `:description` [binary]: IssuingPurchase description. ex: "Office Supplies"
+    - `:metadata` [map]: map used to store additional information about the IssuingPurchase object. ex: { authorizationId: "OjZAqj" }.
+    - `:zip_code` [binary]: zip code of the merchant location. ex: "02101234"
     - `:updated` [DateTime]: latest update datetime for the IssuingPurchase. ex: ~U[2020-03-10 10:30:0:0]
     - `:created` [DateTime]: creation datetime for the IssuingPurchase. ex: ~U[2020-03-10 10:30:0:0]
 
     ## Attributes (authorization request only):
     - `:is_partial_allowed` [bool]: true if the merchant allows partial purchases. ex: False
     - `:card_tags` [list of binaries]: tags of the IssuingCard responsible for this purchase. ex: ["travel", "food"]
+    - `:holder_id` [binary]: card holder ID. ex: "5656565656565656"
     - `:holder_tags` [list of binaries]: tags of the IssuingHolder responsible for this purchase. ex: ["technology", "john snow"]
   """
   @enforce_keys [
@@ -69,6 +73,7 @@ defmodule StarkInfra.IssuingPurchase do
     :merchant_currency_code,
     :merchant_currency_symbol,
     :merchant_category_code,
+    :merchant_category_type,
     :merchant_country_code,
     :acquirer_id,
     :merchant_id,
@@ -79,13 +84,16 @@ defmodule StarkInfra.IssuingPurchase do
     :score,
     :end_to_end_id,
     :tags,
-    :zip_code,
     :issuing_transaction_ids,
     :status,
+    :description,
+    :metadata,
+    :zip_code,
     :updated,
     :created,
     :is_partial_allowed,
     :card_tags,
+    :holder_id,
     :holder_tags,
   ]
 
@@ -105,6 +113,7 @@ defmodule StarkInfra.IssuingPurchase do
     :merchant_currency_code,
     :merchant_currency_symbol,
     :merchant_category_code,
+    :merchant_category_type,
     :merchant_country_code,
     :acquirer_id,
     :merchant_id,
@@ -115,13 +124,16 @@ defmodule StarkInfra.IssuingPurchase do
     :score,
     :end_to_end_id,
     :tags,
-    :zip_code,
     :issuing_transaction_ids,
     :status,
+    :description,
+    :metadata,
+    :zip_code,
     :updated,
     :created,
     :is_partial_allowed,
     :card_tags,
+    :holder_id,
     :holder_tags,
   ]
 
@@ -412,6 +424,7 @@ defmodule StarkInfra.IssuingPurchase do
       merchant_currency_code: json[:merchant_currency_code],
       merchant_currency_symbol: json[:merchant_currency_symbol],
       merchant_category_code: json[:merchant_category_code],
+      merchant_category_type: json[:merchant_category_type],
       merchant_country_code: json[:merchant_country_code],
       acquirer_id: json[:acquirer_id],
       merchant_id: json[:merchant_id],
@@ -422,13 +435,16 @@ defmodule StarkInfra.IssuingPurchase do
       score: json[:score],
       end_to_end_id: json[:end_to_end_id],
       tags: json[:tags],
-      zip_code: json[:zip_code],
       issuing_transaction_ids: json[:issuing_transaction_ids],
       status: json[:status],
+      description: json[:description],
+      metadata: json[:metadata],
+      zip_code: json[:zip_code],
       updated: json[:updated] |> Check.datetime(),
       created: json[:created] |> Check.datetime(),
       is_partial_allowed: json[:is_partial_allowed],
       card_tags: json[:card_tags],
+      holder_id: json[:holder_id],
       holder_tags: json[:holder_tags],
     }
   end
