@@ -47,8 +47,8 @@ Given a version number MAJOR.MINOR.PATCH, increment:
 - response method in IssuingPurchas, PixRequest and PixReversal resources
 - zip_code, is_partial_allowed, card_tags and holder_tags attributes to IssuingPurchase resource
 - brcode, link and due attributes to IssuingInvoice resource
-- payerId and endToEndId parameter to BrcodePreview resource
-- cashierBankCode and description parameter to StaticBrcode resource
+- payer_id and endToEndId parameter to BrcodePreview resource
+- cashier_bank_code and description parameter to StaticBrcode resource
 - merchant_category_type, description, metadata and holder_id attributes to IssuingPurchase resource
 ### Changed
 - CreditNote.Signer to CreditSigner sub-resource
@@ -68,7 +68,9 @@ Given a version number MAJOR.MINOR.PATCH, increment:
 - bank_code attribute from PixReversal resource
 - agent parameter from PixClaim.Log
 - bacen_id attribute from PixChargeback and PixInfraction resources
-- cardDesignId and envelopeDesignId attributes to IssuingEmbossingRequest resource
+- card_design_id and envelopeDesignId attributes to IssuingEmbossingRequest resource
+### Fixed
+- sender_tax_id parameter to DynamicBrcode resource
 
 ## [0.1.0] - 2022-06-03
 ### Added

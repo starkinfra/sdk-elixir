@@ -262,6 +262,7 @@ defmodule StarkInfra.DynamicBrcode do
     - `:reconciliation_id` [binary]: id to be used for conciliation of the resulting Pix transaction. This id must have from to 26 to 35 alphanumeric characters ex: "cd65c78aeb6543eaaa0170f68bd741ee"
     - `:nominal_amount` [integer]: positive integer that represents the amount in cents of the resulting Pix transaction. ex: 1234 (= R$ 12.34)
     - `:sender_name` [binary]: sender's full name. ex: "Anthony Edward Stark"
+    - `:sender_tax_id`: [binary]: sender's CPF (11 digits formatted or unformatted) or CNPJ (14 digits formatted or unformatted). ex: "01.001.001/0001-01"
     - `:receiver_name` [binary]: receiver's full name. ex: "Jamie Lannister"
     - `:receiver_street_line` [binary]: receiver's main address. ex: "Av. Paulista, 200"
     - `:receiver_city` [binary]: receiver's address city name. ex: "Sao Paulo"
@@ -270,7 +271,6 @@ defmodule StarkInfra.DynamicBrcode do
 
     ## Parameters (optional):
     - `:expiration [integer, default 86400 (1 day)]: time in seconds counted from the creation datetime until the DynamicBrcode expires. After expiration, the BR Code cannot be paid anymore.
-    - `:sender_tax_id`: [binary, default nil]: sender's CPF (11 digits formatted or unformatted) or CNPJ (14 digits formatted or unformatted). ex: "01.001.001/0001-01"
     - `:receiver_tax_id`: [binary, default nil]: receiver's CPF (11 digits formatted or unformatted) or CNPJ (14 digits formatted or unformatted). ex: "012.345.678-90"
     - `:fine [float:, default 2.0]: Percentage charged if the sender pays after the due datetime.
     - `:interest`: [float, default 1.0]: Interest percentage charged if the sender pays after the due datetime.
@@ -295,7 +295,7 @@ defmodule StarkInfra.DynamicBrcode do
       status: body.status,
       reconciliationId: body.reconciliation_id,
       nominalAmount: body.nominal_amount,
-      sendeNname: body.sender_name,
+      senderName: body.sender_name,
       senderTaxId: body.sender_tax_id,
       receiverName: body.receiver_name,
       receiverStreetLine: body.receiver_street_line,
