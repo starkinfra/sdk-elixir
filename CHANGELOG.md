@@ -62,6 +62,7 @@ Given a version number MAJOR.MINOR.PATCH, increment:
 - agent parameter to flow on query and page methods in PixClaim resource
 - CreditNote.Signer sub-resource to CreditSigner resource
 - change nominal_amount and amount parameter to conditionally required to CreditNote resource
+- sender_tax_id parameter to DynamicBrcode resource
 ### Removed
 - IssuingAuthorization resource
 - category parameter from IssuingProduct resource
@@ -69,8 +70,6 @@ Given a version number MAJOR.MINOR.PATCH, increment:
 - agent parameter from PixClaim.Log
 - bacen_id attribute from PixChargeback and PixInfraction resources
 - card_design_id and envelopeDesignId attributes to IssuingEmbossingRequest resource
-### Fixed
-- sender_tax_id parameter to DynamicBrcode resource
 
 ## [0.1.0] - 2022-06-03
 ### Added
