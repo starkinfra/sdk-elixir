@@ -11,7 +11,7 @@ defmodule StarkInfra.CreditNote.Invoice.Discount do
 
   ## Parameters (required):
     - `:percentage` [float]: percentage of discount applied until specified due date
-    - `:due` [DateTime, Date or string]: due datetime for the discount
+    - `:due` [DateTime, Date or binary]: due datetime for the discount
   """
   @enforce_keys [
     :percentage,

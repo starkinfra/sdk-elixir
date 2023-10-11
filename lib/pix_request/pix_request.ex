@@ -14,43 +14,46 @@ defmodule StarkInfra.PixRequest do
   @doc """
   PixRequests are used to receive or send instant payments to accounts
   hosted in any Pix participant.
+
   When you initialize a PixRequest, the entity will not be automatically
-  created in the Stark Infra API. The 'create' function sends the structs
-  to the Stark Infra API and returns the list of created structs.
+  created in the Stark Infra API. The 'create' function sends the objects
+  to the Stark Infra API and returns the list of created objects.
 
   ## Parameters (required):
     - `:amount` [integer]: amount in cents to be transferred. ex: 11234 (= R$ 112.34)
-    - `:external_id` [string]: string that must be unique among all your PixRequests. Duplicated external IDs will cause failures. By default, this parameter will block any PixRequests that repeats amount and receiver information on the same date. ex: "my-internal-id-123456"
-    - `:sender_name` [string]: sender's full name. ex: "Edward Stark"
-    - `:sender_tax_id` [string]: sender's tax ID (CPF or CNPJ) with or without formatting. ex: "01234567890" or "20.018.183/0001-80"
-    - `:sender_branch_code` [string]: sender's bank account branch code. Use '-' in case there is a verifier digit. ex: "1357-9"
-    - `:sender_account_number` [string]: sender's bank account number. Use '-' before the verifier digit. ex: "876543-2"
-    - `:sender_account_type` [string, default "checking"]: sender's bank account type. ex: "checking", "savings", "salary" or "payment"
-    - `:receiver_name` [string]: receiver's full name. ex: "Edward Stark"
-    - `:receiver_tax_id` [string]: receiver's tax ID (CPF or CNPJ) with or without formatting. ex: "01234567890" or "20.018.183/0001-80"
-    - `:receiver_bank_code` [string]: receiver's bank institution code in Brazil. ex: "20018183"
-    - `:receiver_account_number` [string]: receiver's bank account number. Use '-' before the verifier digit. ex: "876543-2"
-    - `:receiver_branch_code` [string]: receiver's bank account branch code. Use '-' in case there is a verifier digit. ex: "1357-9"
-    - `:receiver_account_type` [string]: receiver's bank account type. ex: "checking", "savings", "salary" or "payment"
-    - `:end_to_end_id` [string]: central bank's unique transaction ID. ex: "E79457883202101262140HHX553UPqeq"
+    - `:external_id` [binary]: binary that must be unique among all your PixRequests. Duplicated external IDs will cause failures. By default, this parameter will block any PixRequests that repeats amount and receiver information on the same date. ex: "my-internal-id-123456"
+    - `:sender_name` [binary]: sender's full name. ex: "Edward Stark"
+    - `:sender_tax_id` [binary]: sender's tax ID (CPF or CNPJ) with or without formatting. ex: "01234567890" or "20.018.183/0001-80"
+    - `:sender_branch_code` [binary]: sender's bank account branch code. Use '-' in case there is a verifier digit. ex: "1357-9"
+    - `:sender_account_number` [binary]: sender's bank account number. Use '-' before the verifier digit. ex: "876543-2"
+    - `:sender_account_type` [binary]: sender's bank account type. ex: "checking", "savings", "salary" or "payment"
+    - `:receiver_name` [binary]: receiver's full name. ex: "Edward Stark"
+    - `:receiver_tax_id` [binary]: receiver's tax ID (CPF or CNPJ) with or without formatting. ex: "01234567890" or "20.018.183/0001-80"
+    - `:receiver_bank_code` [binary]: receiver's bank institution code in Brazil. ex: "20018183"
+    - `:receiver_account_number` [binary]: receiver's bank account number. Use '-' before the verifier digit. ex: "876543-2"
+    - `:receiver_branch_code` [binary]: receiver's bank account branch code. Use '-' in case there is a verifier digit. ex: "1357-9"
+    - `:receiver_account_type` [binary]: receiver's bank account type. ex: "checking", "savings", "salary" or "payment"
+    - `:end_to_end_id` [binary]: central bank's unique transaction ID. ex: "E79457883202101262140HHX553UPqeq"
+
+  ## Parameters (conditionally-required):
+    - `:cashier_type` [binary]: Cashier's type. Required if the cash_amount is different from 0. ex: "merchant", "participant" and "other"
+    - `:cashier_bank_code` [binary]: Cashier's bank code. Required if the cash_amount is different from 0. ex: "20018183"
 
   ## Parameters (optional):
-    - `:receiver_key_id` [string, default nil]: receiver's dict key. ex: "20.018.183/0001-80"
-    - `:description` [string, default nil]: optional description to override default description to be shown in the bank statement. ex: "Payment for service #1234"
-    - `:reconciliation_id` [string, default nil]: Reconciliation ID linked to this payment. ex: "b77f5236-7ab9-4487-9f95-66ee6eaf1781"
-    - `:initiator_tax_id` [string, default nil]: Payment initiator's tax id (CPF/CNPJ). ex: "01234567890" or "20.018.183/0001-80"
     - `:cash_amount` [integer, default nil]: Amount to be withdrawal from the cashier in cents. ex: 1000 (= R$ 10.00)
-    - `:cashier_bank_code` [string, default nil]: Cashier's bank code. ex: "00000000"
-    - `:cashier_type` [string, default nil]: Cashier's type. ex: [merchant, other, participant]
-    - `:tags` [list of strings, default nil]: list of strings for reference when searching for PixRequests. ex: ["employees", "monthly"]
-    - `:method` [string, default nil]: execution  method for thr creation of the PIX. ex: "manual", "payerQrcode", "dynamicQrcode".
+    - `:receiver_key_id` [binary, default nil]: receiver's dict key. ex: "20.018.183/0001-80"
+    - `:description` [binary, default nil]: optional description to override default description to be shown in the bank statement. ex: "Payment for service #1234"
+    - `:reconciliation_id` [binary, default nil]: Reconciliation ID linked to this payment. ex: "b77f5236-7ab9-4487-9f95-66ee6eaf1781"
+    - `:initiator_tax_id` [binary, default nil]: Payment initiator's tax id (CPF/CNPJ). ex: "01234567890" or "20.018.183/0001-80"
+    - `:tags` [list of binaries, default []]: list of binaries for reference when searching for PixRequests. ex: ["employees", "monthly"]
+    - `:method` [binary, default nil]: execution  method for thr creation of the PIX. ex: "manual", "payerQrcode", "dynamicQrcode".
 
   ## Attributes (return-only):
-    - `:id` [string]: unique id returned when the PixRequest is created. ex: "5656565656565656"
+    - `:id` [binary]: unique id returned when the PixRequest is created. ex: "5656565656565656"
     - `:fee` [integer]: fee charged when PixRequest is paid. ex: 200 (= R$ 2.00)
-    - `:status` [string]: current PixRequest status. Options: “created”, “processing”, “success”, “failed”
-    - `:flow` [string]: direction of money flow. ex: "in" or "out"
-    - `:sender_bank_code` [string]: sender's bank institution code in Brazil. ex: "20018183"
+    - `:status` [binary]: current PixRequest status. ex: “created”, “processing”, “success”, “failed”
+    - `:flow` [binary]: direction of money flow. ex: "in" or "out"
+    - `:sender_bank_code` [binary]: sender's bank institution code in Brazil. ex: "20018183"
     - `:created` [DateTime]: creation datetime for the PixRequest. ex: ~U[2020-03-10 10:30:0:0]
     - `:updated` [DateTime]: latest update datetime for the PixRequest. ex: ~U[2020-03-10 10:30:0:0]
   """
@@ -107,16 +110,16 @@ defmodule StarkInfra.PixRequest do
   @type t() :: %__MODULE__{}
 
   @doc """
-  Send a list of PixRequest structs for creation in the Stark Infra API
+  Send a list of PixRequest objects for creation in the Stark Infra API
 
   ## Parameters (required):
-    - `:requests` [list of PixRequest structs]: list of PixRequest structs to be created in the API
+    - `:requests` [list of PixRequest objects]: list of PixRequest objects to be created in the API
 
-  ## Options:
-    - `:user` [Organization/Project, default nil]: Organization or Project struct returned from StarkInfra.project(). Only necessary if default project or organization has not been set in configs.
+  ## Parameters (optional):
+    - `:user` [Organization/Project, default nil]: Organization or Project object returned from StarkInfra.project(). Only necessary if default project or organization has not been set in configs.
 
   ## Return:
-    - list of PixRequest structs with updated attributes
+    - list of PixRequest objects with updated attributes
   """
   @spec create(
     [PixRequest.t() | map()],
@@ -148,16 +151,16 @@ defmodule StarkInfra.PixRequest do
   end
 
   @doc """
-  Receive a single PixRequest struct previously created in the Stark Infra API by its id
+  Receive a single PixRequest object previously created in the Stark Infra API by its id
 
   ## Parameters (required):
-    - `:id` [string]: struct unique id. ex: "5656565656565656"
+    - `:id` [binary]: object unique id. ex: "5656565656565656"
 
-  ## Options:
-    - `:user` [Organization/Project, default nil]: Organization or Project struct returned from StarkInfra.project(). Only necessary if default project or organization has not been set in configs.
+  ## Parameters (optional):
+    - `:user` [Organization/Project, default nil]: Organization or Project object returned from StarkInfra.project(). Only necessary if default project or organization has not been set in configs.
 
   ## Return:
-    - PixRequest struct with updated attributes
+    - PixRequest object that corresponds to the given id.
   """
   @spec get(
     id: binary,
@@ -189,21 +192,21 @@ defmodule StarkInfra.PixRequest do
   end
 
   @doc """
-  Receive a stream of PixRequest structs previously created in the Stark Infra API
+  Receive a stream of PixRequest objects previously created in the Stark Infra API
 
-  ## Options:
-    - `:limit` [integer, default nil]: maximum number of structs to be retrieved. Unlimited if nil. ex: 35
-    - `:after` [Date or string, default nil]: date filter for structs created after a specified date. ex: ~D[2020, 3, 10]
-    - `:before` [Date or string, default nil]: date filter for structs created before a specified date. ex: ~D[2020, 3, 10]
-    - `:status` [list of strings, default nil]: filter for status of retrieved structs. Options: “created”, “processing”, “success”, “failed”
-    - `:tags` [list of strings, default nil]: tags to filter retrieved structs. ex: ["tony", "stark"]
-    - `:ids` [list of strings, default nil]: list of ids to filter retrieved structs. ex: ["5656565656565656", "4545454545454545"]
-    - `:end_to_end_ids` [list of strings, default nil]: central bank's unique transaction IDs. ex: ["E79457883202101262140HHX553UPqeq", "E79457883202101262140HHX553UPxzx"]
-    - `:external_ids` [list of strings, default nil]: url safe strings that must be unique among all your PixRequests. Duplicated external IDs will cause failures. By default, this parameter will block any PixRequests that repeats amount and receiver information on the same date. ex: ["my-internal-id-123456", "my-internal-id-654321"]
-    - `:user` [Organization/Project, default nil]: Organization or Project struct returned from StarkInfra.project(). Only necessary if default project or organization has not been set in configs.
+  ## Parameters (optional):
+    - `:limit` [integer, default nil]: maximum number of objects to be retrieved. Unlimited if nil. ex: 35
+    - `:after` [Date or binary, default nil]: date filter for objects created after a specified date. ex: ~D[2020, 3, 10]
+    - `:before` [Date or binary, default nil]: date filter for objects created before a specified date. ex: ~D[2020, 3, 10]
+    - `:status` [list of binaries, default nil]: filter for status of retrieved objects. ex: “created”, “processing”, “success”, “failed”
+    - `:ids` [list of binaries, default nil]: list of ids to filter retrieved objects. ex: ["5656565656565656", "4545454545454545"]
+    - `:end_to_end_ids` [list of binaries, default nil]: central bank's unique transaction IDs. ex: ["E79457883202101262140HHX553UPqeq", "E79457883202101262140HHX553UPxzx"]
+    - `:external_ids` [list of binaries, default nil]: url safe binaries that must be unique among all your PixRequests. Duplicated external IDs will cause failures. By default, this parameter will block any PixRequests that repeats amount and receiver information on the same date. ex: ["my-internal-id-123456", "my-internal-id-654321"]
+    - `:tags` [list of binaries, default nil]: tags to filter retrieved objects. ex: ["tony", "stark"]
+    - `:user` [Organization/Project, default nil]: Organization or Project object returned from StarkInfra.project(). Only necessary if default project or organization has not been set in configs.
 
   ## Return:
-    - stream of PixRequest structs with updated attributes
+    - stream of PixRequest objects with updated attributes
   """
   @spec query(
     limit: integer,
@@ -247,24 +250,24 @@ defmodule StarkInfra.PixRequest do
   end
 
   @doc """
-  Receive a list of up to 100 PixRequest structs previously created in the Stark Infra API and the cursor to the next page.
+  Receive a list of up to 100 PixRequest objects previously created in the Stark Infra API and the cursor to the next page.
   Use this function instead of query if you want to manually page your requests.
 
-  ## Options:
-    - `:cursor` [string, default nil]: cursor returned on the previous page function call
-    - `:limit` [integer, default 100]: maximum number of structs to be retrieved. Max = 100. ex: 35
-    - `:after` [Date or string, default nil]: date filter for structs created after a specified date. ex: ~D[2020, 3, 10]
-    - `:before` [Date or string, default nil]: date filter for structs created before a specified date. ex: ~D[2020, 3, 10]
-    - `:status` [list of strings, default nil]: filter for status of retrieved structs. Options: “created”, “processing”, “success”, “failed”
-    - `:tags` [list of strings, default nil]: tags to filter retrieved structs. ex: ["tony", "stark"]
-    - `:ids` [list of strings, default nil]: list of ids to filter retrieved structs. ex: ["5656565656565656", "4545454545454545"]
-    - `:end_to_end_ids` [list of strings, default nil]: central bank's unique transaction IDs. ex: ["E79457883202101262140HHX553UPqeq", "E79457883202101262140HHX553UPxzx"]
-    - `:external_ids` [list of strings, default nil]: url safe strings that must be unique among all your PixRequests. Duplicated external IDs will cause failures. By default, this parameter will block any PixRequests that repeats amount and receiver information on the same date. ex: ["my-internal-id-123456", "my-internal-id-654321"]
-    - `:user` [Organization/Project, default nil]: Organization or Project struct returned from StarkInfra.project(). Only necessary if default project or organization has not been set in configs.
+  ## Parameters (optional):
+    - `:cursor` [binary, default nil]: cursor returned on the previous page function call
+    - `:limit` [integer, default 100]: maximum number of objects to be retrieved. It must be an integer between 1 and 100. ex: 50
+    - `:after` [Date or binary, default nil]: date filter for objects created after a specified date. ex: ~D[2020, 3, 10]
+    - `:before` [Date or binary, default nil]: date filter for objects created before a specified date. ex: ~D[2020, 3, 10]
+    - `:status` [list of binaries, default nil]: filter for status of retrieved objects. ex: “created”, “processing”, “success”, “failed”
+    - `:ids` [list of binaries, default nil]: list of ids to filter retrieved objects. ex: ["5656565656565656", "4545454545454545"]
+    - `:end_to_end_ids` [list of binaries, default nil]: central bank's unique transaction IDs. ex: ["E79457883202101262140HHX553UPqeq", "E79457883202101262140HHX553UPxzx"]
+    - `:external_ids` [list of binaries, default nil]: url safe binaries that must be unique among all your PixRequests. Duplicated external IDs will cause failures. By default, this parameter will block any PixRequests that repeats amount and receiver information on the same date. ex: ["my-internal-id-123456", "my-internal-id-654321"]
+    - `:tags` [list of binaries, default nil]: tags to filter retrieved objects. ex: ["tony", "stark"]
+    - `:user` [Organization/Project, default nil]: Organization or Project object returned from StarkInfra.project(). Only necessary if default project or organization has not been set in configs.
 
     ## Return:
-    - list of PixRequest structs with updated attributes
-    - cursor to retrieve the next page of PixRequest structs
+    - list of PixRequest objects with updated attributes
+    - cursor to retrieve the next page of PixRequest objects
   """
   @spec page(
     cursor: binary,
@@ -310,17 +313,17 @@ defmodule StarkInfra.PixRequest do
   end
 
   @doc """
-  Create a single PixRequest struct from a content string received from a handler listening at the request url.
+  Create a single PixRequest object from a content binary received from a handler listening at the request url.
   If the provided digital signature does not check out with the StarkInfra public key, a
   starkinfra.error.InvalidSignatureError will be raised.
 
   ## Parameters (required):
-    - `:content` [string]: response content from request received at user endpoint (not parsed)
-    - `:signature` [string]: base-64 digital signature received at response header "Digital-Signature"
+    - `:content` [binary]: response content from request received at user endpoint (not parsed)
+    - `:signature` [binary]: base-64 digital signature received at response header "Digital-Signature"
 
-  ## Options:
-    - `cache_pid` [PID, default nil]: PID of the process that holds the public key cache, returned on previous parses. If not provided, a new cache process will be generated.
-    - `:user` [Organization/Project, default nil]: Organization or Project struct returned from StarkInfra.project(). Only necessary if default project or organization has not been set in configs.
+  ## Parameters (optional):
+    - `:cache_pid` [PID, default nil]: PID of the process that holds the public key cache, returned on previous parses. If not provided, a new cache process will be generated.
+    - `:user` [Organization/Project, default nil]: Organization or Project object returned from StarkInfra.project(). Only necessary if default project or organization has not been set in configs.
 
   ## Return:
     - Parsed PixRequest object
@@ -372,6 +375,33 @@ defmodule StarkInfra.PixRequest do
       resource_maker: &resource_maker/1,
       user: user
     )
+  end
+
+  @doc """
+
+  Helps you respond to a PixRequest authorizatio
+
+  ## Parameters (required):
+    - `:status` [binary]: response to the authorization. ex: "approved" or "denied
+
+  ## Parameters (conditionally required):
+    - `:reason` [binary, default nil]: denial reason. Required if the status is "denied". Options: "invalidAccountNumber", "blockedAccount", "accountClosed", "invalidAccountType", "invalidTransactionType", "taxIdMismatch", "invalidTaxId", "orderRejected", "reversalTimeExpired", "settlementFailed"
+
+  ## Return:
+    - Dumped JSON binary that must be returned to us
+  """
+
+  @spec response(
+    map(),
+    user: Project.t() | Organization.t() | nil
+  ) ::
+    {:ok, PixRequest.t()} |
+    {:error, [Error.t()]}
+  def response(status, reason) do
+    body = %{status: status, reason: reason}
+    params = %{authorization: body}
+    params
+    |> Jason.encode!
   end
 
   @doc false

@@ -7,24 +7,24 @@ defmodule StarkInfra.IssuingWithdrawal do
   alias StarkInfra.User.Organization
 
   @moduledoc """
-    # IssuingWithdrawal struct
+    # IssuingWithdrawal object
   """
 
   @doc """
-  The IssuingWithdrawal structs created in your Workspace return cash from your Issuing balance to your Banking balance.
+  The IssuingWithdrawal objects created in your Workspace return cash from your Issuing balance to your Banking balance.
 
   ## Parameters (required):
     - `:amount` [integer]: IssuingWithdrawal value in cents. Minimum = 0 (any value will be accepted). ex: 1234 (= R$ 12.34)
-    - `:external_id` [string] IssuingWithdrawal external ID. ex: "12345"
-    - `:description` [string]: IssuingWithdrawal description. ex: "sending money back"
+    - `:external_id` [binary] IssuingWithdrawal external ID. ex: "12345"
+    - `:description` [binary]: IssuingWithdrawal description. ex: "sending money back"
 
   ## Parameters (optional):
-    - `:tags` [list of strings, default []]: list of strings for tagging. ex: ["tony", "stark"]
+    - `:tags` [list of binaries, default []]: list of binaries for tagging. ex: ["tony", "stark"]
 
   ## Attributes (return-only):
-    - `:id` [string]: unique id returned when IssuingWithdrawal is created. ex: "5656565656565656"
-    - `:transaction_id` [string]: Stark Infra ledger transaction ids linked to this IssuingWithdrawal
-    - `:issuing_transaction_id` [string]: issuing ledger transaction ids linked to this IssuingWithdrawal
+    - `:id` [binary]: unique id returned when IssuingWithdrawal is created. ex: "5656565656565656"
+    - `:transaction_id` [binary]: Stark Infra ledger transaction ids linked to this IssuingWithdrawal
+    - `:issuing_transaction_id` [binary]: issuing ledger transaction ids linked to this IssuingWithdrawal
     - `:updated` [DateTime]: latest update DateTime for the IssuingWithdrawal. ex: ~U[2020-3-10 10:30:0:0]
     - `:created` [DateTime]: creation datetime for the IssuingWithdrawal. ex: ~U[2020-03-10 10:30:0:0]
   """
@@ -48,16 +48,16 @@ defmodule StarkInfra.IssuingWithdrawal do
   @type t() :: %__MODULE__{}
 
   @doc """
-  Send a list of IssuingWithdrawal structs for creation in the Stark Infra API
+  Send a list of IssuingWithdrawal objects for creation in the Stark Infra API
 
   ## Parameters (required):
-    - `:withdrawal` [IssuingWithdrawal struct]: IssuingWithdrawal struct to be created in the API.
+    - `:withdrawal` [IssuingWithdrawal object]: IssuingWithdrawal object to be created in the API.
 
-  ## Options:
-    - `:user` [Organization/Project, default nil]: Organization or Project struct returned from StarkInfra.project(). Only necessary if default project or organization has not been set in configs.
+  ## Parameters (optional):
+    - `:user` [Organization/Project, default nil]: Organization or Project object returned from StarkInfra.project(). Only necessary if default project or organization has not been set in configs.
 
   ## Return:
-    - IssuingWithdrawal struct with updated attributes
+    - IssuingWithdrawal object with updated attributes
   """
   @spec create(
     withdrawal: IssuingWithdrawal.t(),
@@ -89,16 +89,16 @@ defmodule StarkInfra.IssuingWithdrawal do
   end
 
   @doc """
-  Receive a single IssuingWithdrawal struct previously created in the Stark Infra API by its id
+  Receive a single IssuingWithdrawal object previously created in the Stark Infra API by its id
 
   ## Parameters (required):
-    - `:id` [string]: struct unique id. ex: "5656565656565656"
+    - `:id` [binary]: object unique id. ex: "5656565656565656"
 
-  ## Options:
-    - `:user` [Organization/Project, default nil]: Organization or Project struct returned from StarkInfra.project(). Only necessary if default project or organization has not been set in configs.
+  ## Parameters (optional):
+    - `:user` [Organization/Project, default nil]: Organization or Project object returned from StarkInfra.project(). Only necessary if default project or organization has not been set in configs.
 
   ## Return:
-    - IssuingWithdrawal struct with updated attributes
+    - IssuingWithdrawal object that corresponds to the given id.
   """
   @spec get(
     id: binary,
@@ -130,25 +130,25 @@ defmodule StarkInfra.IssuingWithdrawal do
   end
 
   @doc """
-  Receive a stream of IssuingWithdrawal structs previously created in the Stark Infra API
+  Receive a stream of IssuingWithdrawal objects previously created in the Stark Infra API
 
-  ## Options:
-    - `:limit` [integer, default nil]: maximum number of structs to be retrieved. Unlimited if nil. ex: 35
-    - `:external_ids` [list of strings, default []]: external IDs. ex: ["5656565656565656", "4545454545454545"]
-    - `:after` [Date or string, default nil]: date filter for structs created only after specified date. ex: ~D[2020-03-25]
-    - `:before` [Date or string, default nil]: date filter for structs created only before specified date. ex: ~D[2020-03-25]
-    - `:tags` [list of strings, default nil]: tags to filter retrieved structs. ex: ["tony", "stark"]
-    - `:user` [Organization/Project, default nil]: Organization or Project struct returned from StarkInfra.project(). Only necessary if default project or organization has not been set in configs.
+  ## Parameters (optional):
+    - `:limit` [integer, default nil]: maximum number of objects to be retrieved. Unlimited if nil. ex: 35
+    - `:after` [Date or binary, default nil]: date filter for objects created only after specified date. ex: ~D[2020-03-25]
+    - `:before` [Date or binary, default nil]: date filter for objects created only before specified date. ex: ~D[2020-03-25]
+    - `:tags` [list of binaries, default nil]: tags to filter retrieved objects. ex: ["tony", "stark"]
+    - `:external_ids` [list of binaries, default nil]: external IDs. ex: ["5656565656565656", "4545454545454545"]
+    - `:user` [Organization/Project, default nil]: Organization or Project object returned from StarkInfra.project(). Only necessary if default project or organization has not been set in configs.
 
   ## Return:
-    - stream of IssuingWithdrawals structs with updated attributes
+    - stream of IssuingWithdrawal objects with updated attributes
   """
   @spec query(
     limit: integer,
-    external_ids: [binary] | [],
     after: Date.t() | binary,
     before: Date.t() | binary,
     tags: [binary],
+    external_ids: [binary] | [],
     user: (Organization.t() | Project.t()) | nil
   ) ::
     {:ok, [IssuingWithdrawal.t()]} |
@@ -165,10 +165,10 @@ defmodule StarkInfra.IssuingWithdrawal do
   """
   @spec query!(
     limit: integer,
-    external_ids: [binary] | [],
     after: Date.t() | binary,
     before: Date.t() | binary,
     tags: [binary],
+    external_ids: [binary] | [],
     user: (Organization.t() | Project.t()) | nil
   ) :: any
   def query!(options \\ []) do
@@ -179,25 +179,28 @@ defmodule StarkInfra.IssuingWithdrawal do
   end
 
   @doc """
-  Receive a list of IssuingWithdrawal structs previously created in the Stark Infra API and the cursor to the next page.
+  Receive a list of up to 100 IssuingWithdrawal objects previously created in the Stark Infra API and the cursor to the next page.
+  Use this function instead of query if you want to manually page your requests.
 
-  ## Options:
-    - `:limit` [integer, default 100]: maximum number of structs to be retrieved. Unlimited if nil. ex: 35
-    - `:external_ids` [list of strings, default []]: external IDs. ex: ["5656565656565656", "4545454545454545"]
-    - `:after` [Date or string, default nil]: date filter for structs created only after specified date. ex: ~D[2020-03-25]
-    - `:before` [Date or string, default nil]: date filter for structs created only before specified date. ex: ~D[2020-03-25]
-    - `:tags` [list of strings, default nil]: tags to filter retrieved structs. ex: ["tony", "stark"]
-    - `:user` [Organization/Project, default nil]: Organization or Project struct returned from StarkInfra.project(). Only necessary if default project or organization has not been set in configs.
+  ## Parameters (optional):
+    - `:cursor` [binary, default nil]: cursor returned on the previous page function call
+    - `:limit` [integer, default 100]: maximum number of objects to be retrieved. It must be an integer between 1 and 100. ex: 50
+    - `:after` [Date or binary, default nil]: date filter for objects created only after specified date. ex: ~D[2020-03-25]
+    - `:before` [Date or binary, default nil]: date filter for objects created only before specified date. ex: ~D[2020-03-25]
+    - `:external_ids` [list of binaries, default nil]: external IDs. ex: ["5656565656565656", "4545454545454545"]
+    - `:tags` [list of binaries, default nil]: tags to filter retrieved objects. ex: ["tony", "stark"]
+    - `:user` [Organization/Project, default nil]: Organization or Project object returned from StarkInfra.project(). Only necessary if default project or organization has not been set in configs.
 
   ## Return:
-    - list of IssuingWithdrawal structs with updated attributes
-    - cursor to retrieve the next page of IssuingWithdrawal structs
+    - list of IssuingWithdrawal objects with updated attributes
+    - cursor to retrieve the next page of IssuingWithdrawal objects
   """
   @spec page(
+    cursor: binary(),
     limit: integer,
-    external_ids: [binary] | [],
     after: Date.t() | binary,
     before: Date.t() | binary,
+    external_ids: [binary] | [],
     tags: [binary],
     user: (Organization.t() | Project.t()) | nil
   ) ::
@@ -214,10 +217,11 @@ defmodule StarkInfra.IssuingWithdrawal do
   Same as page(), but it will unwrap the error tuple and raise in case of errors.
   """
   @spec page!(
+    cursor: binary(),
     limit: integer,
-    external_ids: [binary] | [],
     after: Date.t() | binary,
     before: Date.t() | binary,
+    external_ids: [binary] | [],
     tags: [binary],
     user: (Organization.t() | Project.t()) | nil
   ) :: any

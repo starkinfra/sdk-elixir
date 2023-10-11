@@ -10,7 +10,7 @@ defmodule StarkInfra.Key do
   Generates a secp256k1 ECDSA private/public key pair to be used in the API authentications
 
   ## Parameters (optional):
-    - `path` [string, default nil]: path to save the keys .pem files. No files will be saved if this parameter isn't provided.
+    - `path` [binary, default nil]: path to save the keys .pem files. No files will be saved if this parameter isn't provided.
   """
   @spec create(any) :: {binary, binary}
   def create(path \\ nil) do

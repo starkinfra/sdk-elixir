@@ -7,24 +7,27 @@ defmodule StarkInfra.IssuingInvoice do
   alias StarkInfra.Error
 
   @moduledoc """
-    # IssuingInvoice struct
+    # IssuingInvoice object
   """
 
   @doc """
-  The IssuingInvoice structs created in your Workspace load your Issuing balance when paid.
+  The IssuingInvoice objects created in your Workspace load your Issuing balance when paid.
 
   ## Parameters (required):
     - `:amount` [integer]: IssuingInvoice value in cents. ex: 1234 (= R$ 12.34)
 
   ## Parameters (optional):
-    - `:tax_id` [string, default sub-issuer tax ID]: payer tax ID (CPF or CNPJ) with or without formatting. ex: "01234567890" or "20.018.183/0001-80"
-    - `:name` [string, default sub-issuer name]: payer name. ex: "Iron Bank S.A."
-    - `:tags` [list of strings, default []]: list of strings for tagging. ex: ["travel", "food"]
+    - `:tax_id` [binary, default sub-issuer tax ID]: payer tax ID (CPF or CNPJ) with or without formatting. ex: "01234567890" or "20.018.183/0001-80"
+    - `:name` [binary, default sub-issuer name]: payer name. ex: "Iron Bank S.A."
+    - `:tags` [list of binaries, default []]: list of binaries for tagging. ex: ["travel", "food"]
 
   ## Attributes (return-only):
-    - `:id` [string]: unique id returned when IssuingInvoice is created. ex: "5656565656565656"
-    - `:status` [string]: current IssuingInvoice status. ex: "created", "expired", "overdue", "paid"
-    - `:issuing_transaction_id` [string]: ledger transaction ids linked to this IssuingInvoice. ex: "issuing-invoice/5656565656565656"
+    - `:id` [binary]: unique id returned when IssuingInvoice is created. ex: "5656565656565656"
+    - `:brcode` [binary]: BR Code for the Invoice payment. ex: "00020101021226930014br.gov.bcb.pix2571brcode-h.development.starkinfra.com/v2/d7f6546e194d4c64a153e8f79f1c41ac5204000053039865802BR5925Stark Bank S.A. - Institu6009Sao Paulo62070503***63042109"
+    - `:due` [Date, DateTime or binary]: Invoice due and expiration date in UTC ISO format. ex: "2020-10-28T17:59:26.249976+00:00"
+    - `:link` [binary]: public Invoice webpage URL. ex: "https://starkbank-card-issuer.development.starkbank.com/invoicelink/d7f6546e194d4c64a153e8f79f1c41ac"
+    - `:status` [binary]: current IssuingInvoice status. Options: "created", "expired", "overdue", "paid"
+    - `:issuing_transaction_id` [binary]: ledger transaction ids linked to this IssuingInvoice. ex: "issuing-invoice/5656565656565656"
     - `:updated` [DateTime]: latest update DateTime for the IssuingInvoice. ex: ~U[2020-3-10 10:30:0:0]
     - `:created` [DateTime]: creation datetime for the IssuingInvoice. ex: ~U[2020-03-10 10:30:0:0]
   """
@@ -37,6 +40,9 @@ defmodule StarkInfra.IssuingInvoice do
     :name,
     :tags,
     :id,
+    :brcode,
+    :due,
+    :link,
     :status,
     :issuing_transaction_id,
     :updated,
@@ -46,16 +52,16 @@ defmodule StarkInfra.IssuingInvoice do
   @type t() :: %__MODULE__{}
 
   @doc """
-  Send a list of IssuingInvoice structs for creation in the Stark Infra API
+  Send a list of IssuingInvoice objects for creation in the Stark Infra API
 
   ## Parameters (required):
-    - `:invoice` [IssuingInvoice struct]: IssuingInvoice struct to be created in the API.
+    - `:invoice` [IssuingInvoice object]: IssuingInvoice object to be created in the API.
 
-  ## Options:
-    - `:user` [Organization/Project, default nil]: Organization or Project struct returned from StarkInfra.project(). Only necessary if default project or organization has not been set in configs.
+  ## Parameters (optional):
+    - `:user` [Organization/Project, default nil]: Organization or Project object returned from StarkInfra.project(). Only necessary if default project or organization has not been set in configs.
 
   ## Return:
-    - IssuingInvoice struct with updated attributes
+    - IssuingInvoice object with updated attributes
   """
   @spec create(
     invoice: IssuingInvoice.t(),
@@ -87,16 +93,16 @@ defmodule StarkInfra.IssuingInvoice do
   end
 
   @doc """
-  Receive a single IssuingInvoice struct previously created in the Stark Infra API by its id
+  Receive a single IssuingInvoice object previously created in the Stark Infra API by its id
 
   ## Parameters (required):
-    - `:id` [string]: struct unique id. ex: "5656565656565656"
+    - `:id` [binary]: object unique id. ex: "5656565656565656"
 
-  ## Options:
-    - `:user` [Organization/Project, default nil]: Organization or Project struct returned from StarkInfra.project(). Only necessary if default project or organization has not been set in configs.
+  ## Parameters (optional):
+    - `:user` [Organization/Project, default nil]: Organization or Project object returned from StarkInfra.project(). Only necessary if default project or organization has not been set in configs.
 
   ## Return:
-    - IssuingInvoice struct with updated attributes
+    - IssuingInvoice object that corresponds to the given id.
   """
   @spec get(
     id: binary,
@@ -128,18 +134,18 @@ defmodule StarkInfra.IssuingInvoice do
   end
 
   @doc """
-  Receive a stream of IssuingInvoices structs previously created in the Stark Infra API
+  Receive a stream of IssuingInvoice objects previously created in the Stark Infra API
 
-  ## Options:
-    - `:limit` [integer, default nil]: maximum number of structs to be retrieved. Unlimited if nil. ex: 35
-    - `:after` [Date or string, default nil]: date filter for structs created only after specified date. ex: ~D[2020-03-25]
-    - `:before` [Date or string, default nil]: date filter for structs created only before specified date. ex: ~D[2020-03-25]
-    - `:status` [list of strings, default nil]: filter for status of retrieved structs. ex: ["created", "expired", "overdue", "paid"]
-    - `:tags` [list of strings, default nil]: tags to filter retrieved structs. ex: ["tony", "stark"]
-    - `:user` [Organization/Project, default nil]: Organization or Project struct returned from StarkInfra.project(). Only necessary if default project or organization has not been set in configs.
+  ## Parameters (optional):
+    - `:limit` [integer, default nil]: maximum number of objects to be retrieved. Unlimited if nil. ex: 35
+    - `:after` [Date or binary, default nil]: date filter for objects created only after specified date. ex: ~D[2020-03-25]
+    - `:before` [Date or binary, default nil]: date filter for objects created only before specified date. ex: ~D[2020-03-25]
+    - `:status` [list of binaries, default nil]: filter for status of retrieved objects. ex: ["created", "expired", "overdue", "paid"]
+    - `:tags` [list of binaries, default nil]: tags to filter retrieved objects. ex: ["tony", "stark"]
+    - `:user` [Organization/Project, default nil]: Organization or Project object returned from StarkInfra.project(). Only necessary if default project or organization has not been set in configs.
 
   ## Return:
-    - stream of IssuingInvoices structs with updated attributes
+    - stream of IssuingInvoice objects with updated attributes
   """
   @spec query(
     limit: integer | nil,
@@ -177,20 +183,21 @@ defmodule StarkInfra.IssuingInvoice do
   end
 
   @doc """
-  Receive a list of IssuingInvoices structs previously created in the Stark Infra API and the cursor to the next page.
+  Receive a list of up to 100 IssuingInvoice objects previously created in the Stark Infra API and the cursor to the next page.
+  Use this function instead of query if you want to manually page your requests.
 
-  ## Options:
-    - `:cursor` [string, default nil]: cursor returned on the previous page function call
-    - `:limit` [integer, default 100]: maximum number of structs to be retrieved. Unlimited if nil. ex: 35
-    - `:after` [Date or string, default nil]: date filter for structs created only after specified date. ex: ~D[2020-03-25]
-    - `:before` [Date or string, default nil]: date filter for structs created only before specified date. ex: ~D[2020-03-25]
-    - `:status` [list of strings, default nil]: filter for status of retrieved structs. ex: ["created", "expired", "overdue", "paid"]
-    - `:tags` [list of strings, default nil]: tags to filter retrieved structs. ex: ["tony", "stark"]
-    - `:user` [Organization/Project, default nil]: Organization or Project struct returned from StarkInfra.project(). Only necessary if default project or organization has not been set in configs.
+  ## Parameters (optional):
+    - `:cursor` [binary, default nil]: cursor returned on the previous page function call
+    - `:limit` [integer, default 100]: maximum number of objects to be retrieved. It must be an integer between 1 and 100. ex: 50
+    - `:after` [Date or binary, default nil]: date filter for objects created only after specified date. ex: ~D[2020-03-25]
+    - `:before` [Date or binary, default nil]: date filter for objects created only before specified date. ex: ~D[2020-03-25]
+    - `:status` [list of binaries, default nil]: filter for status of retrieved objects. ex: ["created", "expired", "overdue", "paid"]
+    - `:tags` [list of binaries, default nil]: tags to filter retrieved objects. ex: ["tony", "stark"]
+    - `:user` [Organization/Project, default nil]: Organization or Project object returned from StarkInfra.project(). Only necessary if default project or organization has not been set in configs.
 
   ## Return:
-    - list of IssuingInvoices structs with updated attributes
-    - cursor to retrieve the next page of IssuingInvoices structs
+    - list of IssuingInvoice objects with updated attributes
+    - cursor to retrieve the next page of IssuingInvoice objects
   """
   @spec page(
     cursor: binary | nil,
@@ -245,6 +252,9 @@ defmodule StarkInfra.IssuingInvoice do
       name: json[:name],
       tags: json[:tags],
       id: json[:id],
+      brcode: json[:brcode],
+      due: json[:due],
+      link: json[:link],
       status: json[:status],
       issuing_transaction_id: json[:issuing_transaction_id],
       updated: json[:updated] |> Check.datetime(),

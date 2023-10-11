@@ -10,7 +10,7 @@ This SDK version is compatible with the Stark Infra API v2.
 
 - [Introduction](#introduction)
   - [Supported Elixir versions](#supported-elixir-versions)
-  - [API documentation](#stark-bank-api-documentation)
+  - [API documentation](#stark-infra-api-documentation)
   - [Versioning](#versioning)
 - [Setup](#setup)
   - [Install our SDK](#1-install-our-sdk)
@@ -18,18 +18,25 @@ This SDK version is compatible with the Stark Infra API v2.
   - [Register your user credentials](#3-register-your-user-credentials)
   - [Setting up the user](#4-setting-up-the-user)
   - [Setting up the error language](#5-setting-up-the-error-language)
-  - [Resource listing and manual pagination](#6-resource-listing-and-manual-pagination)
+- [Resource listing and manual pagination](#6-resource-listing-and-manual-pagination)
 - [Testing in Sandbox](#testing-in-sandbox) 
 - [Usage](#usage)
    - [Issuing](#issuing)
-    - [BINs](#query-issuingbins): View available sub-issuer BINs (a.k.a. card number ranges)
+    - [Products](#query-issuingproducts): View available sub-issuer card products (a.k.a. card number ranges or BINs)
     - [Holders](#create-issuingholders): Manage card holders
     - [Cards](#create-issuingcards): Create virtual and/or physical cards
+    - [Design](#query-issuingdesigns): View your current card or package designs
+    - [EmbossingKit](#query-issuingembossingkits): Create embossing kits
+    - [Stock](#query-issuingstocks): View your current stock of a certain IssuingDesign linked to an Embosser on the workspace
+    - [Restock](#create-issuingrestocks): Create restock orders of a specific IssuingStock object
+    - [EmbossingRequest](#create-issuingembossingrequests): Create embossing requests
     - [Purchases](#process-purchase-authorizations): Authorize and view your past purchases
     - [Invoices](#create-issuinginvoices): Add money to your issuing balance
     - [Withdrawals](#create-issuingwithdrawals): Send money back to your Workspace from your issuing balance
     - [Balance](#get-your-issuingbalance): View your issuing balance
-    - [Transactions](#query-issuingtransactions): View the transactions that have affected your issuing balance
+    - [Transactions](#query-issuingtransactions): View the transactions that have affected your issuing 
+    balance
+    - [Enums](#issuing-enums): Query enums related to the issuing purchases, such as merchant categories, countries and card purchase methods
   - [Pix](#pix)
     - [PixRequests](#create-pixrequests): Create Pix transactions
     - [PixReversals](#create-pixreversals): Reverse Pix transactions
@@ -41,11 +48,18 @@ This SDK version is compatible with the Stark Infra API v2.
     - [PixInfraction](#create-pixinfractions): Create Pix Infraction reports
     - [PixChargeback](#create-pixchargebacks): Create Pix Chargeback requests
     - [PixDomain](#query-pixdomains): View registered SPI participants certificates
-  - [Credit Note](#credit-note)
-    - [CreditNote](#create-creditnotes): Create credit notes
+    - [StaticBrcode](#create-staticbrcodes): Create static Pix BR codes
+    - [DynamicBrcode](#create-dynamicbrcodes): Create dynamic Pix BR codes
+    - [BrcodePreview](#create-brcodepreviews): Read data from BR Codes before paying them
+  - [Lending](#lending)
+      - [CreditNote](#create-creditnotes): Create credit notes
+      - [CreditPreview](#create-creditpreviews): Create credit previews
+      - [CreditHolmes](#create-creditholmes): Create credit holmes debt verification
+  - [Identity](#identity)
+      - [IndividualIdentity](#create-individualidentities): Create individual identities
+      - [IndividualDocument](#create-individualdocuments): Create individual documents
   - [Webhook](#webhook):
-    - [Webhook](#create-a-webhook-subscription): Configure your webhook endpoints and subscriptions
-  - [Webhook Events](#webhook-events):
+    - [Webhook](#create-a-webhook): Configure your webhook endpoints and subscriptions
     - [WebhookEvents](#process-webhook-events): Manage Webhook events
     - [WebhookEventAttempts](#query-failed-webhook-event-delivery-attempts-information): Query failed webhook event deliveries
 - [Handling errors](#handling-errors)
@@ -57,7 +71,7 @@ This library supports Elixir versions 1.9+.
 
 # Stark Infra API documentation
 
-Feel free to take a look at our [API docs](https://www.starkbank.com/docs/api).
+Feel free to take a look at our [API docs](https://www.starkinfra.com/docs/api).
 
 # Versioning
 
@@ -129,7 +143,7 @@ Since this user is unique in your entire organization, only one credential can b
 
 3.1.5. After creating the Project, get its Project ID
 
-3.1.6. Use the Project ID and private key to create the struct below:
+3.1.6. Use the Project ID and private key to create the object below:
 
 ```elixir
 # Get your private key from an environment variable or an encrypted database.
@@ -164,7 +178,7 @@ project = StarkInfra.project(
 
 3.2.5. Click on your profile picture and then on the "Organization" menu to get the Organization ID
 
-3.2.6. Use the Organization ID and private key to create the struct below:
+3.2.6. Use the Organization ID and private key to create the object below:
 
 ```elixir
 # Get your private key from an environment variable or an encrypted database.
@@ -203,7 +217,7 @@ There are three kinds of users that can access our API: **Organization**, **Proj
 
 There are two ways to inform the user to the SDK:
  
-4.1 Passing the user as argument in all functions using the `user` keyword:
+4.1 Passing the user as an argument in all functions:
 
 ```elixir
 balance = StarkInfra.PixBalance.get!(user: project)  # or organization
@@ -237,7 +251,7 @@ config :starkinfra,
 ```
 
 Just select the way of passing the user that is more convenient to you.
-On all following examples we will assume a default user has been set in the configs.
+On all following examples, we will assume a default user has been set.
 
 ## 5. Setting up the error language
 
@@ -250,13 +264,13 @@ config :starkinfra,
   language: "en-US"
 ```
 
-Language options are "en-US" for english and "pt-BR" for brazilian portuguese. English is default
+Language options are "en-US" for english and "pt-BR" for brazilian portuguese. English is default.
 
 ## 6. Resource listing and manual pagination
 
 Almost all SDK resources provide a `query` and a `page` function.
 
-- The `query` function provides a straight forward way to efficiently iterate through all results that match the filters you inform,
+- The `query` function provides a straightforward way to efficiently iterate through all results that match the filters you inform,
 seamlessly retrieving the next batch of elements from the API only when you reach the end of the current batch.
 If you are not worried about data volume or processing time, this is the way to go.
 
@@ -299,14 +313,13 @@ To simplify the following SDK examples, we will only use the `query` function, b
 # Testing in Sandbox
 
 Your initial balance is zero. For many operations in Stark Infra, you'll need funds
-in your account, which can be added to your balance by creating an StarkBank.Invoice 
-or a StarkBank.Boleto. 
+in your account, which can be added to your balance by creating an StarkBank.Invoice. 
 
-In the Sandbox environment, most of the created Invoices and Boletos will be automatically paid,
+In the Sandbox environment, most of the created StarkBank.Invoice will be automatically paid,
 so there's nothing else you need to do to add funds to your account. Just create
-a few Invoices and wait around a bit.
+a few StarkBank.Invoice and wait around a bit.
 
-In Production, you (or one of your clients) will need to actually pay this Invoice or Boleto
+In Production, you (or one of your clients) will need to actually pay this Invoice
 for the value to be credited to your account.
 
 # Usage
@@ -321,12 +334,12 @@ Here are a few examples on how to use the SDK. If you have any doubts, use the b
 
 ## Issuing
 
-### Query IssuingBins
+### Query IssuingProducts
 
-To take a look at the sub-issuer BINs available to you, just run the following:
+To take a look at the sub-issuer card products available to you, just run the following:
 
 ```elixir
-StarkInfra.IssuingBin.query!() 
+StarkInfra.IssuingProduct.query!() 
 |> Enum.take(10) 
 |> IO.inspect
 ```
@@ -360,7 +373,7 @@ StarkInfra.IssuingHolder.create!(
 ) |> IO.inspect
 ```
 
-**Note**: Instead of using IssuingHolder structs, you can also pass each transfer element in dictionary format
+**Note**: Instead of using IssuingHolder objects, you can also pass each transfer element in dictionary format
 
 ### Query IssuingHolders
 
@@ -374,7 +387,7 @@ StarkInfra.IssuingHolder.query!()
 
 ### Cancel an IssuingHolder
 
-To cancel a single Issuing Holder by its id, run:
+To cancel a specific IssuingHolder by its id, run:
 
 ```elixir
 StarkInfra.IssuingHolder.cancel!("5155165527080960") 
@@ -383,7 +396,7 @@ StarkInfra.IssuingHolder.cancel!("5155165527080960")
 
 ### Get an IssuingHolder
 
-To get a single Issuing Holder by its id, run:
+To get a specific IssuingHolder by its id, run:
 
 ```elixir
 StarkInfra.IssuingHolder.get!("5155165527080960") 
@@ -392,7 +405,7 @@ StarkInfra.IssuingHolder.get!("5155165527080960")
 
 ### Query IssuingHolder logs
 
-You can query holder logs to better understand holder life cycles.
+You can query IssuingHolder logs to better understand IssuingHolder life cycles.
 
 ```elixir
 StarkInfra.IssuingHolder.Log.query!(
@@ -497,16 +510,233 @@ StarkInfra.IssuingCard.Log.query!(
 
 ### Get an IssuingCard log
 
-You can get a single log by its id.
+You can get a specific log by its id.
 
 ```elixir
 StarkInfra.IssuingCard.Log.get!("5155165527080960") 
 |> IO.inspect
 ```
 
+### Query IssuingDesigns
+
+You can get a list of available designs given some filters.
+
+
+```elixir
+StarkInfra.IssuingDesign.query!(
+  limit: 10
+) 
+|> Enum.take(10) 
+|> IO.inspect
+```
+
+### Get an IssuingDesign
+
+Information on a design may be retrieved by its id.
+
+```elixir
+StarkInfra.IssuingDesign.get!("5155165527080960") 
+|> IO.inspect
+```
+
+### Query IssuingEmbossingKits
+
+You can get a list of created embossing kits given some filters.
+
+```elixir
+StarkInfra.IssuingEmbossingKit.query!(
+  limit: 10,
+  after: Date.utc_today |> Date.add(-30),
+  before: Date.utc_today |> Date.add(-1)
+) 
+|> Enum.take(10) 
+|> IO.inspect
+```
+
+### Get an IssuingEmbossingKit
+
+After its creation, information on an embossing kit may be retrieved by its id.
+
+```elixir
+StarkInfra.IssuingEmbossingKit.get!("5792731695677440") 
+|> IO.inspect
+```
+
+### Query IssuingStocks
+
+You can get a list of available stocks given some filters.
+
+```elixir
+StarkInfra.IssuingStock.query!(
+  limit: 10,
+  after: Date.utc_today |> Date.add(-30),
+  before: Date.utc_today |> Date.add(-1)
+) 
+|> Enum.take(10) 
+|> IO.inspect
+```
+
+### Get an IssuingStock
+
+Information on a stock may be retrieved by its id.
+
+```elixir
+StarkInfra.IssuingStock.get!("5792731695677440") 
+|> IO.inspect
+```
+
+### Query IssuingStock logs
+
+Logs are pretty important to understand the life cycle of a stock.
+
+```elixir
+StarkInfra.IssuingStock.Log.query!(
+  limit: 150
+) 
+|> Enum.take(150) 
+|> IO.inspect
+```
+
+### Get an IssuingStock log
+
+You can get a single log by its id.
+
+```elixir
+StarkInfra.IssuingStock.Log.get!("5792731695677440") 
+|> IO.inspect
+```
+
+### Create IssuingRestocks
+
+You can order restocks for a specific IssuingStock.
+
+```elixir
+StarkInfra.IssuingRestock.create!(
+  [
+    %StarkInfra.IssuingRestock{
+      count: 100,
+      stock_id: "5136459887542272"
+    }
+  ]
+) |> IO.inspect
+```
+
+### Query IssuingRestocks
+
+You can get a list of created restocks given some filters.
+
+```elixir
+StarkInfra.IssuingRestock.query!(
+  after: Date.utc_today |> Date.add(-30),
+  before: Date.utc_today |> Date.add(-1)
+) 
+|> Enum.take(150) 
+|> IO.inspect
+```
+
+### Get an IssuingRestock
+
+After its creation, information on a restock may be retrieved by its id.
+
+```elixir
+StarkInfra.IssuingRestock.get!("5792731695677440") 
+|> IO.inspect
+```
+
+### Query IssuingRestock logs
+
+Logs are pretty important to understand the life cycle of a restock.
+
+```elixir
+StarkInfra.IssuingRestock.Log.query!(
+  limit: 150
+) 
+|> Enum.take(150) 
+|> IO.inspect
+```
+
+### Get an IssuingRestock log
+
+You can get a single log by its id.
+
+```elixir
+StarkInfra.IssuingRestock.Log.get!("5792731695677440") 
+|> IO.inspect
+```
+
+### Create IssuingEmbossingRequests
+
+You can create a request to emboss a physical card.
+
+```elixir
+StarkInfra.IssuingEmbossingRequest.create!(
+  [
+    %StarkInfra.IssuingEmbossingRequest{
+      kit_id: "5648359658356736", 
+      card_id: "5714424132272128", 
+      display_name_1: "Antonio Stark", 
+      shipping_city: "Sao Paulo",
+      shipping_country_code: "BRA",
+      shipping_district: "Bela Vista",
+      shipping_service: "loggi",
+      shipping_state_code: "SP",
+      shipping_street_line_1: "Av. Paulista, 200",
+      shipping_street_line_2: "10 andar",
+      shipping_tracking_number: "My_custom_tracking_number",
+      shipping_zip_code: "12345-678",
+      embosser_id: "5746980898734080"
+    }
+  ]
+) |> IO.inspect
+```
+
+### Query IssuingEmbossingRequests
+
+You can get a list of created embossing requests given some filters.
+
+```elixir
+StarkInfra.IssuingEmbossingRequest.query!(
+  after: Date.utc_today |> Date.add(-30),
+  before: Date.utc_today |> Date.add(-1)
+) 
+|> Enum.take(150) 
+|> IO.inspect
+```
+
+### Get an IssuingEmbossingRequest
+
+After its creation, information on an embossing request may be retrieved by its id.
+
+```elixir
+StarkInfra.IssuingEmbossingRequest.get!("5792731695677440") 
+|> IO.inspect
+```
+
+### Query IssuingEmbossingRequest logs
+
+Logs are pretty important to understand the life cycle of an embossing request.
+
+```elixir
+StarkInfra.IssuingEmbossingRequest.Log.query!(
+  limit: 150
+) 
+|> Enum.take(150) 
+|> IO.inspect
+```
+
+### Get an IssuingEmbossingRequest log
+
+You can get a single log by its id.
+
+```elixir
+StarkInfra.IssuingEmbossingRequest.Log.get!("5792731695677440") 
+|> IO.inspect
+```
+
 ### Process Purchase authorizations
 
 It's easy to process purchase authorizations delivered to your endpoint.
+Remember to pass the signature header so the SDK can make sure it's StarkInfra that sent you the event.
 If you do not approve or decline the authorization within 2 seconds, the authorization will be denied.
 
 ```elixir
@@ -552,7 +782,7 @@ StarkInfra.IssuingPurchase.query!(
 
 ### Get an IssuingPurchase
 
-After its creation, information on a purchase may be retrieved by its id. 
+After its creation, information on a purchase may be retrieved by its id.
 
 ```elixir
 StarkInfra.IssuingPurchase.get!("5155165527080960") 
@@ -575,7 +805,7 @@ StarkInfra.IssuingPurchase.Log.query!(
 
 ### Get an IssuingPurchase log
 
-You can get a single log by its id.
+You can get a specific log by its id.
 
 ```elixir
 StarkInfra.IssuingPurchase.Log.get!("5155165527080960") 
@@ -584,7 +814,7 @@ StarkInfra.IssuingPurchase.Log.get!("5155165527080960")
 
 ### Create IssuingInvoices
 
-Issuing invoices are requests to transfer money to your Issuing Balance. When an Issuing Invoice you created is paid, the amount will be added to your Issuing Balance.
+You can create Pix invoices to transfer money from accounts you have in any bank to your Issuing balance, allowing you to run your issuing operation.
 
 ```elixir
 StarkInfra.IssuingInvoice.create!([
@@ -594,7 +824,7 @@ StarkInfra.IssuingInvoice.create!([
 ]) |> IO.inspect
 ```
 
-**Note**: Instead of using Invoice structs, you can also pass each invoice element in dictionary format
+**Note**: Instead of using IssuingInvoice objects, you can also pass each element in dictionary format
 
 ### Get an IssuingInvoice
 
@@ -636,7 +866,7 @@ StarkInfra.IssuingInvoice.Log.query!(
 
 ### Get an IssuingInvoice log
 
-You can get a single log by its id.
+You can also get a specific log by its id.
 
 ```elixir
 StarkInfra.IssuingInvoice.Log.get!("5155165527080960") 
@@ -645,8 +875,7 @@ StarkInfra.IssuingInvoice.Log.get!("5155165527080960")
 
 ### Create IssuingWithdrawals
 
-You can create withdrawals to send cash back from your Issuing balance to your Banking balance
-by using the Withdrawal resource.
+You can create withdrawals to send cash back from your Issuing balance to your Banking balance by using the IssuingWithdrawal resource.
 
 ```elixir
 StarkInfra.IssuingWithdrawal.create!(
@@ -658,7 +887,7 @@ StarkInfra.IssuingWithdrawal.create!(
 ) |> IO.inspect
 ```
 
-**Note**: Instead of using Withdrawal structs, you can also pass each withdrawal element in dictionary format
+**Note**: Instead of using IssuingWithdrawal objects, you can also pass each element in dictionary format
 
 ### Get an IssuingWithdrawal
 
@@ -671,7 +900,7 @@ StarkInfra.IssuingWithdrawal.get!("5155165527080960")
 
 ### Query IssuingWithdrawals
 
-You can get a list of created invoices given some filters.
+You can create withdrawals to send cash back from your Issuing balance to your Banking balance by using the IssuingWithdrawal resource.
 
 ```elixir
 StarkInfra.IssuingWithdrawal.query!(
@@ -717,6 +946,42 @@ StarkInfra.IssuingTransaction.get!("5155165527080960")
 |> IO.inspect
 ```
 
+### Issuing Enums
+
+#### Query MerchantCategories
+
+You can query any merchant categories using this resource.
+You may also use MerchantCategories to define specific category filters in IssuingRules.
+Either codes (which represents specific MCCs) or types (code groups) will be accepted as filters.
+
+```elixir
+categories = StarkInfra.MerchantCategory.query!(search: "food")
+|> Enum.take(10)
+|> IO.inspect
+```
+
+#### Query MerchantCountries
+
+You can query any merchant countries using this resource.
+You may also use MerchantCountries to define specific country filters in IssuingRules.
+
+```elixir
+countries = StarkInfra.MerchantCountry.query!(search: "brazil")
+|> Enum.take(10)
+|> IO.inspect
+```
+
+#### Query CardMethods
+
+You can query available card methods using this resource.
+You may also use CardMethods to define specific purchase method filters in IssuingRules.
+
+```elixir
+methods = StarkInfra.CardMethod.query!(search: "token")
+|> Enum.take(1)
+|> IO.inspect
+```
+
 ## Pix
 
 ### Create PixRequests
@@ -744,11 +1009,11 @@ StarkInfra.PixRequest.create!([
 ]) |> IO.inspect
 ```
 
-**Note**: Instead of using PixRequest structs, you can also pass each element in dictionary format
+**Note**: Instead of using PixRequest objects, you can also pass each element in dictionary format
 
 ### Query PixRequests
 
-You can query multiple Pix requests according to filters.
+You can query multiple PixRequests according to filters.
 
 ```elixir
 StarkInfra.PixRequest.query!(
@@ -764,16 +1029,47 @@ StarkInfra.PixRequest.query!(
 
 ### Get a PixRequest
 
-After its creation, information on a Pix request may be retrieved by its id. Its status indicates whether it has been paid.
+After its creation, information on a Pix request may be retrieved by its id. 
+Its status indicates whether it has been paid.
 
 ```elixir
 StarkInfra.PixRequest.get!("5155165527080960") 
 |> IO.inspect
 ```
 
+### Process inbound PixRequest authorizations
+
+It's easy to process authorization requests that arrived at your endpoint.
+Remember to pass the signature header so the SDK can make sure it's StarkInfra that sent you the event.
+If you do not approve or decline the authorization within 1 second, the authorization will be denied.
+
+```elixir
+request = listen()  # this is the method you made to get the events posted to your webhook
+
+{pix_request, _cache_pid} = StarkInfra.PixRequest.parse!(
+  content: request.content,
+  signature: request.headers["Digital-Signature"]
+)
+
+send_response(  # you should also implement this method
+  StarkInfra.PixRequest.response!(
+      "approved"
+  )
+)
+
+# or
+
+send_response(
+  StarkInfra.PixRequest.response!(
+      "denied",
+      reason: "orderRejected"
+  )
+)
+```
+
 ### Query PixRequest logs
 
-You can query Pix request logs to better understand Pix request life cycles. 
+You can query Pix request logs to better understand Pix request life cycles.
 
 ```elixir
 logs = StarkInfra.PixRequest.Log.query!(
@@ -808,7 +1104,7 @@ StarkInfra.PixReversal.create!([
 
 ### Query PixReversals 
 
-You can query multiple Pix reversals according to filters. 
+You can query multiple Pix reversals according to filters.
 
 ```elixir
 StarkInfra.PixReversal.query!(
@@ -833,9 +1129,39 @@ StarkInfra.PixReversal.get!("5155165527080960")
 |> IO.inspect
 ```
 
+### Process inbound PixReversal authorizations
+
+It's easy to process authorization requests that arrived at your endpoint.
+Remember to pass the signature header so the SDK can make sure it's StarkInfra that sent you the event.
+If you do not approve or decline the authorization within 1 second, the authorization will be denied.
+
+```elixir
+request = listen()  # this is the method you made to get the events posted to your webhook
+
+{reversal, _cache_pid} = StarkInfra.PixReversal.parse!(
+  content: request.content,
+  signature: request.headers["Digital-Signature"]
+)
+
+send_response(  # you should also implement this method
+  StarkInfra.PixReversal.response!(
+      "approved"
+  )
+)
+
+# or
+
+send_response(
+  StarkInfra.PixReversal.response!(
+      "denied",
+      reason: "orderRejected"
+  )
+)
+```
+
 ### Query PixReversal logs
 
-You can query Pix reversal logs to better understand their life cycles. 
+You can query Pix reversal logs to better understand their life cycles.
 
 ```elixir
 StarkInfra.PixReversal.Log.query!(
@@ -880,7 +1206,7 @@ statement = StarkInfra.PixStatement.create!(
 
 ### Query PixStatements
 
-You can query multiple Pix statements according to filters. 
+You can query multiple PixStatements according to filters.
 
 ```elixir
 statements = StarkInfra.PixStatement.query!(
@@ -912,7 +1238,7 @@ File.close(file)
 
 ### Create a PixKey
 
-You can create a Pix Key to link a bank account information to a key id:
+You can create a Pix key to link a bank account information to a key id:
 
 ```elixir
 key = StarkInfra.PixKey.create!(
@@ -930,7 +1256,7 @@ key = StarkInfra.PixKey.create!(
 
 ### Query PixKeys
 
-You can query multiple Pix keys you own according to filters.
+You can query multiple Pix keys according to filters.
 
 ```elixir
 keys = StarkInfra.PixKey.query!(
@@ -956,7 +1282,7 @@ StarkInfra.PixKey.get!("+5511989898989", "012.345.678-90")
 |> IO.inspect
 ```
 
-### Patch a PixKey
+### Update a PixKey
 
 Update the account information linked to a Pix Key.
 
@@ -1023,7 +1349,7 @@ StarkInfra.PixClaim.create!(
 
 ### Query PixClaims
 
-You can query multiple Pix claims according to filters.
+You can query multiple PixClaims according to filters.
 
 ```elixir
 StarkInfra.PixClaim.query!(
@@ -1049,7 +1375,7 @@ StarkInfra.PixClaim.get!("5729405850615808")
 |> IO.inspect
 ```
 
-### Patch a PixClaim
+### Update a PixClaim
 
 A Pix Claim can be confirmed or canceled by patching its status.
 A received Pix Claim must be confirmed by the donor to be completed.
@@ -1061,7 +1387,7 @@ StarkInfra.PixClaim.update!(
   "5729405850615808", 
   status: "confirmed"
 ) |> IO.inspect
-```
+``` 
 
 ### Query PixClaim logs
 
@@ -1105,8 +1431,7 @@ StarkInfra.PixDirector.create!(
 
 ### Create PixInfractions
 
-Pix infractions are used to report transactions that raise fraud suspicion, to request a refund or to 
-reverse a refund. Pix infractions can be created by either participant of a transaction.
+Pix infractions are used to report transactions that raise fraud suspicion, to request a refund or to reverse a refund. Pix infractions can be created by either participant of a transaction.
 
 ```elixir
 StarkInfra.PixInfraction.create!([
@@ -1119,7 +1444,7 @@ StarkInfra.PixInfraction.create!([
 
 ### Query PixInfractions
 
-You can query multiple Pix infractions according to filters.
+You can query multiple infraction reports according to filters.
 
 ```elixir
 StarkInfra.PixInfraction.query!(
@@ -1164,7 +1489,7 @@ StarkInfra.PixInfraction.cancel!("5155165527080960")
 
 ### Query PixInfraction logs
 
-You can query Pix infractions logs to better understand their life cycles. 
+You can query infraction report logs to better understand their life cycles.
 
 ```elixir
 StarkInfra.PixInfraction.Log.query!(
@@ -1190,8 +1515,7 @@ StarkInfra.PixInfraction.Log.get!("5155165527080960")
 
 ### Create PixChargebacks
 
-A Pix chargeback can be created when fraud is detected on a transaction or a system malfunction 
-results in an erroneous transaction.
+A Pix chargeback can be created when fraud is detected on a transaction or a system malfunction results in an erroneous transaction.
 
 ```elixir
 StarkInfra.PixChargeback.create!(
@@ -1254,7 +1578,7 @@ StarkInfra.PixChargeback.cancel!("5155165527080960")
 
 ### Query PixChargeback logs
 
-You can query Pix chargeback logs to better understand Pix chargeback life cycles. 
+You can query PixChargeback logs to better understand PixChargeback life cycles.
 
 ```elixir
 StarkInfra.PixChargeback.Log.query!(
@@ -1279,18 +1603,227 @@ StarkInfra.PixChargeback.Log.get!("5155165527080960")
 
 ### Query PixDomains
 
-You can query for domains of registered SPI participants able to issue dynamic QR Codes.
+Here you can list all Pix Domains registered at the Brazilian Central Bank. The Pix Domain object displays the domain name and the QR Code domain certificates of registered Pix participants able to issue dynamic QR Codes.
 
 ```elixir
 StarkInfra.PixDomain.query!() 
 |> IO.inspect
 ```
 
-## Credit Note
+### Create StaticBrcodes
+
+StaticBrcodes store account information via a BR Code or an image (QR code)
+that represents a PixKey and a few extra fixed parameters, such as an amount 
+and a reconciliation ID. They can easily be used to receive Pix transactions.
+
+```elixir
+brcode = StarkInfra.StaticBrcode.create!(
+  [
+    %StarkInfra.StaticBrcode {
+    name: "Jamie Lannister",
+    key_id: "+5511988887777",
+    amount: 10000,
+    reconciliation_id: "123",
+    city: "São Paulo"
+    }
+  ]
+)
+|> Enum.take(100)
+|> IO.inspect
+```
+
+### Query StaticBrcodes
+
+You can query multiple StaticBrcodes according to filters.
+
+```elixir
+brcodes = StarkInfra.StaticBrcode.query!(limit: 10)
+|> Enum.take(1)
+|> IO.inspect
+```
+
+### Get a StaticBrcode
+
+After its creation, information on a StaticBrcode may be retrieved by its UUID.
+
+```elixir
+StarkInfra.StaticBrcode.Log.get!("5155165527080960") 
+|> IO.inspect
+```
+
+### Create DynamicBrcodes
+
+BR codes store information represented by Pix QR Codes, which are used to send 
+or receive Pix transactions in a convenient way.
+DynamicBrcodes represent charges with information that can change at any time,
+since all data needed for the payment is requested dynamically to an URL stored
+in the BR Code. Stark Infra will receive the GET request and forward it to your
+registered endpoint with a GET request containing the UUID of the BR Code for
+identification.
+
+```elixir
+brcodes = StarkInfra.DynamicBrcode.create!(
+  [
+    %StarkInfra.DynamicBrcode {
+    name: "Jamie Lannister",
+    city: "Rio de Janeiro",
+    external_id: "my-external-id-1!",
+    type: brcode.type
+    }
+  ]
+)
+|> Enum.take(10)
+|> IO.inspect
+```
+
+### Query DynamicBrcodes
+
+You can query multiple DynamicBrcodes according to filters.
+
+```elixir
+brcodes = StarkInfra.DynamicBrcode.query!(limit: 10)
+|> Enum.take(10)
+|> IO.inspect
+```
+
+### Get a DynamicBrcode
+
+After its creation, information on a DynamicBrcode may be retrieved by its UUID.
+
+```elixir
+StarkInfra.DynamicBrcode.get!("5155165527080960") 
+|> IO.inspect
+```
+
+### Verify a DynamicBrcode read
+
+When a DynamicBrcode is read by your user, a GET request will be made to your registered URL to retrieve additional information needed to complete the transaction.
+Use this method to verify the authenticity of a GET request received at your registered endpoint.
+If the provided digital signature does not check out with the StarkInfra public key, a Stark.Exception.InvalidSignatureException will be raised.
+
+```elixir
+request = listen()  # this is the method you made to get the read requests posted to your registered endpoint
+
+uuid = StarkInfra.DynamicBrcode.verify!(
+    content: request.url.get_parameter("uuid"),
+    signature: request.headers["Digital-Signature"],
+)
+|> IO.inspect
+```
+
+### Answer to a Due DynamicBrcode read
+
+When a Due DynamicBrcode is read by your user, a GET request containing 
+the BR Code UUID will be made to your registered URL to retrieve additional 
+information needed to complete the transaction.
+
+The GET request must be answered in the following format within 5 seconds 
+and with an HTTP status code 200.
+
+```elixir
+request = listen()  # this is the method you made to get the read requests posted to your registered endpoint
+
+uuid = StarkInfra.DynamicBrcode.verify!(
+    content: request.url.get_parameter("uuid"),
+    signature: request.headers["Digital-Signature"],
+)
+
+invoice = get_my_invoice(uuid) # you should implement this method to get the information of the BR Code from its uuid
+
+send_response(  # you should also implement this method to respond the read request
+    StarkInfra.DynamicBrcode.responde_due(
+        version=invoice.version,
+        created=invoice.created,
+        due=invoice.due,
+        key_id=invoice.key_id,
+        status=invoice.status,
+        reconciliation_id=invoice.reconciliation_id,
+        amount=invoice.amount,
+        sender_name=invoice.sender_name,
+        sender_tax_id=invoice.sender_tax_id,
+        receiver_name=invoice.receiver_name,
+        receiver_tax_id=invoice.receiver_tax_id,
+        receiver_street_line=invoice.receiver_street_line,
+        receiver_city=invoice.receiver_city,
+        receiver_state_code=invoice.receiver_state_code,
+        receiver_zip_code=invoice.receiver_zip_code
+    )
+)
+```
+
+### Answer to an Instant DynamicBrcode read
+
+When an Instant DynamicBrcode is read by your user, a GET request 
+containing the BR Code UUID will be made to your registered URL to retrieve 
+additional information needed to complete the transaction.
+
+The get request must be answered in the following format 
+within 5 seconds and with an HTTP status code 200.
+
+```elixir
+request = listen()  # this is the method you made to get the read requests posted to your registered endpoint
+
+uuid = StarkInfra.DynamicBrcode.verify!(
+    content: request.url.get_parameter("uuid"),
+    signature: request.headers["Digital-Signature"],
+)
+
+invoice = get_my_invoice(uuid) # you should implement this method to get the information of the BR Code from its uuid
+
+send_response(  # you should also implement this method to respond the read request
+    StarkInfra.DynamicBrcode.response_instant(
+        version=invoice.version,
+        created=invoice.created,
+        key_id=invoice.key_id,
+        status=invoice.status,
+        reconciliation_id=invoice.reconciliation_id,
+        amount=invoice.amount,
+        cashier_type=invoice.cashier_type,
+        cashier_bank_code=invoice.cashier_bank_code,
+        cash_amount=invoice.cash_amount
+    )
+)
+```
+
+## Create BrcodePreviews
+
+You can create BrcodePreviews to preview BR Codes before paying them.
+
+```elixir
+StarkInfra.BrcodePreview.create([
+  %StarkInfra.BrcodePreview{
+      id: "00020126420014br.gov.bcb.pix0120nedstark@hotmail.com52040000530398654075000.005802BR5909Ned Stark6014Rio de Janeiro621605126674869738606304FF71",
+      payerId: "123.456.789-10"
+  },
+  %StarkInfra.BrcodePreview{
+      id: "00020126430014br.gov.bcb.pix0121aryastark@hotmail.com5204000053039865406100.005802BR5910Arya Stark6014Rio de Janeiro6216051262678188104863042BA4",
+      payerId: "123.456.789-10"
+  }
+])
+|> IO.inspect
+```
+
+## Lending
+If you want to establish a lending operation, you can use Stark Infra to
+create a CCB contract. This will enable your business to lend money without
+requiring a banking license, as long as you use a Credit Fund 
+or Securitization company.
+
+The required steps to initiate the operation are:
+ 1. Have funds in your Credit Fund or Securitization account
+ 2. Request the creation of an [Identity Check](#create-individualidentities)
+for the credit receiver (make sure you have their documents and express authorization)
+ 3. (Optional) Create a [Credit Simulation](#create-creditpreviews) 
+with the desired installment plan to display information for the credit receiver
+ 4. Create a [Credit Note](#create-creditnotes)
+with the desired installment plan
 
 ### Create CreditNotes
 
-You can create a Credit Note to generate a CCB contract:
+For lending operations, you can create a CreditNote to generate a CCB contract.
+
+Note that you must have recently created an identity check for that same Tax ID before
+being able to create a credit operation for them.
 
 ```elixir
 StarkInfra.CreditNote.create!([
@@ -1334,11 +1867,11 @@ StarkInfra.CreditNote.create!([
 ]) |> IO.inspect
 ```
 
-**Note**: Instead of using CreditNote structs, you can also pass each CreditNote element in map format
+**Note**: Instead of using CreditNote objects, you can also pass each element in map format
 
 ### Query CreditNotes
 
-You can query multiple credit notes according to filters.
+You can query multiple CreditNotes according to filters.
 
 ```elixir
 StarkInfra.CreditNote.query!(
@@ -1372,7 +1905,7 @@ StarkInfra.CreditNote.cancel!("5155165527080960")
   
 ### Query CreditNote logs
 
-You can query credit note logs to better understand credit note life cycles. 
+You can query CreditNote logs to better understand CreditNote life cycles.
 
 ```elixir
 StarkInfra.CreditNote.Log.query!(
@@ -1393,11 +1926,333 @@ StarkInfra.CreditNote.log.get!("5155165527080960")
 |> IO.inspect
 ```
 
+### Create CreditPreviews
+
+You can preview a credit operation before creating them (Currently we only have CreditNote / CCB previews):
+
+```elixir
+previews = StarkInfra.CreditPreview.create!(
+  [
+    %StarkInfra.CreditPreview{
+      type: "credit-note",
+      credit: %StarkInfra.CreditNotePreview{
+        tax_id: "012.345.678-90",
+        type: "sac",
+        nominal_amount: 100000,
+        rebate_amount: 1000,
+        nominal_interest: 2.5,
+        scheduled: "2023-04-28",
+        initial_due: "2023-12-28",
+        initial_amount: 9999,
+        interval: "month"
+      }
+    },
+    %StarkInfra.CreditPreview{
+      type: "credit-note",
+      credit: %StarkInfra.CreditNotePreview{
+        tax_id: "012.345.678-90",
+        type: "bullet",
+        nominal_amount: 100000,
+        rebate_amount: 1000,
+        nominal_interest: 2.5,
+        scheduled: "2023-04-28",
+        initial_due: "2023-12-28",
+      }
+    },
+    %StarkInfra.CreditPreview{
+      type: "credit-note",
+      credit: %StarkInfra.CreditNotePreview{
+        tax_id: "012.345.678-90",
+        type: "price",
+        nominal_amount: 100000,
+        rebate_amount: 1000,
+        nominal_interest: 2.5,
+        scheduled: "2023-04-28",
+        initial_due: "2023-12-28",
+        initial_amount: 9999,
+        interval: "month"
+      }
+    },
+    %StarkInfra.CreditPreview{
+      type: "credit-note",
+      credit: %StarkInfra.CreditNotePreview{
+        tax_id: "012.345.678-90",
+        type: "american",
+        nominal_amount: 100000,
+        rebate_amount: 1000,
+        nominal_interest: 2.5,
+        scheduled: "2023-04-28",
+        initial_due: "2023-12-28",
+        count: 12,
+        interval: "year"
+      }
+    }
+  ]
+)
+|> IO.inspect
+```
+
+**Note**: Instead of using CreditPreview objects, you can also pass each element in dictionary format
+
+### Create CreditHolmes
+
+Before you request a credit operation, you may want to check previous credit operations
+the credit receiver has taken.
+
+For that, open up a CreditHolmes investigation to receive information on all debts and credit operations registered for that individual or company inside the Central Bank's SCR.
+
+```elixir
+previews = StarkInfra.CreditHolmes.create!(
+  [
+    %StarkInfra.CreditHolmes{
+      tax_id: "123.456.789-00",
+      competence: "2022-09"
+    },
+    %StarkInfra.CreditHolmes{
+      tax_id: "123.456.789-00",
+      competence: "2022-08"
+    },
+    %StarkInfra.CreditHolmes{
+      tax_id: "123.456.789-00",
+      competence: "2022-07"
+    }
+  ]
+)
+|> IO.inspect
+```
+
+### Query CreditHolmes
+
+You can query multiple credit holmes according to filters.
+
+```elixir
+StarkInfra.CreditHolmes.query!(
+  status: "sucess",
+  after: "2020-11-01",
+  before: "2020-11-02"
+)
+|> Enum.take(10)
+|> IO.inspect
+```
+
+### Get an CreditHolmes
+
+After its creation, information on a credit holmes may be retrieved by its id.
+
+```elixir
+StarkInfra.CreditHolmes.get!("5155165527080960") 
+|> IO.inspect
+```
+
+### Query CreditHolmes logs
+
+You can query credit holmes logs to better understand their life cycles. 
+
+```elixir
+StarkInfra.CreditHolmes.Log.query!(
+  limit: 50,
+  id: ["5729405850615808"]
+  after: "2020-11-01",
+  before: "2020-11-02"
+  types: ["created"]
+)
+|> Enum.take(10)
+|> IO.inspect
+```
+
+### Get an CreditHolmes log
+
+You can also get a specific log by its id.
+
+```elixir
+StarkInfra.CreditHolmes.Log.get!("5155165527080960") 
+|> IO.inspect
+```
+
+## Identity
+Several operations, especially credit ones, require that the identity
+of a person or business is validated beforehand.
+
+Identities are validated according to the following sequence:
+1. The Identity resource is created for a specific Tax ID
+2. Documents are attached to the Identity resource
+3. The Identity resource is updated to indicate that all documents have been attached
+4. The Identity is sent for validation and returns a webhook notification to reflect
+the success or failure of the operation
+
+### Create IndividualIdentities
+
+You can create an IndividualIdentity to validate a document of a natural person
+
+```elixir
+previews = StarkInfra.IndividualIdentity.create!(
+  [
+    %StarkInfra.IndividualIdentity{
+      name: "Walter White",
+      tax_id: "123.456.789-00",
+      tags: ["breaking", "bad"]
+    }
+  ]
+)
+|> IO.inspect
+```
+
+**Note**: Instead of using IndividualIdentity objects, you can also pass each element in dictionary format
+
+### Query IndividualIdentity
+
+You can query multiple individual identities according to filters.
+
+```elixir
+StarkInfra.IndividualIdentity.query!(
+  limit: 10,
+  after: "2020-11-01",
+  before: "2020-11-02",
+  before: "success",
+  tags: ["breaking", "bad"]
+)
+|> Enum.take(10)
+|> IO.inspect
+```
+
+### Get an IndividualIdentity
+
+After its creation, information on an individual identity may be retrieved by its id.
+
+```elixir
+StarkInfra.IndividualIdentity.get!("5155165527080960") 
+|> IO.inspect
+```
+
+### Update an IndividualIdentity
+
+You can update a specific identity status to "processing" for send it to validation.
+
+```elixir
+StarkInfra.IndividualIdentity.update!("5155165527080960", status: "processing") 
+|> IO.inspect
+```
+
+**Note**: Before sending your individual identity to validation by patching its status, you must send all the required documents using the create method of the CreditDocument resource. Note that you must reference the individual identity in the create method of the CreditDocument resource by its id.
+
+### Cancel an IndividualIdentity
+
+You can cancel an individual identity before updating its status to processing.
+
+```elixir
+StarkInfra.IndividualIdentity.cancel!("5155165527080960") 
+|> IO.inspect
+```
+
+### Query IndividualIdentity logs
+
+You can query individual identity logs to better understand individual identity life cycles. 
+
+```elixir
+StarkInfra.IndividualIdentity.Log.query!(
+  limit: 50,
+  after: "2020-11-01",
+  before: "2020-11-02"
+)
+|> Enum.take(50)
+|> IO.inspect
+```
+
+### Get an IndividualIdentity log
+
+You can also get a specific log by its id.
+
+```elixir
+StarkInfra.IndividualIdentity.Log.get!("5155165527080960") 
+|> IO.inspect
+```
+
+### Create IndividualDocuments
+
+You can create an individual document to attach images of documents to a specific individual Identity.
+You must reference the desired individual identity by its id.
+
+```elixir
+previews = StarkInfra.IndividualDocument.create!(
+  [
+    %StarkInfra.IndividualDocument{
+      type: "identity-front",
+      content: "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAASABIAAD...",
+      identity_id: "5155165527080960",
+      tags: ["breaking", "bad"]
+    },
+    %StarkInfra.IndividualDocument{
+      type: "identity-back",
+      content: "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAASABIAAD...",
+      identity_id: "5155165527080960",
+      tags: ["breaking", "bad"]
+    },
+    %StarkInfra.IndividualDocument{
+      type: "selfie",
+      content: "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAASABIAAD...",
+      identity_id: "5155165527080960",
+      tags: ["breaking", "bad"]
+    }
+  ]
+)
+|> IO.inspect
+```
+
+**Note**: Instead of using IndividualDocument objects, you can also pass each element in dictionary format
+
+### Query IndividualDocument
+
+You can query multiple individual documents according to filters.
+
+```elixir
+StarkInfra.IndividualDocument.query!(
+  limit: 10,
+  after: "2020-11-01",
+  before: "2020-11-02",
+  status: "success",
+  tags: ["breaking", "bad"]
+)
+|> Enum.take(10)
+|> IO.inspect
+```
+
+### Get an IndividualDocument
+
+After its creation, information on an individual document may be retrieved by its id.
+
+```elixir
+StarkInfra.IndividualDocument.get!("5155165527080960") 
+|> IO.inspect
+```
+
+### Query IndividualDocument logs
+
+You can query individual document logs to better understand individual document life cycles. 
+
+```elixir
+StarkInfra.IndividualDocument.Log.query!(
+  limit: 10,
+  after: "2020-11-01",
+  before: "2020-11-02"
+)
+|> Enum.take(10)
+|> IO.inspect
+```
+
+### Get an IndividualDocument log
+
+You can also get a specific log by its id.
+
+```elixir
+StarkInfra.IndividualDocument.Log.get!("5155165527080960") 
+|> IO.inspect
+```
+
 ## Webhook
 
-### Create a Webhook subscription
+### Create a Webhook
 
-To create a webhook subscription and be notified whenever an event occurs, run:
+To create a Webhook and be notified whenever an event occurs, run:
 
 ```elixir
 StarkInfra.Webhook.create!(
@@ -1416,7 +2271,7 @@ for webhook <- StarkInfra.Webhook.query!() do
 end
 ```
 
-### Get a Webhook subscription
+### Get a Webhook
 
 You can get a specific webhook by its id.
 
@@ -1425,7 +2280,7 @@ StarkInfra.Webhook.get!("6178044066660352")
 |> IO.inspect
 ```
 
-### Delete a Webhook subscription
+### Delete a Webhook
 
 You can also delete a specific webhook by its id.
 
@@ -1433,8 +2288,6 @@ You can also delete a specific webhook by its id.
 StarkInfra.Webhook.delete!("6178044066660352")
 |> IO.inspect
 ```
-
-## Webhook events
 
 ### Process Webhook events
 
@@ -1464,12 +2317,9 @@ and automatically refresh it if an inconsistency is found between the content, s
 ) |> IO.inspect
 ```
 
-If the data does not check out with the Stark Bank public-key, the function will automatically request the
-key from the API and try to validate the signature once more. If it still does not check out, it will raise an error.
-
 ### Query Webhook events
 
-To search for webhooks events, run:
+To search for Webhooks events, run:
 
 ```elixir
 StarkInfra.Event.query!(
@@ -1483,7 +2333,7 @@ StarkInfra.Event.query!(
 
 ### Get a Webhook event
 
-You can get a specific webhook event by its id.
+You can get a specific Webhook event by its id.
 
 ```elixir
 StarkInfra.Event.get!("4568139664719872")
@@ -1492,7 +2342,7 @@ StarkInfra.Event.get!("4568139664719872")
 
 ### Delete a Webhook event
 
-You can also delete a specific webhook event by its id.
+You can also delete a specific Webhook event by its id.
 
 ```elixir
 StarkInfra.Event.delete!("4568139664719872")
@@ -1522,7 +2372,7 @@ end
 
 ### Get a failed Webhook event delivery attempt information
 
-To retrieve information on a single attempt, use the following function:
+To retrieve information on a specific attempt, use the following function:
 
 ```elixir
 StarkInfra.Event.Attempt.get("1616161616161616")
@@ -1531,10 +2381,10 @@ StarkInfra.Event.Attempt.get("1616161616161616")
 
 # Handling errors
 
-The SDK may raise or return errors as the StarkInfra.Error struct, which contains the "code" and "message" attributes.
+The SDK may raise or return errors as the StarkInfra.Error object, which contains the "code" and "message" attributes.
 
-If you use bang functions, the list of errors will be converted into a string and raised.
-If you use normal functions, the list of error structs will be returned so you can better analyse them.
+If you use bang functions, the list of errors will be converted into a binary and raised.
+If you use normal functions, the list of error objects will be returned so you can better analyse them.
 
 # Help and Feedback
 

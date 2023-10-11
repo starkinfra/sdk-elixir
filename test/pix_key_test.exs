@@ -22,7 +22,7 @@ defmodule StarkInfraTest.PixKey do
     assert !is_nil(pix_key.id)
     assert byte_size(pix_key.id) > 0
 
-    {:ok, key} = StarkInfra.PixKey.get(pix_key.id, "012.345.678-90")
+    {:ok, key} = StarkInfra.PixKey.get(pix_key.id, pix_key.tax_id)
 
     assert !is_nil(key.id)
   end
@@ -127,7 +127,7 @@ defmodule StarkInfraTest.PixKey do
 
   @tag :pix_key
   test "query pix and cancel" do
-    StarkInfra.PixKey.query(limit: 20)
+    StarkInfra.PixKey.query(limit: 20, status: "registered")
       |> Enum.take(10)
       |> Enum.each(fn {:ok, pix_key} -> StarkInfra.PixKey.cancel(pix_key.id) end)
   end

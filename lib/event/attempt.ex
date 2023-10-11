@@ -14,12 +14,12 @@ defmodule StarkInfra.Event.Attempt do
   When an Event delivery fails, an event attempt will be registered.
   It carries information meant to help you debug event reception issues.
 
-  ## Attributes:
-    - `:id` [string]: unique id that identifies the delivery attempt. ex: "5656565656565656"
-    - `:code` [string]: delivery error code. ex: badHttpStatus, badConnection, timeout
-    - `:message` [string]: delivery error full description. ex: "HTTP POST request returned status 404"
-    - `:event_id` [string]: ID of the Event whose delivery failed. ex: "4848484848484848"
-    - `:webhook_id` [string]: ID of the Webhook that triggered this event. ex: "5656565656565656"
+  ## Attributes (return-only):
+    - `:id` [binary]: unique id that identifies the delivery attempt. ex: "5656565656565656"
+    - `:code` [binary]: delivery error code. ex: "badHttpStatus", "badConnection", "timeout"
+    - `:message` [binary]: delivery error full description. ex: "HTTP POST request returned status 404"
+    - `:event_id` [binary]: ID of the Event whose delivery failed. ex: "4848484848484848"
+    - `:webhook_id` [binary]: ID of the Webhook that triggered this event. ex: "5656565656565656"
     - `:created` [DateTime]: datetime representing the moment when the attempt was made. ex: ~U[2020-03-26 19:32:35.418698Z]
   """
   @enforce_keys [:id, :code, :message, :webhook_id, :event_id, :created]
@@ -28,16 +28,16 @@ defmodule StarkInfra.Event.Attempt do
   @type t() :: %__MODULE__{}
 
   @doc """
-  Receive a single Event.Attempt struct previously created by the Stark Infra API by its id
+  Receive a single Event.Attempt object previously created by the Stark Infra API by its id
 
   ## Parameters (required):
-    - `:id` [string]: struct unique id. ex: "5656565656565656"
+    - `:id` [binary]: object unique id. ex: "5656565656565656"
 
-  ## Options:
-    - `:user` [Organization/Project, default nil]: Organization or Project struct returned from StarkInfra.project(). Only necessary if default project or organization has not been set in configs.
+  ## Parameters (optional):
+    - `:user` [Organization/Project, default nil]: Organization or Project object returned from StarkInfra.project(). Only necessary if default project or organization has not been set in configs.
 
   ## Return:
-    - Event.Attempt struct with updated attributes
+    - Event.Attempt object that corresponds to the given id.
   """
   @spec get(
     binary,
@@ -58,18 +58,18 @@ defmodule StarkInfra.Event.Attempt do
   end
 
   @doc """
-  Receive a stream of Event.Attempt structs previously created in the Stark Infra API
+  Receive a stream of Event.Attempt objects previously created in the Stark Infra API
 
-  ## Options:
-    - `:limit` [integer, default nil]: maximum number of structs to be retrieved. Unlimited if nil. ex: 35
-    - `:after` [Date or string, default nil]: date filter for structs created only after specified date. ex: ~D[2020-03-25]
-    - `:before` [Date or string, default nil]: date filter for structs created only before specified date. ex: ~D[2020-03-25]
-    - `:event_ids` [list of strings, default nil]: list of Event ids to filter attempts. ex: ["5656565656565656", "4545454545454545"]
-    - `:webhook_ids` [list of strings, default nil]: list of Webhook ids to filter attempts. ex: ["5656565656565656", "4545454545454545"]
-    - `:user` [Organization/Project, default nil]: Organization or Project struct returned from StarkInfra.project(). Only necessary if default project or organization has not been set in configs.
+  ## Parameters (optional):
+    - `:limit` [integer, default nil]: maximum number of objects to be retrieved. Unlimited if nil. ex: 35
+    - `:after` [Date or binary, default nil]: date filter for objects created only after specified date. ex: ~D[2020-03-25]
+    - `:before` [Date or binary, default nil]: date filter for objects created only before specified date. ex: ~D[2020-03-25]
+    - `:event_ids` [list of binaries, default nil]: list of Event ids to filter attempts. ex: ["5656565656565656", "4545454545454545"]
+    - `:webhook_ids` [list of binaries, default nil]: list of Webhook ids to filter attempts. ex: ["5656565656565656", "4545454545454545"]
+    - `:user` [Organization/Project, default nil]: Organization or Project object returned from StarkInfra.project(). Only necessary if default project or organization has not been set in configs.
 
   ## Return:
-    - stream of Event.Attempt structs with updated attributes
+    - stream of Event.Attempt objects with updated attributes
   """
   @spec query(
     limit: integer,
@@ -108,20 +108,21 @@ defmodule StarkInfra.Event.Attempt do
   end
 
   @doc """
-  Receive a list of up to 100 Attempt structs previously created in the Stark Infra API and the cursor to the next page.
+  Receive a list of up to 100 Event.Attempt objects previously created in the Stark Infra API and the cursor to the next page.
   Use this function instead of query if you want to manually page your requests.
 
-  ## Options:
-    - `:cursor` [string, default nil]: cursor returned on the previous page function call
-    - `:limit` [integer, default 100]: maximum number of structs to be retrieved. Max = 100. ex: 35
-    - `:after` [Date or string, default nil]: date filter for structs created only after specified date. ex: ~D[2020-03-25]
-    - `:before` [Date or string, default nil]: date filter for structs created only before specified date. ex: ~D[2020-03-25]
-    - `:event_ids` [list of strings, default nil]: list of Event ids to filter attempts. ex: ["5656565656565656", "4545454545454545"]
-    - `:webhook_ids` [list of strings, default nil]: list of Webhook ids to filter attempts. ex: ["5656565656565656", "4545454545454545"]
-    - `:user` [Organization/Project, default nil]: Organization or Project struct returned from StarkInfra.project(). Only necessary if default project or organization has not been set in configs.
+  ## Parameters (optional):
+    - `:cursor` [binary, default nil]: cursor returned on the previous page function call
+    - `:limit` [integer, default 100]: maximum number of objects to be retrieved. It must be an integer between 1 and 100. ex: 50
+    - `:after` [Date or binary, default nil]: date filter for objects created only after specified date. ex: ~D[2020-03-25]
+    - `:before` [Date or binary, default nil]: date filter for objects created only before specified date. ex: ~D[2020-03-25]
+    - `:event_ids` [list of binaries, default nil]: list of Event ids to filter attempts. ex: ["5656565656565656", "4545454545454545"]
+    - `:webhook_ids` [list of binaries, default nil]: list of Webhook ids to filter attempts. ex: ["5656565656565656", "4545454545454545"]
+    - `:user` [Organization/Project, default nil]: Organization or Project object returned from StarkInfra.project(). Only necessary if default project or organization has not been set in configs.
 
   ## Return:
-    - list of Attempt structs with updated attributes and cursor to retrieve the next page of Attempt structs
+    - list of Event.Attempt objects with updated attributes
+    - cursor to retrieve the next page of Event.Attempt objects
   """
   @spec page(
     cursor: binary,

@@ -12,12 +12,12 @@ defmodule StarkInfra.PixDomain do
   """
 
   @doc """
-  The PixDomain struct displays the QR Code domain certificate information of Pix participants.
+  The PixDomain object displays the domain name and the QR Code domain certificate of Pix participants.
   All certificates must be registered with the Central Bank.
 
   ## Attributes (return-only):
     - certificates [list of PixDomain.Certificate]: certificate information of the Pix participant.
-    - name [string]: current active domain (URL) of the Pix participant.
+    - name [binary]: current active domain (URL) of the Pix participant.
   """
   @enforce_keys [
     :certificates,
@@ -31,13 +31,13 @@ defmodule StarkInfra.PixDomain do
   @type t() :: %__MODULE__{}
 
   @doc """
-  Receive a stream of PixDomain objects.
+  Receive a stream of PixDomain objects of Pix participants able to issue BR Codes
 
-  ## Options:
-    - `:user` [Organization/Project, default nil]: Organization or Project struct returned from StarkInfra.project(). Only necessary if default project or organization has not been set in configs.
+  ## Parameters (optional):
+    - `:user` [Organization/Project, default nil]: Organization or Project object returned from StarkInfra.project(). Only necessary if default project or organization has not been set in configs.
 
   ## Return:
-    - stream of PixDomain structs with updated attributes
+    - stream of PixDomain objects with updated attributes
   """
   @spec query(
     user: Organization.t() | Project.t() | nil

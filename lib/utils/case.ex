@@ -1,14 +1,14 @@
 defmodule StarkInfra.Utils.Case do
   @moduledoc false
 
-  def camel_to_kebab(string) do
-  string
+  def camel_to_kebab(binary) do
+  binary
   |> camel_to_snake()
   |> String.replace("_", "-")
   end
 
-  def camel_to_snake(string) do
-  string
+  def camel_to_snake(binary) do
+  binary
   |> String.graphemes()
   |> camel_to_snake_graphemes()
   |> strip_underscore()
@@ -36,12 +36,12 @@ defmodule StarkInfra.Utils.Case do
   rest
   end
 
-  defp strip_underscore(string) do
-  string
+  defp strip_underscore(binary) do
+  binary
   end
 
-  def snake_to_camel(string) do
-  string
+  def snake_to_camel(binary) do
+  binary
   |> String.graphemes()
   |> snake_to_camel_graphemes()
   |> Enum.join()

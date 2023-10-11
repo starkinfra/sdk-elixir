@@ -11,22 +11,23 @@ defmodule StarkInfra.PixStatement do
   """
 
   @doc """
-  The PixStatement struct stores information about all the transactions that
-  happened on a specific day at your settlment account according to the Central Bank.
+  The PixStatement object stores information about all the transactions that
+  happened on a specific day at your settlement account according to the Central Bank.
   It must be created by the user before it can be accessed.
   This feature is only available for direct participants.
+
   When you initialize a PixStatement, the entity will not be automatically
-  created in the Stark Infra API. The 'create' function sends the structs
-  to the Stark Infra API and returns the created struct.
+  created in the Stark Infra API. The 'create' function sends the objects
+  to the Stark Infra API and returns the created object.
 
   ## Parameters (required):
     - `:after` [Date]: transactions that happened at this date are stored in the PixStatement, must be the same as before. ex: ~D[2020, 3, 10]
     - `:before` [Date]: transactions that happened at this date are stored in the PixStatement, must be the same as after. ex: ~D[2020, 3, 10]
-    - `:type` [string]: types of entities to include in statement. Options: ["interchange", "interchangeTotal", "transaction"]
+    - `:type` [binary]: types of entities to include in statement. ex: ["interchange", "interchangeTotal", "transaction"]
 
   ## Attributes (return-only):
-    - `:id` [string]: unique id returned when the PixStatement is created. ex: "5656565656565656"
-    - `:status` [string]: current PixStatement status. ex: ["success", "failed"]
+    - `:id` [binary]: unique id returned when the PixStatement is created. ex: "5656565656565656"
+    - `:status` [binary]: current PixStatement status. ex: ["success", "failed"]
     - `:transaction_count` [integer]: number of transactions that happened during the day that the PixStatement was requested. ex: 11
     - `:created` [DateTime]: creation datetime for the PixStatement. ex: ~U[2020-03-10 10:30:0:0]
     - `:updated` [DateTime]: latest update datetime for the PixStatement. ex: ~U[2020-03-10 10:30:0:0]
@@ -52,14 +53,14 @@ defmodule StarkInfra.PixStatement do
   @doc """
   Create a PixStatement linked to your Workspace in the Stark Infra API
 
-  ## Options:
-    - `:statement` [PixStatement struct]: PixStatement struct to be created in the API.
+  ## Parameters (optional):
+    - `:statement` [PixStatement object]: PixStatement object to be created in the API.
 
-  ## Options:
-    - `:user` [Organization/Project, default nil]: Organization or Project struct returned from StarkInfra.project(). Only necessary if default project or organization has not been set in configs.
+  ## Parameters (optional):
+    - `:user` [Organization/Project, default nil]: Organization or Project object returned from StarkInfra.project(). Only necessary if default project or organization has not been set in configs.
 
   ## Return:
-    - PixStatement struct with updated attributes.
+    - PixStatement object with updated attributes.
   """
   @spec create(
     PixStatement.t() | map(),
@@ -93,16 +94,16 @@ defmodule StarkInfra.PixStatement do
   end
 
   @doc """
-  Retrieve the PixStatement struct linked to your Workspace in the Stark Infra API by its id.
+  Retrieve the PixStatement object linked to your Workspace in the Stark Infra API by its id.
 
   ## Parameters (required):
-    - `:id` [string]: struct unique id. ex: "5656565656565656"
+    - `:id` [binary]: object unique id. ex: "5656565656565656"
 
-  ## Options:
-    - `:user` [Organization/Project, default nil]: Organization or Project struct returned from StarkInfra.project(). Only necessary if default project or organization has not been set in configs.
+  ## Parameters (optional):
+    - `:user` [Organization/Project, default nil]: Organization or Project object returned from StarkInfra.project(). Only necessary if default project or organization has not been set in configs.
 
   ## Return:
-    - PixStatement struct that corresponds to the given id.
+    - PixStatement object that corresponds to the given id.
   """
   @spec get(
     id: binary,
@@ -128,15 +129,15 @@ defmodule StarkInfra.PixStatement do
   end
 
   @doc """
-  Receive a stream of PixStatements structs previously created in the Stark Infra API
+  Receive a stream of PixStatement objects previously created in the Stark Infra API
 
-  ## Options:
-    - `:limit` [integer, default nil]: maximum number of structs to be retrieved. Unlimited if nil. ex: 35
-    - `:ids` [list of strings, default nil]: list of ids to filter retrieved structs. ex: ["5656565656565656", "4545454545454545"]
-    - `:user` [Organization/Project, default nil]: Organization or Project struct returned from StarkInfra.project(). Only necessary if default project or organization has not been set in configs.
+  ## Parameters (optional):
+    - `:limit` [integer, default nil]: maximum number of objects to be retrieved. Unlimited if nil. ex: 35
+    - `:ids` [list of binaries, default nil]: list of ids to filter retrieved objects. ex: ["5656565656565656", "4545454545454545"]
+    - `:user` [Organization/Project, default nil]: Organization or Project object returned from StarkInfra.project(). Only necessary if default project or organization has not been set in configs.
 
   ## Return:
-    - stream of PixStatement structs with updated attributes
+    - stream of PixStatement objects with updated attributes
   """
   @spec query(
     limit: integer,
@@ -164,17 +165,18 @@ defmodule StarkInfra.PixStatement do
   end
 
   @doc """
-  Receive a list of up to 100 PixStatements structs previously created in the Stark Infra API
+  Receive a list of up to 100 PixStatement objects previously created in the Stark Infra API
+  Use this function instead of query if you want to manually page your statements.
 
-  ## Options:
-    - `:cursor` [string, default nil]: cursor returned on the previous page function call
-    - `:limit` [integer, default 100]: maximum number of structs to be retrieved. Max = 100. ex: 35
-    - `:ids` [list of strings, default nil]: list of ids to filter retrieved structs. ex: ["5656565656565656", "4545454545454545"]
-    - `:user` [Organization/Project, default nil]: Organization or Project struct returned from StarkInfra.project(). Only necessary if default project or organization has not been set in configs.
+  ## Parameters (optional):
+    - `:cursor` [binary, default nil]: cursor returned on the previous page function call
+    - `:limit` [integer, default 100]: maximum number of objects to be retrieved. It must be an integer between 1 and 100. ex: 50
+    - `:ids` [list of binaries, default nil]: list of ids to filter retrieved objects. ex: ["5656565656565656", "4545454545454545"]
+    - `:user` [Organization/Project, default nil]: Organization or Project object returned from StarkInfra.project(). Only necessary if default project or organization has not been set in configs.
 
   ## Return:
-    - list of PixStatement structs with updated attributes
-    - cursor to retrieve the next page of PixStatement structs
+    - list of PixStatement objects with updated attributes
+    - cursor to retrieve the next page of PixStatement objects
   """
   @spec page(
     cursor: binary,
@@ -204,13 +206,13 @@ defmodule StarkInfra.PixStatement do
   end
 
   @doc """
-  Retrieve a specific PixStatement by its ID in a .csv file.
+  Retrieve a specific PixStatement by its id in a .csv file.
 
   ## Parameters (required):
-    - `:id` [string]: struct unique id. ex: "5656565656565656"
+    - `:id` [binary]: object unique id. ex: "5656565656565656"
 
-  ## Options:
-    - `:user` [Organization/Project, default nil]: Organization or Project struct returned from StarkInfra.project(). Only necessary if default project or organization has not been set in configs.
+  ## Parameters (optional):
+    - `:user` [Organization/Project, default nil]: Organization or Project object returned from StarkInfra.project(). Only necessary if default project or organization has not been set in configs.
 
   ## Return:
     - .zip file containing a PixStatement in .csv format

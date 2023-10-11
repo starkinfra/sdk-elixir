@@ -1,37 +1,37 @@
 defmodule StarkInfra.IssuingRule do
+  alias StarkInfra.Utils.API
+  alias StarkInfra.CardMethod
+  alias StarkInfra.MerchantCountry
+  alias StarkInfra.MerchantCategory
   alias __MODULE__, as: IssuingRule
 
   @moduledoc """
-    # IssuingRule struct
+    # IssuingRule object
   """
 
   @doc """
-  The IssuingRule struct displays the spending rules of IssuingCards and IssuingHolders created in your Workspace.
+  The IssuingRule object displays the spending rules of IssuingCards and IssuingHolders created in your Workspace.
 
   ## Parameters (required):
-    - `:name` [string]: rule name. ex: "Travel" or "Food"
+    - `:name` [binary]: rule name. ex: "Travel" or "Food"
     - `:amount` [integer]: maximum amount that can be spent in the informed interval. ex: 200000 (= R$ 2000.00)
-    - `:interval` [string]: interval after which the rule amount counter will be reset to 0. ex: "instant", "day", "week", "month", "year" or "lifetime"
 
-  ## Parameters (optional):
-    - `:currency_code` [string, default "BRL"]: code of the currency that the rule amount refers to. ex: "BRL" or "USD"
-    - `:categories` [list of strings, default []]: merchant categories accepted by the rule. ex: ["eatingPlacesRestaurants", "travelAgenciesTourOperators"]
-    - `:countries` [list of strings, default []]: countries accepted by the rule. ex: ["BRA", "USA"]
-    - `:methods` [list of strings, default []]: card purchase methods accepted by the rule. ex: ["chip", "token", "server", "manual", "magstripe", "contactless"]
+    ## Parameters (optional):
+    - `:interval` [binary, default nil]: interval after which the rule amount counter will be reset to 0. ex: "instant", "day", "week", "month", "year" or "lifetime"
+    - `:currency_code` [binary, default "BRL"]: code of the currency that the rule amount refers to. ex: "BRL" or "USD"
+    - `:categories` [list of MerchantCategories, default []]: merchant categories accepted by the rule. ex: [%{ code: "fastFoodRestaurants"}]
+    - `:countries` [list of MerchantCountries, default []]: countries accepted by the rule. ex: [%{ code: "BRA"}]
+    - `:methods` [list of CardMethods, default []]: card purchase methods accepted by the rule. ex: [%{ code: "magstripe"}]
 
-  ## Attributes (expanded return-only):
+    ## Attributes (expanded return-only):
+    - `:id` [binary]: unique id returned when Rule is created, used to update a specific IssuingRule. ex: "5656565656565656"
     - `:counter_amount` [integer]: current rule spent amount. ex: 1000
-    - `:currency_symbol` [string]: currency symbol. ex: "R$"
-    - `:currency_name` [string]: currency name. ex: "Brazilian Real"
-
-  ## Attributes (return-only):
-    - `:id` [string]: unique id returned when Rule is created. ex: "5656565656565656"
+    - `:currency_symbol` [binary]: currency symbol. ex: "R$"
+    - `:currency_name` [binary]: currency name. ex: "Brazilian Real"
   """
   @enforce_keys [
-    :amount,
-    :currency_code,
-    :interval,
-    :name
+    :name,
+    :amount
   ]
   defstruct [
     :amount,
@@ -65,13 +65,12 @@ defmodule StarkInfra.IssuingRule do
       id: json[:id],
       interval: json[:interval],
       name: json[:name],
-      categories: json[:categories],
-      countries: json[:countries],
-      methods: json[:methods],
+      categories: json[:categories] |> Enum.map(fn category -> API.from_api_json(category, &MerchantCategory.resource_maker/1) end),
+      countries: json[:countries] |> Enum.map(fn country -> API.from_api_json(country, &MerchantCountry.resource_maker/1) end),
+      methods: json[:methods] |> Enum.map(fn method -> API.from_api_json(method, &CardMethod.resource_maker/1) end),
       counter_amount: json[:counter_amount],
       currency_symbol: json[:currency_symbol],
       currency_name: json[:currency_name]
     }
   end
-
 end

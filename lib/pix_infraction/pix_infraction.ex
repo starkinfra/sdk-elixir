@@ -13,27 +13,28 @@ defmodule StarkInfra.PixInfraction do
   @doc """
   PixInfraction are used to report transactions that are suspected of
   fraud, to request a refund or to reverse a refund.
+
   When you initialize a PixInfraction, the entity will not be automatically
   created in the Stark Infra API. The 'create' function sends the objects
-  to the Stark Infra API and returns the created struct.
+  to the Stark Infra API and returns the created object.
 
   ## Parameters (required):
-    - `:reference_id` [string]: end_to_end_id or return_id of the transaction being reported. ex: "E20018183202201201450u34sDGd19lz"
-    - `:type` [string]: type of infraction report. Options: "fraud", "reversal", "reversalChargeback"
+    - `:reference_id` [binary]: end_to_end_id or return_id of the transaction being reported. ex: "E20018183202201201450u34sDGd19lz"
+    - `:type` [binary]: type of infraction report. Options: "fraud", "reversal", "reversalChargeback"
 
   ## Parameters (optional):
-    - `:description` [string, default nil]: description for any details that can help with the infraction investigation.
+    - `:description` [binary, default nil]: description for any details that can help with the infraction investigation.
+    - `:tags` [list of binaries, default []]: list of binaries for tagging. ex: ["travel", "food"]
 
   ## Attributes (return-only):
-    - id [string]: unique id returned when the PixInfraction is created. ex: "5656565656565656"
-    - credited_bank_code [string]: bank_code of the credited Pix participant in the reported transaction. ex: "20018183"
-    - debited_bank_code [string]: bank_code of the debited Pix participant in the reported transaction. ex: "20018183"
-    - agent [string]: Options: "reporter" if you created the PixInfraction, "reported" if you received the PixInfraction.
-    - analysis [string]: analysis that led to the result.
-    - bacen_id [string]: central bank's unique UUID that identifies the infraction report.
-    - reported_by [string]: agent that reported the PixInfraction. Options: "debited", "credited".
-    - result [string]: result after the analysis of the PixInfraction by the receiving party. Options: "agreed", "disagreed"
-    - status [string]: current PixInfraction status. Options: "created", "failed", "delivered", "closed", "canceled".
+    - id [binary]: unique id returned when the PixInfraction is created. ex: "5656565656565656"
+    - credited_bank_code [binary]: bank_code of the credited Pix participant in the reported transaction. ex: "20018183"
+    - debited_bank_code [binary]: bank_code of the debited Pix participant in the reported transaction. ex: "20018183"
+    - flow [binary]: direction of the PixInfraction flow. ex: "out" if you created the PixInfraction, "in" if you received the PixInfraction.
+    - analysis [binary]: analysis that led to the result.
+    - reported_by [binary]: agent that reported the PixInfraction. Options: "debited", "credited".
+    - result [binary]: result after the analysis of the PixInfraction by the receiving party. Options: "agreed", "disagreed"
+    - status [binary]: current PixInfraction status. Options: "created", "failed", "delivered", "closed", "canceled".
     - created [DateTime]: creation datetime for the PixInfraction. ex: ~U[2020-3-10 10:30:0:0]
     - updated [DateTime]: latest update datetime for the PixInfraction. ex: ~U[2020-3-10 10:30:0:0]
   """
@@ -45,12 +46,12 @@ defmodule StarkInfra.PixInfraction do
     :reference_id,
     :type,
     :description,
+    :tags,
     :id,
     :credited_bank_code,
     :debited_bank_code,
-    :agent,
+    :flow,
     :analysis,
-    :bacen_id,
     :reported_by,
     :result,
     :status,
@@ -61,16 +62,16 @@ defmodule StarkInfra.PixInfraction do
   @type t() :: %__MODULE__{}
 
   @doc """
-  Create PixInfractions in the Stark Infra API
+  Create PixInfraction objects in the Stark Infra API
 
   ## Parameters (required):
-    - `:infractions` [list of PixInfraction]: list of PixInfraction structs to be created in the API.
+    - `:infractions` [list of PixInfraction]: list of PixInfraction objects to be created in the API.
 
-  ## Options:
-    - `:user` [Organization/Project, default nil]: Organization or Project struct returned from StarkInfra.project(). Only necessary if default project or organization has not been set in configs.
+  ## Parameters (optional):
+    - `:user` [Organization/Project, default nil]: Organization or Project object returned from StarkInfra.project(). Only necessary if default project or organization has not been set in configs.
 
   ## Return:
-    - list of PixInfraction structs with updated attributes
+    - list of PixInfraction objects with updated attributes
   """
   @spec create(
     [PixInfraction.t() | map],
@@ -102,16 +103,16 @@ defmodule StarkInfra.PixInfraction do
   end
 
   @doc """
-  Retrieve the PixInfraction struct linked to your Workspace in the Stark Infra API using its id.
+  Retrieve the PixInfraction object linked to your Workspace in the Stark Infra API using its id.
 
   ## Parameters (required):
-    - `:id` [string]: struct unique id. ex: "5656565656565656".
+    - `:id` [binary]: object unique id. ex: "5656565656565656".
 
-  ## Options:
-    - `:user` [Organization/Project, default nil]: Organization or Project struct returned from StarkInfra.project(). Only necessary if default project or organization has not been set in configs.
+  ## Parameters (optional):
+    - `:user` [Organization/Project, default nil]: Organization or Project object returned from StarkInfra.project(). Only necessary if default project or organization has not been set in configs.
 
   ## Return:
-    - PixInfraction struct that corresponds to the given id.
+    - PixInfraction object that corresponds to the given id.
   """
   @spec get(
     id: binary,
@@ -143,19 +144,21 @@ defmodule StarkInfra.PixInfraction do
   end
 
   @doc """
-  Receive a stream of PixInfractions structs previously created in the Stark Infra API
+  Receive a stream of PixInfraction objects previously created in the Stark Infra API
 
-  ## Options:
-    - `:limit` [integer, default nil]: maximum number of structs to be retrieved. Unlimited if nil. ex: 35
-    - `:after` [Date or string, default nil]: date filter for structs created after a specified date. ex: ~D[2020-03-10]
-    - `:before` [Date or string, default nil]: date filter for structs created before a specified date. ex: ~D[2020-03-10]
-    - `:status` [list of strings, default nil]: filter for status of retrieved objects. ex: ["created", "failed", "delivered", "closed", "canceled"]
-    - `:ids` [list of strings, default nil]: list of ids to filter retrieved objects. ex: ["5656565656565656", "4545454545454545"]
-    - `:type` [list of strings, default nil]: filter for the type of retrieved PixInfractions. Options: "fraud", "reversal", "reversalChargeback"
-    - `:user` [Organization/Project, default nil]: Organization or Project struct returned from StarkInfra.project(). Only necessary if default project or organization has not been set in configs.
+  ## Parameters (optional):
+    - `:limit` [integer, default nil]: maximum number of objects to be retrieved. Unlimited if nil. ex: 35
+    - `:after` [Date or binary, default nil]: date filter for objects created after a specified date. ex: ~D[2020-03-10]
+    - `:before` [Date or binary, default nil]: date filter for objects created before a specified date. ex: ~D[2020-03-10]
+    - `:status` [list of binaries, default nil]: filter for status of retrieved objects. Options: ["created", "failed", "delivered", "closed", "canceled"]
+    - `:ids` [list of binaries, default nil]: list of ids to filter retrieved objects. ex: ["5656565656565656", "4545454545454545"]
+    - `:type` [list of binaries, default nil]: filter for the type of retrieved PixInfractions. Options: "fraud", "reversal", "reversalChargeback"
+    - `:flow` [binary, default nil]: direction of the PixInfraction flow. Options: "out" if you created the PixInfraction, "in" if you received the PixInfraction.
+    - `:tags` [list of binaries, default nil]: list of binaries for tagging. ex: ["travel", "food"]
+    - `:user` [Organization/Project, default nil]: Organization or Project object returned from StarkInfra.project(). Only necessary if default project or organization has not been set in configs.
 
   ## Return:
-    - stream of PixInfraction structs with updated attributes
+    - stream of PixInfraction objects with updated attributes
   """
   @spec query(
     limit: integer | nil,
@@ -164,6 +167,8 @@ defmodule StarkInfra.PixInfraction do
     status: [binary] | nil,
     ids: [binary] | nil,
     type: [binary] | nil,
+    flow: binary | nil,
+    tags: [binary] | nil,
     user: Organization.t() | Project.t() | nil
   ) ::
     ({:cont, {:ok, [PixInfraction.t() | map]}} |
@@ -188,6 +193,8 @@ defmodule StarkInfra.PixInfraction do
     status: [binary] | nil,
     ids: [binary] | nil,
     type: [binary] | nil,
+    flow: binary | nil,
+    tags: [binary] | nil,
     user: Organization.t() | Project.t() | nil
   ) :: any
   def query!(options \\ []) do
@@ -198,21 +205,24 @@ defmodule StarkInfra.PixInfraction do
   end
 
   @doc """
-  Receive a list of up to 100 PixInfractions structs previously created in the Stark Infra API and the cursor to the next page.
+  Receive a list of up to 100 PixInfraction objects previously created in the Stark Infra API and the cursor to the next page.
   Use this function instead of query if you want to manually page your requests.
 
-  ## Options:
-    - `:cursor` [string, default nil]: cursor returned on the previous page function call.
-    - `:limit` [integer, default 100]: maximum number of structs to be retrieved. Max = 100. ex: 35
-    - `:after` [Date or string, default nil]: date filter for structs created after a specified date. ex: ~D[2020-03-10]
-    - `:before` [Date or string, default nil]: date filter for structs created before a specified date. ex: ~D[2020-03-10]
-    - `:status` [list of strings, default nil]: filter for status of retrieved objects. ex: ["created", "failed", "delivered", "closed", "canceled"]
-    - `:ids` [list of strings, default nil]: list of ids to filter retrieved objects. ex: ["5656565656565656", "4545454545454545"]
-    - `:type` [list of strings, default nil]: filter for the type of retrieved PixInfractions. Options: "fraud", "reversal", "reversalChargeback"
-    - `:user` [Organization/Project, default nil]: Organization or Project struct returned from StarkInfra.project(). Only necessary if default project or organization has not been set in configs.
+  ## Parameters (optional):
+    - `:cursor` [binary, default nil]: cursor returned on the previous page function call.
+    - `:limit` [integer, default 100]: maximum number of objects to be retrieved. It must be an integer between 1 and 100. ex: 50
+    - `:after` [Date or binary, default nil]: date filter for objects created after a specified date. ex: ~D[2020-03-10]
+    - `:before` [Date or binary, default nil]: date filter for objects created before a specified date. ex: ~D[2020-03-10]
+    - `:status` [list of binaries, default nil]: filter for status of retrieved objects. Options: ["created", "failed", "delivered", "closed", "canceled"]
+    - `:ids` [list of binaries, default nil]: list of ids to filter retrieved objects. ex: ["5656565656565656", "4545454545454545"]
+    - `:type` [list of binaries, default nil]: filter for the type of retrieved PixInfractions. Options: "fraud", "reversal", "reversalChargeback"
+    - `:flow` [binary, default nill]: direction of the PixInfraction flow. Options: "out" if you created the PixInfraction, "in" if you received the PixInfraction.
+    - `:tags` [list of binaries, default nil]: list of strings for tagging. ex: ["travel", "food"]
+    - `:user` [Organization/Project, default nil]: Organization or Project object returned from StarkInfra.project(). Only necessary if default project or organization has not been set in configs.
 
   ## Return:
-    - list of PixInfraction structs with updated attributes and cursor to retrieve the next page of PixInfraction objects
+    - list of PixInfraction objects with updated attributes
+    - cursor to retrieve the next page of PixInfraction objects
   """
   @spec page(
     cursor: binary | nil,
@@ -222,6 +232,8 @@ defmodule StarkInfra.PixInfraction do
     status: [binary] | nil,
     ids: [binary] | nil,
     type: [binary] | nil,
+    flow: binary | nil,
+    tags: [binary] | nil,
     user: Organization.t() | Project.t() | nil
   ) ::
     {:ok, {binary, [PixInfraction.t() | map]}} |
@@ -244,6 +256,8 @@ defmodule StarkInfra.PixInfraction do
     status: [binary] | nil,
     ids: [binary] | nil,
     type: [binary] | nil,
+    flow: binary | nil,
+    tags: [binary] | nil,
     user: Organization.t() | Project.t() | nil
   ) :: any
   def page!(options \\ []) do
@@ -254,15 +268,15 @@ defmodule StarkInfra.PixInfraction do
   end
 
   @doc """
-  Respond to a received PixInfraction.
+  Update a PixInfraction by passing id.
 
   ## Parameters (required):
-    - `:id` [string]: PixInfraction id. ex: '5656565656565656'
-    - `:result` [string]: result after the analysis of the PixInfraction. Options: "agreed", "disagreed"
+    - `:id` [binary]: object unique id. ex: '5656565656565656'
+    - `:result` [binary]: result after the analysis of the PixInfraction. Options: "agreed", "disagreed"
 
   ## Parameters (optional):
-    - `:analysis` [string, default nil]: analysis that led to the result.
-    - `:user` [Organization/Project, default nil]: Organization or Project struct returned from StarkInfra.project(). Only necessary if default project or organization has not been set in configs.
+    - `:analysis` [binary, default nil]: analysis that led to the result.
+    - `:user` [Organization/Project, default nil]: Organization or Project object returned from StarkInfra.project(). Only necessary if default project or organization has not been set in configs.
 
   ## Return:
     - PixInfraction with updated attributes
@@ -306,13 +320,13 @@ defmodule StarkInfra.PixInfraction do
   Cancel a PixInfraction entity previously created in the Stark Infra API
 
   ## Parameters (required):
-    - `:id` [string]: struct unique id. ex: "5656565656565656"
+    - `:id` [binary]: object unique id. ex: "5656565656565656"
 
-  ## Options:
-    - `:user` [Organization/Project, default nil]: Organization or Project struct returned from StarkInfra.project(). Only necessary if default project or organization has not been set in configs.
+  ## Parameters (optional):
+    - `:user` [Organization/Project, default nil]: Organization or Project object returned from StarkInfra.project(). Only necessary if default project or organization has not been set in configs.
 
   ## Return:
-    - canceled PixInfraction struct
+    - canceled PixInfraction object
   """
   @spec cancel(
     id: binary,
@@ -357,12 +371,12 @@ defmodule StarkInfra.PixInfraction do
       reference_id: json[:reference_id],
       type: json[:type],
       description: json[:description],
+      tags: json[:tags],
       id: json[:id],
       credited_bank_code: json[:credited_bank_code],
       debited_bank_code: json[:debited_bank_code],
-      agent: json[:agent],
+      flow: json[:flow],
       analysis: json[:analysis],
-      bacen_id: json[:bacen_id],
       reported_by: json[:reported_by],
       result: json[:result],
       status: json[:status],
