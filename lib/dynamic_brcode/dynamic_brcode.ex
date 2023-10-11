@@ -264,6 +264,7 @@ defmodule StarkInfra.DynamicBrcode do
     - `:sender_name` [binary]: sender's full name. ex: "Anthony Edward Stark"
     - `:sender_tax_id`: [binary]: sender's CPF (11 digits formatted or unformatted) or CNPJ (14 digits formatted or unformatted). ex: "01.001.001/0001-01"
     - `:receiver_name` [binary]: receiver's full name. ex: "Jamie Lannister"
+    - `:receiver_tax_id`: [binary]: receiver's CPF (11 digits formatted or unformatted) or CNPJ (14 digits formatted or unformatted). ex: "012.345.678-90"
     - `:receiver_street_line` [binary]: receiver's main address. ex: "Av. Paulista, 200"
     - `:receiver_city` [binary]: receiver's address city name. ex: "Sao Paulo"
     - `:receiver_state_code` [binary]: receiver's address state code. ex: "SP"
@@ -271,7 +272,6 @@ defmodule StarkInfra.DynamicBrcode do
 
     ## Parameters (optional):
     - `:expiration [integer, default 86400 (1 day)]: time in seconds counted from the creation datetime until the DynamicBrcode expires. After expiration, the BR Code cannot be paid anymore.
-    - `:receiver_tax_id`: [binary, default nil]: receiver's CPF (11 digits formatted or unformatted) or CNPJ (14 digits formatted or unformatted). ex: "012.345.678-90"
     - `:fine [float:, default 2.0]: Percentage charged if the sender pays after the due datetime.
     - `:interest`: [float, default 1.0]: Interest percentage charged if the sender pays after the due datetime.
     - `:discounts`: [list of dictionaries, default nil]: list of dictionaries with "percentage":float and "due":DateTime or binary pairs.
@@ -298,11 +298,11 @@ defmodule StarkInfra.DynamicBrcode do
       senderName: body.sender_name,
       senderTaxId: body.sender_tax_id,
       receiverName: body.receiver_name,
+      receiverTaxId: body.receiver_tax_id,
       receiverStreetLine: body.receiver_street_line,
       receiverCity: body.receiver_city,
       receiverStateCode: body.receiver_state_code,
       expiration: body.expiration,
-      receiverTaxId: body.receiver_tax_id,
       fine: body.fine,
       interest: body.interest,
       discounts: body.discounts,
