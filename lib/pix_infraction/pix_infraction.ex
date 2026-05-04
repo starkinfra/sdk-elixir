@@ -78,6 +78,7 @@ defmodule StarkInfra.PixInfraction do
   ) ::
     {:ok, [PixInfraction.t() | map]} |
     {:error, Error.t()}
+  @deprecated "Function deprecated since v0.2.0"
   def create(infractions, options \\ []) do
     Rest.post(
       resource(),
@@ -89,16 +90,13 @@ defmodule StarkInfra.PixInfraction do
   @doc """
   Same as create(), but it will unwrap the error tuple and raise in case of errors.
   """
+  @deprecated "Function deprecated since v0.2.0"
   @spec create!(
     [PixInfraction.t() | map],
     user: Organization.t() | Project.t() | nil
   ) :: any
   def create!(infractions, options \\ []) do
-    Rest.post!(
-      resource(),
-      infractions,
-      options
-    )
+    raise "Function deprecated since v0.2.0"
   end
 
   @doc """
