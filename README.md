@@ -50,6 +50,7 @@ This SDK version is compatible with the Stark Infra API v2.
     - [PixUser](#get-a-pixuser): Get fraud statistics of a user
     - [PixChargeback](#create-pixchargebacks): Create Pix Chargeback requests
     - [PixDomain](#query-pixdomains): View registered SPI participants certificates
+    - [BrcodePreview](#create-brcodepreviews): Preview information from a BR Code before paying it
     - [PixPullSubscription](#create-pixpullsubscriptions): Set up recurring Pix debit authorizations
     - [PixPullRequest](#create-pixpullrequests): Charge against an active PixPullSubscription
     - [PixDispute](#create-pixdisputes): Create Pix Dispute requests
@@ -1706,6 +1707,20 @@ StarkInfra.PixDomain.query!()
 |> IO.inspect
 ```
 
+### Create BrcodePreviews
+
+You can preview a BR Code before paying it by providing the BR Code string and the payer's tax id:
+
+```elixir
+StarkInfra.BrcodePreview.create!([
+  %StarkInfra.BrcodePreview{
+    id: "00020126580014br.gov.bcb.pix0136a629532e-7693-4846-852d-1bbff817b5a8520400005303986540510.005802BR5908T'Challa6009Sao Paulo62090505123456304B14A",
+    payer_id: "20.018.183/0001-80"
+  }
+]) |> IO.inspect
+```
+
+**Note**: Instead of using BrcodePreview structs, you can also pass each BrcodePreview element in map format
 ### Create PixDisputes
 
 Pix disputes can be created when a fraud is detected creating a chain of transactions in order to reverse the funds to the origin.

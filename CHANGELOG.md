@@ -59,6 +59,7 @@ Given a version number MAJOR.MINOR.PATCH, increment:
 - brcode, due, link and metadata attributes to IssuingInvoice resource
 - customer_type attribute to IssuingProduct resource
 - Rule sub-resource and rules, debtor_workspace_id and nominal_interest attributes to CreditNote resource
+- BrcodePreview resource
 ### Changed
 - IssuingBin resource to IssuingProduct
 - settlement parameter to funding_type and client parameter to holder_type of IssuingProduct
