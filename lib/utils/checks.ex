@@ -26,12 +26,20 @@ defmodule StarkInfra.Utils.Check do
   nil
   end
 
+  def datetime("") do
+  nil
+  end
+
   def datetime(data) when is_binary(data) do
   {:ok, datetime, _utc_offset} = data |> DateTime.from_iso8601()
   datetime
   end
 
   def date(data) when is_nil(data) do
+  nil
+  end
+
+  def date("") do
   nil
   end
 
@@ -45,6 +53,10 @@ defmodule StarkInfra.Utils.Check do
 
   def date(data) do
   data
+  end
+
+  def date_or_datetime("") do
+  nil
   end
 
   def date_or_datetime(data) do
