@@ -14,6 +14,7 @@ Given a version number MAJOR.MINOR.PATCH, increment:
 ## [Unreleased]
 ### Added
 - IssuingRule missing parameters
+- BrcodePreview resource
 ### Fixed
 - query parameters in post requests
 

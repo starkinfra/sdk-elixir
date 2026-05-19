@@ -41,6 +41,7 @@ This SDK version is compatible with the Stark Infra API v2.
     - [PixInfraction](#create-pixinfractions): Create Pix Infraction reports
     - [PixChargeback](#create-pixchargebacks): Create Pix Chargeback requests
     - [PixDomain](#query-pixdomains): View registered SPI participants certificates
+    - [BrcodePreview](#create-brcodepreviews): Preview information from a BR Code before paying it
   - [Credit Note](#credit-note)
     - [CreditNote](#create-creditnotes): Create credit notes
   - [Webhook](#webhook):
@@ -1285,6 +1286,21 @@ You can query for domains of registered SPI participants able to issue dynamic Q
 StarkInfra.PixDomain.query!() 
 |> IO.inspect
 ```
+
+### Create BrcodePreviews
+
+You can preview a BR Code before paying it by providing the BR Code string and the payer's tax id:
+
+```elixir
+StarkInfra.BrcodePreview.create!([
+  %StarkInfra.BrcodePreview{
+    id: "00020126580014br.gov.bcb.pix0136a629532e-7693-4846-852d-1bbff817b5a8520400005303986540510.005802BR5908T'Challa6009Sao Paulo62090505123456304B14A",
+    payer_id: "20.018.183/0001-80"
+  }
+]) |> IO.inspect
+```
+
+**Note**: Instead of using BrcodePreview structs, you can also pass each BrcodePreview element in map format
 
 ## Credit Note
 
