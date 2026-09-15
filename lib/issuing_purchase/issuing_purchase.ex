@@ -2,6 +2,8 @@ defmodule StarkInfra.IssuingPurchase do
   alias __MODULE__, as: IssuingPurchase
   alias StarkInfra.Utils.Rest
   alias StarkInfra.Utils.Check
+  alias StarkInfra.Utils.JSON
+  alias StarkInfra.Utils.Parse
   alias StarkInfra.User.Project
   alias StarkInfra.User.Organization
   alias StarkInfra.Error
@@ -41,6 +43,13 @@ defmodule StarkInfra.IssuingPurchase do
     - `:tags` [string]: list of strings for tagging returned by the sub-issuer during the authorization. ex: ["travel", "food"]
     - `:updated` [DateTime]: latest update DateTime for the IssuingPurchase. ex: ~U[2020-3-10 10:30:0:0]
     - `:created` [DateTime]: creation datetime for the IssuingPurchase. ex: ~U[2020-03-10 10:30:0:0]
+
+  ## Attributes (authorization request only):
+    - `:purpose` [string]: purchase purpose. ex: "purchase"
+    - `:is_partial_allowed` [bool]: true if the merchant allows partial purchases. ex: false
+    - `:card_tags` [list of strings]: tags of the IssuingCard responsible for this purchase. ex: ["travel", "food"]
+    - `:holder_id` [string]: card holder ID. ex: "5656565656565656"
+    - `:holder_tags` [list of strings]: tags of the IssuingHolder responsible for this purchase. ex: ["technology", "john snow"]
   """
   @enforce_keys [
     :id,
@@ -69,7 +78,12 @@ defmodule StarkInfra.IssuingPurchase do
     :status,
     :tags,
     :updated,
-    :created
+    :created,
+    :purpose,
+    :is_partial_allowed,
+    :card_tags,
+    :holder_id,
+    :holder_tags
   ]
 
   defstruct [
@@ -99,7 +113,12 @@ defmodule StarkInfra.IssuingPurchase do
     :status,
     :tags,
     :updated,
-    :created
+    :created,
+    :purpose,
+    :is_partial_allowed,
+    :card_tags,
+    :holder_id,
+    :holder_tags
   ]
 
   @type t() :: %__MODULE__{}
@@ -302,7 +321,106 @@ defmodule StarkInfra.IssuingPurchase do
       status: json[:status],
       tags: json[:tags],
       updated: json[:updated] |> Check.datetime(),
-      created: json[:created] |> Check.datetime()
+      created: json[:created] |> Check.datetime(),
+      purpose: json[:purpose],
+      is_partial_allowed: json[:is_partial_allowed],
+      card_tags: json[:card_tags],
+      holder_id: json[:holder_id],
+      holder_tags: json[:holder_tags]
     }
+  end
+
+  @doc """
+  Create a single IssuingPurchase struct received from IssuingPurchase at the informed endpoint.
+  If the provided digital signature does not check out with the StarkInfra public key, a
+  starkinfra.error.InvalidSignatureError will be raised.
+
+  ## Parameters (required):
+    - `:content` [string]: response content from request received at user endpoint (not parsed)
+    - `:signature` [string]: base-64 digital signature received at response header "Digital-Signature"
+
+  ## Options
+    - `cache_pid` [PID, default nil]: PID of the process that holds the public key cache, returned on previous parses. If not provided, a new cache process will be generated.
+    - `:user` [Organization/Project, default nil]: Organization or Project struct returned from StarkInfra.project(). Only necessary if default project or organization has not been set in configs.
+
+  ## Return:
+    - Parsed IssuingPurchase struct
+  """
+  @spec parse(
+    content: binary,
+    signature: binary,
+    cache_pid: PID,
+    user: Project.t() | Organization.t()
+  )::
+    {:ok, IssuingPurchase.t()} |
+    {:error, [error: Error.t()]}
+  def parse(options) do
+    %{content: content, signature: signature, cache_pid: cache_pid, user: user} =
+      Enum.into(
+        options |> Check.enforced_keys([:content, :signature]),
+        %{cache_pid: nil, user: nil}
+      )
+    Parse.parse_and_verify(
+      content: content,
+      signature: signature,
+      cache_pid: cache_pid,
+      key: nil,
+      resource_maker: &resource_maker/1,
+      user: user
+    )
+  end
+
+  @doc """
+  Same as parse(), but it will unwrap the error tuple and raise in case of errors.
+  """
+  @spec parse!(
+    content: binary,
+    signature: binary,
+    cache_pid: PID,
+    user: Project.t() | Organization.t()
+  ) :: any
+  def parse!(options \\ []) do
+    %{content: content, signature: signature, cache_pid: cache_pid, user: user} =
+      Enum.into(
+        options |> Check.enforced_keys([:content, :signature]),
+        %{cache_pid: nil, user: nil}
+      )
+    Parse.parse_and_verify!(
+      content: content,
+      signature: signature,
+      cache_pid: cache_pid,
+      key: nil,
+      resource_maker: &resource_maker/1,
+      user: user
+    )
+  end
+
+  @doc """
+  Helps you respond IssuingPurchase authorization requests.
+
+  ## Parameters (required):
+    - `:status` [string]: sub-issuer response to the authorization. ex: "accepted" or "denied"
+
+  ## Options
+    - `:amount` [integer, default 0]: amount in cents that was authorized. ex: 1234 (= R$ 12.34)
+    - `:reason` [string, default ""]: denial reason. ex: "other"
+    - `:tags` [list of strings, default []]: tags to filter retrieved object. ex: ["tony", "stark"]
+
+  ## Return:
+    - Dumped JSON string that must be returned to us on the IssuingPurchase authorization request
+  """
+  @spec response!(
+    status: binary,
+    amount: integer,
+    reason: binary,
+    tags: [binary]
+  ) :: any
+  def response!(status, options \\ []) do
+    options = options ++ [status: status]
+    JSON.encode!(%{authorization:
+      Enum.into(options |> Check.enforced_keys([:status]), %{amount: 0, reason: "", tags: []})
+      |> Enum.filter(fn {_, v} -> v != nil end)
+      |> Enum.into(%{})
+    })
   end
 end

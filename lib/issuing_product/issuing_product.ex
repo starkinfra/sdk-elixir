@@ -1,5 +1,5 @@
-defmodule StarkInfra.IssuingBin do
-  alias __MODULE__, as: IssuingBin
+defmodule StarkInfra.IssuingProduct do
+  alias __MODULE__, as: IssuingProduct
   alias StarkInfra.Utils.Rest
   alias StarkInfra.Utils.Check
   alias StarkInfra.User.Project
@@ -7,58 +7,55 @@ defmodule StarkInfra.IssuingBin do
   alias StarkInfra.Error
 
   @moduledoc """
-  Groups IssuingBin related functions
+  Groups IssuingProduct related functions
   """
 
   @doc """
-  The IssuingBin object displays information of BINs registered to your Workspace.
-  They represent a group of cards that begin with the same numbers (BIN) and offer the same product to end customers.
+  The IssuingProduct object displays information of registered card products to your Workspace.
+  They represent a group of cards that begin with the same numbers (id) and offer the same product to end customers.
 
   ## Attributes (return-only):
-    - `:id` [string]: unique BIN number registered within the card network. ex: "53810200"
+    - `:id` [string]: unique card product number (BIN) registered within the card network. ex: "53810200"
     - `:network` [string]: card network flag. ex: "mastercard"
-    - `:settlement` [string]: settlement type. ex: "credit"
-    - `:category` [string]: purchase category. ex: "prepaid"
-    - `:client` [string]: client type. ex: "business"
-    - `:updated` [DateTime]: latest update DateTime for the IssuingBin. ex: ~U[2020-3-10 10:30:0:0]
-    - `:created` [DateTime]: creation datetime for the IssuingBin. ex: ~U[2020-03-10 10:30:0:0]
+    - `:funding_type` [string]: type of funding used for payment. ex: "credit", "debit"
+    - `:holder_type` [string]: holder type. ex: "business", "individual"
+    - `:code` [string]: internal code from card flag informing the product. ex: "MRW", "MCO", "MWB", "MCS"
+    - `:created` [DateTime]: creation datetime for the IssuingProduct. ex: ~U[2020-03-10 10:30:0:0]
   """
   @enforce_keys [
     :id,
     :network,
-    :settlement,
-    :category,
-    :client,
-    :updated,
+    :funding_type,
+    :holder_type,
+    :code,
     :created
   ]
   defstruct [
     :id,
     :network,
-    :settlement,
-    :category,
-    :client,
-    :updated,
+    :funding_type,
+    :holder_type,
+    :code,
     :created
   ]
 
   @type t() :: %__MODULE__{}
 
   @doc """
-  Receive a stream of IssuingBin structs previously registered in the Stark Infra API
+  Receive a stream of IssuingProduct structs previously registered in the Stark Infra API
 
   ## Options:
     - `:limit` [integer, default nil]: maximum number of structs to be retrieved. Unlimited if nil. ex: 35
     - `:user` [Organization/Project, default nil]: Organization or Project struct returned from StarkInfra.project(). Only necessary if default project or organization has not been set in configs.
 
   ## Return:
-    - stream of IssuingBin structs with updated attributes
+    - stream of IssuingProduct structs with updated attributes
   """
   @spec query(
     limit: integer,
     user: Project.t() | Organization.t() | nil
   ) ::
-    { :ok, [IssuingBin.t()] } |
+    { :ok, [IssuingProduct.t()] } |
     { :error, [error: Error.t()] }
   def query(options \\ []) do
     Rest.get_list(resource(), options)
@@ -76,7 +73,7 @@ defmodule StarkInfra.IssuingBin do
   end
 
   @doc """
-  Receive a list of up to 100 IssuingBin structs previously registered in the Stark Infra API and the cursor to the next page.
+  Receive a list of up to 100 IssuingProduct structs previously registered in the Stark Infra API and the cursor to the next page.
 
   ## Options:
     - `:cursor` [string, default nil]: cursor returned on the previous page function call
@@ -84,15 +81,15 @@ defmodule StarkInfra.IssuingBin do
     - `:user` [Organization/Project, default nil]: Organization or Project struct returned from StarkInfra.project(). Only necessary if default project or organization has not been set in configs.
 
   ## Return:
-    - list of IssuingBin structs with updated attributes
-    - cursor to retrieve the next page of IssuingBin structs
+    - list of IssuingProduct structs with updated attributes
+    - cursor to retrieve the next page of IssuingProduct structs
   """
   @spec page(
     cursor: binary,
     limit: integer,
     user: Project.t() | Organization.t() | nil
   ) ::
-    { :ok, {binary, [IssuingBin.t()]}} |
+    { :ok, {binary, [IssuingProduct.t()]}} |
     { :error, [error: Error.t()] }
   def page(options \\ []) do
     Rest.get_page(resource(), options)
@@ -113,20 +110,19 @@ defmodule StarkInfra.IssuingBin do
   @doc false
   def resource() do
     {
-      "IssuingBin",
+      "IssuingProduct",
       &resource_maker/1
     }
   end
 
   @doc false
   def resource_maker(json) do
-    %IssuingBin{
+    %IssuingProduct{
       id: json[:id],
       network: json[:network],
-      settlement: json[:settlement],
-      category: json[:category],
-      client: json[:client],
-      updated: json[:updated] |> Check.datetime(),
+      funding_type: json[:funding_type],
+      holder_type: json[:holder_type],
+      code: json[:code],
       created: json[:created] |> Check.datetime()
     }
   end
