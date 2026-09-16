@@ -13,6 +13,9 @@ Given a version number MAJOR.MINOR.PATCH, increment:
 
 ## [Unreleased]
 ### Added
+- Ledger resource
+- Ledger.Rule sub-resource
+- Ledger.Log sub-resource
 - IssuingRule missing parameters
 ### Changed
 - IssuingBin resource to IssuingProduct
