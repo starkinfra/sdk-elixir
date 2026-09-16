@@ -102,7 +102,7 @@ defmodule StarkInfra.Ledger do
     - Ledger struct with updated attributes
   """
   @spec get(
-    id: binary,
+    binary,
     user: Organization.t() | Project.t() | nil
   ) ::
     {:ok, Ledger.t()} |
@@ -119,7 +119,7 @@ defmodule StarkInfra.Ledger do
   Same as get(), but it will unwrap the error tuple and raise in case of errors.
   """
   @spec get!(
-    id: binary,
+    binary,
     user: Organization.t() | Project.t() | nil
   ) :: any
   def get!(id, options \\ []) do
@@ -303,7 +303,7 @@ defmodule StarkInfra.Ledger do
   def resource_maker(json) do
     %Ledger{
       external_id: json[:external_id],
-      rules: json[:rules] |> Enum.map(fn rule -> API.from_api_json(rule, &Rule.resource_maker/1) end),
+      rules: json[:rules] && Enum.map(json[:rules], fn rule -> API.from_api_json(rule, &Rule.resource_maker/1) end),
       tags: json[:tags],
       metadata: json[:metadata],
       id: json[:id],

@@ -285,7 +285,7 @@ defmodule StarkInfra.LedgerTransaction do
       external_id: json[:external_id],
       source: json[:source],
       fee: json[:fee],
-      rules: (json[:rules] || []) |> Enum.map(fn rule -> API.from_api_json(rule, &Rule.resource_maker/1) end),
+      rules: json[:rules] && Enum.map(json[:rules], fn rule -> API.from_api_json(rule, &Rule.resource_maker/1) end),
       metadata: json[:metadata],
       tags: json[:tags],
       created: json[:created] |> Check.datetime(),

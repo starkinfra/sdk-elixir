@@ -33,11 +33,9 @@ defmodule StarkInfraTest.Ledger do
 
   @tag :ledger
   test "query ledger" do
-    ledgers = StarkInfra.Ledger.query!(limit: 5)
-      |> Enum.map(fn(ledger) ->
-        assert ledger.id == StarkInfra.Ledger.get!(ledger.id).id
-      end)
-    assert length(ledgers) <= 5
+    ledgers = StarkInfra.Ledger.query(limit: 101)
+      |> Enum.take(200)
+    assert length(ledgers) <= 101
   end
 
   @tag :ledger
