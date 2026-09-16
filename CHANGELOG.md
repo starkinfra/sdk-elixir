@@ -21,6 +21,9 @@ Given a version number MAJOR.MINOR.PATCH, increment:
 - CreditHolmes.Log sub-resource
 - CreditPreview resource
 - CreditPreview.CreditNotePreview sub-resource
+- CreditNote.Signer.resend_token method
+- CreditNote.pdf method
+- CreditNote.payment method
 - IssuingRule missing parameters
 ### Changed
 - IssuingBin resource to IssuingProduct

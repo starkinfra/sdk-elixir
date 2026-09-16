@@ -83,6 +83,90 @@ defmodule StarkInfraTest.CreditNote do
     assert !is_nil(note.id)
   end
 
+  @tag :credit_note
+  test "get credit note pdf" do
+    credit_note =
+      StarkInfra.CreditNote.query!(limit: 1, status: "signed")
+      |> Enum.take(1)
+      |> hd()
+
+    {:ok, pdf} = StarkInfra.CreditNote.pdf(credit_note.id)
+
+    file = File.open!("./credit_note.pdf", [:write])
+    IO.binwrite(file, pdf)
+    File.close(file)
+
+    assert length(pdf) > 0
+  end
+
+  @tag :credit_note
+  test "get! credit note pdf" do
+    credit_note =
+      StarkInfra.CreditNote.query!(limit: 1, status: "signed")
+      |> Enum.take(1)
+      |> hd()
+
+    pdf = StarkInfra.CreditNote.pdf!(credit_note.id)
+
+    file = File.open!("./credit_note1.pdf", [:write])
+    IO.binwrite(file, pdf)
+    File.close(file)
+
+    assert length(pdf) > 0
+  end
+
+  @tag :credit_note
+  test "get credit note payment pdf" do
+    credit_note =
+      StarkInfra.CreditNote.query!(limit: 1, status: "success")
+      |> Enum.take(1)
+      |> hd()
+
+    {:ok, payment} = StarkInfra.CreditNote.payment(credit_note.id)
+
+    file = File.open!("./credit_note_payment.pdf", [:write])
+    IO.binwrite(file, payment)
+    File.close(file)
+
+    assert length(payment) > 0
+  end
+
+  @tag :credit_note
+  test "get! credit note payment pdf" do
+    credit_note =
+      StarkInfra.CreditNote.query!(limit: 1, status: "success")
+      |> Enum.take(1)
+      |> hd()
+
+    payment = StarkInfra.CreditNote.payment!(credit_note.id)
+
+    file = File.open!("./credit_note_payment1.pdf", [:write])
+    IO.binwrite(file, payment)
+    File.close(file)
+
+    assert length(payment) > 0
+  end
+
+  @tag :credit_note
+  test "resend token to credit note signer" do
+    credit_note = StarkInfra.CreditNote.create!([example_credit_note()]) |> hd
+    signer = credit_note.signers |> hd
+
+    {:ok, updated_signer} = StarkInfra.CreditNote.Signer.resend_token(signer.id)
+
+    assert updated_signer.id == signer.id
+  end
+
+  @tag :credit_note
+  test "resend! token to credit note signer" do
+    credit_note = StarkInfra.CreditNote.create!([example_credit_note()]) |> hd
+    signer = credit_note.signers |> hd
+
+    updated_signer = StarkInfra.CreditNote.Signer.resend_token!(signer.id)
+
+    assert updated_signer.id == signer.id
+  end
+
   def example_credit_note() do
     %StarkInfra.CreditNote{
       template_id: "5707012469948416",

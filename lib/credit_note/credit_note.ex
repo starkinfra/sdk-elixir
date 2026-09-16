@@ -323,6 +323,72 @@ defmodule StarkInfra.CreditNote do
     Rest.delete_id!(resource(), id, options)
   end
 
+  @doc """
+  Receive a single CCB disbursement pdf file generated in the Stark Infra API by the CreditNote id.
+
+  ## Parameters (required):
+    - `:id` [string]: CreditNote unique id. ex: "5656565656565656"
+
+  ## Options:
+    - `:user` [Organization/Project, default nil]: Organization or Project struct returned from StarkInfra.project(). Only necessary if default project or organization has not been set in configs.
+
+  ## Return:
+    - CreditNote pdf file content
+  """
+  @spec pdf(
+    binary,
+    user: Project.t() | Organization.t() | nil
+  ) ::
+    {:ok, binary} |
+    {:error, [Error.t()]}
+  def pdf(id, options \\ []) do
+    Rest.get_content(resource(), id, "pdf", options |> Keyword.delete(:user), options[:user])
+  end
+
+  @doc """
+  Same as pdf(), but it will unwrap the error tuple and raise in case of errors.
+  """
+  @spec pdf!(
+    binary,
+    user: Project.t() | Organization.t() | nil
+  ) :: binary
+  def pdf!(id, options \\ []) do
+    Rest.get_content!(resource(), id, "pdf", options |> Keyword.delete(:user), options[:user])
+  end
+
+  @doc """
+  Receive a single CCB disbursement payment receipt pdf file generated in the Stark Infra API by the CreditNote id.
+
+  ## Parameters (required):
+    - `:id` [string]: CreditNote unique id. ex: "5656565656565656"
+
+  ## Options:
+    - `:user` [Organization/Project, default nil]: Organization or Project struct returned from StarkInfra.project(). Only necessary if default project or organization has not been set in configs.
+
+  ## Return:
+    - CreditNote payment pdf file content
+  """
+  @spec payment(
+    binary,
+    user: Project.t() | Organization.t() | nil
+  ) ::
+    {:ok, binary} |
+    {:error, [Error.t()]}
+  def payment(id, options \\ []) do
+    Rest.get_content(resource(), id, "payment/pdf", options |> Keyword.delete(:user), options[:user])
+  end
+
+  @doc """
+  Same as payment(), but it will unwrap the error tuple and raise in case of errors.
+  """
+  @spec payment!(
+    binary,
+    user: Project.t() | Organization.t() | nil
+  ) :: binary
+  def payment!(id, options \\ []) do
+    Rest.get_content!(resource(), id, "payment/pdf", options |> Keyword.delete(:user), options[:user])
+  end
+
   defp parse_payment!(payment, payment_type) do
     case payment_type do
       "transfer" -> API.from_api_json(payment, &Transfer.resource_maker/1)

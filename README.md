@@ -1400,6 +1400,37 @@ StarkInfra.CreditNote.log.get!("5155165527080960")
 |> IO.inspect
 ```
 
+### Get a CreditNote pdf
+
+You can get the CCB disbursement contract pdf associated with a CreditNote by its id.
+
+```elixir
+{:ok, pdf} = StarkInfra.CreditNote.pdf("5155165527080960")
+file = File.open!("credit_note.pdf", [:write])
+IO.binwrite(file, pdf)
+File.close(file)
+```
+
+### Get a CreditNote payment pdf
+
+You can also get the CCB disbursement payment receipt pdf by the CreditNote id.
+
+```elixir
+{:ok, payment} = StarkInfra.CreditNote.payment("5155165527080960")
+file = File.open!("credit_note_payment.pdf", [:write])
+IO.binwrite(file, payment)
+File.close(file)
+```
+
+### Resend a CreditNote signer's token
+
+If a signer did not receive the signing link or token, you can resend it by the signer's id.
+
+```elixir
+StarkInfra.CreditNote.Signer.resend_token!("5155165527080960")
+|> IO.inspect
+```
+
 ## Credit Holmes
 
 ### Create CreditHolmes
