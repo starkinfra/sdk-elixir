@@ -24,6 +24,8 @@ Given a version number MAJOR.MINOR.PATCH, increment:
 - CreditNote.Signer.resend_token method
 - CreditNote.pdf method
 - CreditNote.payment method
+- IssuingBillingInvoice resource
+- IssuingBillingTransaction resource
 - IssuingRule missing parameters
 ### Changed
 - IssuingBin resource to IssuingProduct

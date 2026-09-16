@@ -30,6 +30,8 @@ This SDK version is compatible with the Stark Infra API v2.
     - [Withdrawals](#create-issuingwithdrawals): Send money back to your Workspace from your issuing balance
     - [Balance](#get-your-issuingbalance): View your issuing balance
     - [Transactions](#query-issuingtransactions): View the transactions that have affected your issuing balance
+    - [BillingInvoices](#query-issuingbillinginvoices): View the invoices charged for your Issuing costs
+    - [BillingTransactions](#query-issuingbillingtransactions): View the transactions that compose your Issuing billing invoices
   - [Pix](#pix)
     - [PixRequests](#create-pixrequests): Create Pix transactions
     - [PixReversals](#create-pixreversals): Reverse Pix transactions
@@ -721,6 +723,44 @@ You can get a specific transaction by its id:
 
 ```elixir
 StarkInfra.IssuingTransaction.get!("5155165527080960") 
+|> IO.inspect
+```
+
+### Query IssuingBillingInvoices
+
+To understand the amounts charged from your Workspace to cover the costs of your
+Issuing operations, you can query the invoices generated according to your billing plan.
+
+```elixir
+StarkInfra.IssuingBillingInvoice.query!(
+  limit: 10,
+  after: Date.utc_today |> Date.add(-30),
+  before: Date.utc_today |> Date.add(-1),
+  status: "paid"
+)
+|> Enum.take(10)
+|> IO.inspect
+```
+
+### Get an IssuingBillingInvoice
+
+You can get a specific billing invoice by its id.
+
+```elixir
+StarkInfra.IssuingBillingInvoice.get!("5155165527080960")
+|> IO.inspect
+```
+
+### Query IssuingBillingTransactions
+
+You can query the transactions that compose a given IssuingBillingInvoice by filtering on its id.
+
+```elixir
+StarkInfra.IssuingBillingTransaction.query!(
+  limit: 10,
+  invoice_id: "5155165527080960"
+)
+|> Enum.take(10)
 |> IO.inspect
 ```
 
