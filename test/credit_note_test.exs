@@ -96,7 +96,7 @@ defmodule StarkInfraTest.CreditNote do
     IO.binwrite(file, pdf)
     File.close(file)
 
-    assert length(pdf) > 0
+    assert byte_size(pdf) > 0
   end
 
   @tag :credit_note
@@ -112,7 +112,7 @@ defmodule StarkInfraTest.CreditNote do
     IO.binwrite(file, pdf)
     File.close(file)
 
-    assert length(pdf) > 0
+    assert byte_size(pdf) > 0
   end
 
   @tag :credit_note
@@ -128,7 +128,7 @@ defmodule StarkInfraTest.CreditNote do
     IO.binwrite(file, payment)
     File.close(file)
 
-    assert length(payment) > 0
+    assert byte_size(payment) > 0
   end
 
   @tag :credit_note
@@ -144,7 +144,7 @@ defmodule StarkInfraTest.CreditNote do
     IO.binwrite(file, payment)
     File.close(file)
 
-    assert length(payment) > 0
+    assert byte_size(payment) > 0
   end
 
   @tag :credit_note
