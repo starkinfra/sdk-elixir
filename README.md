@@ -43,6 +43,10 @@ This SDK version is compatible with the Stark Infra API v2.
     - [PixDomain](#query-pixdomains): View registered SPI participants certificates
   - [Credit Note](#credit-note)
     - [CreditNote](#create-creditnotes): Create credit notes
+  - [Credit Holmes](#credit-holmes)
+    - [CreditHolmes](#create-creditholmes): Investigate your customers' debt information with the Central Bank
+  - [Credit Preview](#credit-preview)
+    - [CreditPreview](#create-creditpreviews): Preview credit notes before taking them
   - [Ledger](#ledger)
     - [Ledger](#create-ledgers): Create and manage Ledgers to track balances
     - [LedgerTransaction](#create-ledgertransactions): Create LedgerTransactions to update a Ledger's balance
@@ -1395,6 +1399,97 @@ You can also get a specific log by its id.
 StarkInfra.CreditNote.log.get!("5155165527080960") 
 |> IO.inspect
 ```
+
+## Credit Holmes
+
+### Create CreditHolmes
+
+Before you create a CreditHolmes, make sure you have your customer's express authorization
+to verify their information in the Central Bank's SCR.
+
+```elixir
+StarkInfra.CreditHolmes.create!([
+  %StarkInfra.CreditHolmes{
+    tax_id: "012.345.678-90",
+    competence: "2022-06"
+  }
+]) |> IO.inspect
+```
+
+**Note**: Instead of using CreditHolmes structs, you can also pass each CreditHolmes element in map format
+
+### Query CreditHolmes
+
+You can query multiple CreditHolmes according to filters.
+
+```elixir
+StarkInfra.CreditHolmes.query!(
+  limit: 10,
+  after: Date.utc_today |> Date.add(-30),
+  before: Date.utc_today |> Date.add(-1)
+)
+|> Enum.take(10)
+|> IO.inspect
+```
+
+### Get a CreditHolmes
+
+After its creation, information on a CreditHolmes investigation may be retrieved by its id.
+
+```elixir
+StarkInfra.CreditHolmes.get!("5155165527080960")
+|> IO.inspect
+```
+
+### Query CreditHolmes logs
+
+You can query CreditHolmes logs to better understand a CreditHolmes life cycle.
+
+```elixir
+StarkInfra.CreditHolmes.Log.query!(
+  limit: 10,
+  after: "2020-11-01",
+  before: "2020-11-02"
+)
+|> Enum.take(10)
+|> IO.inspect
+```
+
+### Get a CreditHolmes log
+
+You can also get a specific log by its id.
+
+```elixir
+StarkInfra.CreditHolmes.Log.get!("5155165527080960")
+|> IO.inspect
+```
+
+## Credit Preview
+
+### Create CreditPreviews
+
+You can preview a credit note before taking it, to check whether its computed fields
+match what you expect.
+
+```elixir
+StarkInfra.CreditPreview.create!([
+  %StarkInfra.CreditPreview{
+    type: "credit-note",
+    credit: %StarkInfra.CreditPreview.CreditNotePreview{
+      type: "sac",
+      nominal_amount: 100000,
+      scheduled: "2023-06-25",
+      tax_id: "012.345.678-90",
+      initial_due: "2023-07-25",
+      nominal_interest: 10,
+      count: 12,
+      interval: "month"
+    }
+  }
+]) |> IO.inspect
+```
+
+**Note**: Instead of using CreditPreview structs, you can also pass each CreditPreview element in map format
 
 ## Ledger
 

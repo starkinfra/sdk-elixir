@@ -17,6 +17,10 @@ Given a version number MAJOR.MINOR.PATCH, increment:
 - Ledger.Rule sub-resource
 - Ledger.Log sub-resource
 - LedgerTransaction resource
+- CreditHolmes resource
+- CreditHolmes.Log sub-resource
+- CreditPreview resource
+- CreditPreview.CreditNotePreview sub-resource
 - IssuingRule missing parameters
 ### Changed
 - IssuingBin resource to IssuingProduct
