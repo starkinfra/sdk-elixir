@@ -30,6 +30,7 @@ defmodule StarkInfra.PixBalance do
   Receive the PixBalance struct linked to your Workspace in the Stark Infra API
 
   ## Options:
+    - `:before` [Date or string, default nil]: date used to retrieve the balance as of the end of that day. When omitted or set to the current day, the current balance is returned. ex: ~D[2022-01-31]
     - `:user` [Organization/Project, default nil]: Organization or Project struct returned from StarkInfra.project(). Only necessary if default project or organization has not been set in configs.
 
   ## Return:

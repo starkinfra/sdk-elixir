@@ -23,7 +23,11 @@ defmodule StarkInfra.IssuingInvoice do
 
   ## Attributes (return-only):
     - `:id` [string]: unique id returned when IssuingInvoice is created. ex: "5656565656565656"
-    - `:status` [string]: current IssuingInvoice status. ex: "created", "expired", "overdue", "paid"
+    - `:status` [string]: current IssuingInvoice status. ex: "created", "paid", "overdue", "expired", "canceled"
+    - `:brcode` [string]: Pix brcode string for payment.
+    - `:due` [DateTime]: invoice due datetime.
+    - `:link` [string]: public URL to the invoice payment page.
+    - `:metadata` [map]: free-form map attached to the invoice.
     - `:issuing_transaction_id` [string]: ledger transaction ids linked to this IssuingInvoice. ex: "issuing-invoice/5656565656565656"
     - `:updated` [DateTime]: latest update DateTime for the IssuingInvoice. ex: ~U[2020-3-10 10:30:0:0]
     - `:created` [DateTime]: creation datetime for the IssuingInvoice. ex: ~U[2020-03-10 10:30:0:0]

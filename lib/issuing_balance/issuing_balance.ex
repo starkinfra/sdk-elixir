@@ -19,6 +19,8 @@ defmodule StarkInfra.IssuingBalance do
   ## Attributes (return-only):
     - `:id` [string]: unique id returned when IssuingBalance is created. ex: "5656565656565656"
     - `:amount` [integer]: current balance amount of the Workspace in cents. ex: 200 (= R$ 2.00)
+    - `:limit` [integer]: spending limit of the balance.
+    - `:max_limit` [integer]: maximum spending limit. Currently always equal to `:limit`.
     - `:currency` [string]: currency of the current Workspace. Expect others to be added eventually. ex: "BRL"
     - `:updated` [DateTime]: latest update DateTime for the IssuingBalance. ex: ~U[2020-3-10 10:30:0:0]
   """

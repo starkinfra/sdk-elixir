@@ -41,11 +41,19 @@ defmodule StarkInfra.IssuingPurchase do
     - `:end_to_end_id` [string]: central bank's unique transaction ID. ex: "E79457883202101262140HHX553UPqeq"
     - `:status` [string]: current IssuingCard status. ex: "approved", "canceled", "denied", "confirmed", "voided"
     - `:tags` [string]: list of strings for tagging returned by the sub-issuer during the authorization. ex: ["travel", "food"]
+    - `:description` [string]: purchase description provided by the merchant.
+    - `:confirmed` [DateTime]: confirmation datetime, nil until the purchase is confirmed.
+    - `:metadata` [map]: additional data related to the purchase, such as the authorizationId.
+    - `:zip_code` [string]: ZIP code of the merchant location.
+    - `:merchant_category_number` [integer]: MCC number of the merchant category. ex: 5814
+    - `:merchant_category_type` [string]: type of the merchant category. ex: "food"
+    - `:product_id` [string]: id of the IssuingProduct of the card used in the purchase.
+    - `:installment_count` [integer]: number of installments of the purchase. ex: 1
     - `:updated` [DateTime]: latest update DateTime for the IssuingPurchase. ex: ~U[2020-3-10 10:30:0:0]
     - `:created` [DateTime]: creation datetime for the IssuingPurchase. ex: ~U[2020-03-10 10:30:0:0]
 
   ## Attributes (authorization request only):
-    - `:purpose` [string]: purchase purpose. ex: "purchase"
+    - `:purpose` [string]: purchase purpose. Options: "purchase", "withdrawal", "verification", "purchaseRefund", "cashbackPurchase", "paymentTransaction".
     - `:is_partial_allowed` [bool]: true if the merchant allows partial purchases. ex: false
     - `:card_tags` [list of strings]: tags of the IssuingCard responsible for this purchase. ex: ["travel", "food"]
     - `:holder_id` [string]: card holder ID. ex: "5656565656565656"
@@ -176,6 +184,7 @@ defmodule StarkInfra.IssuingPurchase do
     - `:holder_ids` [list of strings, default []]: card holder IDs. ex: ["5656565656565656", "4545454545454545"]
     - `:card_ids` [list of strings, default []]: card  IDs. ex: ["5656565656565656", "4545454545454545"]
     - `:status` [list of strings, default nil]: filter for status of retrieved structs. ex: ["approved", "canceled", "denied", "confirmed", "voided"]
+    - `:tags` [list of strings, default nil]: tags to filter retrieved structs. ex: ["tony", "stark"]
     - `:user` [Organization/Project, default nil]: Organization or Project struct returned from StarkInfra.project(). Only necessary if default project or organization has not been set in configs.
 
   ## Return:

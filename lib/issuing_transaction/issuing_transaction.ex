@@ -15,7 +15,7 @@ defmodule StarkInfra.IssuingTransaction do
 
   ## Attributes (return-only):
     - `:id` [string]: unique id returned when IssuingTransaction is created. ex: "5656565656565656"
-    - `:amount` [integer]: IssuingTransaction value in cents. ex: 1234 (= R$ 12.34)
+    - `:amount` [integer]: IssuingTransaction value in cents. Positive for credits, negative for debits. ex: 1234 (= R$ 12.34)
     - `:balance` [integer]: balance amount of the Workspace at the instant of the Transaction in cents. ex: 200 (= R$ 2.00)
     - `:description` [string]: IssuingTransaction description. ex: "Buying food"
     - `:source` [string]: source of the transaction. ex: "issuing-purchase/5656565656565656"
@@ -95,6 +95,7 @@ defmodule StarkInfra.IssuingTransaction do
     - `:status` [string, default nil]: filter for status of retrieved structs. ex: "approved", "canceled", "denied", "confirmed" or "voided"
     - `:ids` [list of strings, default [], default nil]: purchase IDs
     - `:limit` [integer, default nil]: maximum number of structs to be retrieved. Unlimited if nil. ex: 35
+    - `:source` [string, default nil]: filter transactions by the source entity that generated them. ex: "issuing-purchase/5656565656565656"
     - `:user` [Organization/Project, default nil]: Organization or Project struct returned from StarkInfra.project(). Only necessary if default project or organization has not been set in configs.
 
   ## Return:

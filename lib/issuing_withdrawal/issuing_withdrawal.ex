@@ -15,7 +15,7 @@ defmodule StarkInfra.IssuingWithdrawal do
 
   ## Parameters (required):
     - `:amount` [integer]: IssuingWithdrawal value in cents. Minimum = 0 (any value will be accepted). ex: 1234 (= R$ 12.34)
-    - `:external_id` [string] IssuingWithdrawal external ID. ex: "12345"
+    - `:external_id` [string]: your unique identifier for this withdrawal, used to prevent duplicates. Must be unique per workspace. ex: "withdrawal-2024-001"
     - `:description` [string]: IssuingWithdrawal description. ex: "sending money back"
 
   ## Parameters (optional):

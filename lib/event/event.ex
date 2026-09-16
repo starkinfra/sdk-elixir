@@ -157,7 +157,8 @@ defmodule StarkInfra.Event do
   end
 
   @doc """
-  Delete a list of notification Event entities previously created in the Stark Infra API
+  Delete a list of notification Event entities previously created in the Stark Infra API. This
+  action cannot be undone.
 
   ## Parameters (required):
     - `id` [string]: Event unique id. ex: "5656565656565656"

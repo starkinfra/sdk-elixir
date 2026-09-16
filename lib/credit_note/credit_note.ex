@@ -21,14 +21,13 @@ defmodule StarkInfra.CreditNote do
   to the Stark Infra API and returns the list of created structs.
 
   ## Parameters (required):
-    - `:template_id` [string]: ID of the contract template on which the CreditNote will be based. ex: "0123456789101112"
+    - `:template_id` [string]: ID of the contract template on which the CreditNote will be based. Templates are enabled for your workspace through your credit profile. ex: "0123456789101112"
     - `:name` [string]: credit receiver's full name. ex: "Anthony Edward Stark"
     - `:tax_id` [string]: credit receiver's tax ID (CPF or CNPJ). ex: "20.018.183/0001-80"
-    - `:nominal_amount` [integer]: amount in cents transferred to the credit receiver, before deductions. ex: 11234 (= R$ 112.34)
     - `:scheduled` [Date Datetime or string]: Date or datetime of transfer execution. ex: ~D[2020-03-10]
-    - `:invoices` [list of Invoice structs or maps]: list of Invoice structs to be created and sent to the credit receiver. ex: [%{ due: "2023-06-25", amount: 120000, fine: 10, interest: 2}]
-    - `:payment` [Transfer struct or map]: payment entity to be created and sent to the credit receiver. ex: %{ bankCode: "00000000", branchCode: "1234", accountNumber: "129340-1", name: "Jamie Lannister", taxId: "012.345.678-90"}
-    - `:signers` [list of Signer objects or maps]: name and e-mail of signers that sign the contract. ex: [%{"name": "Tony Stark", "contact": "tony@starkindustries.com", "method": "link"}]
+    - `:invoices` [list of up to 100 Invoice structs or maps]: installments to be paid by the borrower. Each invoice takes a required `:amount` (in cents) and optional `:due`, `:fine` (default 2.0), `:interest` (default 1.0), `:expiration`, `:descriptions` and `:tags`. All invoices in the same CreditNote must share the same `:fine` and `:interest`. ex: [%{ due: "2023-06-25", amount: 120000, fine: 10, interest: 2}]
+    - `:payment` [Transfer struct or map]: payment entity to be created and sent to the credit receiver. Do not include an `:amount` field on this struct/map — the disbursed amount is computed by the API from the invoice schedule. ex: %{ bankCode: "00000000", branchCode: "1234", accountNumber: "129340-1", name: "Jamie Lannister", taxId: "012.345.678-90"}
+    - `:signers` [list of up to 10 Signer structs or maps]: every person or entity that must sign the contract, each with required `:name`, `:contact` and `:method`. Methods: "link" (signing link sent to the contact), "token" (signing token sent to the contact), "server" and "organization" (automatic signatures over URL contacts). Signers registered in your credit profile and the SCD signature are appended automatically.
     - `:external_id` [string]: a string that must be unique among all your CreditNotes, used to avoid resource duplication. ex: “my-internal-id-123456”
     - `:street_line_1` [string]: credit receiver main address. ex: "Av. Paulista, 200"
     - `:street_line_2` [string]: credit receiver address complement. ex: "Apto. 123"
@@ -39,9 +38,12 @@ defmodule StarkInfra.CreditNote do
 
   ## Parameters (conditionally required):
     - `:payment_type` [string]: payment type, inferred from the payment parameter if it is not a dictionary. ex: "transfer"
+    - `:nominal_amount` [integer, optional]: nominal amount in cents transferred to the credit receiver, before deductions -- provide either `:nominal_amount` or `:amount`.
+    - `:amount` [integer, optional]: net amount in cents to be disbursed to the borrower -- provide either `:nominal_amount` or `:amount`; whichever is omitted is computed from the invoice schedule.
 
   ## Parameters (optional):
     - `:rebate_amount` [integer, default 0]: credit analysis fee deducted from lent amount. ex: 11234 (= R$ 112.34)
+    - `:rules` [list of maps, default nil]: list of rules modifying the credit note behavior, as %{key: ..., value: ...} maps. Currently available key: "invoiceCreationMode", with values "scheduled" (default — each installment invoice is issued a few days before its due date), "instant" (all invoices are issued as soon as the note is disbursed) or "never" (invoices are not issued automatically).
     - `:tags` [list of strings, default []]: list of strings for reference when searching for CreditNotes. ex: [\"employees\", \"monthly\"]
 
   ## Attributes (return-only):
@@ -112,7 +114,7 @@ defmodule StarkInfra.CreditNote do
   Send a list of CreditNote structs for creation in the Stark Infra API
 
   ## Parameters (required):
-    - `:notes` [list of CreditNote structs]: list of CreditNote structs to be created in the API
+    - `:notes` [list of up to 100 CreditNote structs]: list of CreditNote structs to be created in the API in a single request. Sending more than 100 notes in one call is rejected.
 
   ## Options:
     - `:user` [Organization/Project, default nil]: Organization or Project struct returned from StarkInfra.project(). Only necessary if default project or organization has not been set in configs.
@@ -286,7 +288,10 @@ defmodule StarkInfra.CreditNote do
   end
 
   @doc """
-  Cancel a CreditNote entity previously created in the Stark Infra API
+  Cancel a CreditNote entity previously created in the Stark Infra API. Only CreditNotes with
+  status "created", "signed" or "processing" can be canceled — canceling also cancels the
+  signing document. CreditNotes with status "success", "failed", "expired" or already "canceled"
+  are returned unchanged.
 
   ## Parameters (required):
     - `:id` [string]: id of the CreditNote to be canceled
