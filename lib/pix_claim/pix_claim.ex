@@ -69,6 +69,8 @@ defmodule StarkInfra.PixClaim do
   @doc """
   Create a PixClaim to request the transfer of a PixKey to an account
   hosted at other Pix participants in the Stark Infra API.
+  An ownership claim changes the holder of a PixKey (phone keyType only); a portability claim
+  changes the linked account without changing the holder (phone, email or taxId keyTypes).
 
   ## Parameters (required):
     - `:claim` [PixClaim struct]: PixClaim struct to be created in the API.
@@ -274,13 +276,18 @@ defmodule StarkInfra.PixClaim do
 
   @doc """
   Update a PixClaim parameters by passing id.
+  You must answer an inbound PixClaim within 7 days of its status changing to "delivered" — if
+  unanswered, a portability claim is rejected and an ownership claim is accepted by default, both
+  with reason "defaultOperation". You can only confirm PixClaims with "delivered" status;
+  confirming deletes the referenced PixKey from Stark Infra and the Central Bank. You can only
+  cancel PixClaims with "delivered" or "confirmed" status.
 
   ## Parameters (required):
     - `:id` [string]: PixClaim id. ex: '5656565656565656'
     - `:status` [string]: patched status for Pix Claim. Options: "confirmed" and "canceled"
 
   ## Parameters (optional):
-    - `:reason` [string, default: "userRequested"]: reason why the PixClaim is being patched. Options: "fraud", "userRequested".
+    - `:reason` [string, default: "userRequested"]: reason why the PixClaim is being patched. Options: "userRequested", "accountClosure", "fraud".
     - `:user` [Organization/Project, default nil]: Organization or Project struct returned from StarkInfra.project(). Only necessary if default project or organization has not been set in configs.
 
   ## Return:

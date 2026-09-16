@@ -20,7 +20,7 @@ defmodule StarkInfra.PixKey do
   ## Parameters (required):
     - `:account_created` [Date, DateTime or string]: opening Date or DateTime for the linked account. ex: "2022-01-01".
     - `:account_number` [string]: number of the linked account. ex: "76543".
-    - `:account_type` [string]: type of the linked account. Options: "checking", "savings", "salary" or "payment".
+    - `:account_type` [string]: type of the linked account. Options: "checking", "savings", "salary", "payment" or "other".
     - `:branch_code` [string]: branch code of the linked account. ex: 1234.
     - `:name` [string]: holder's name of the linked account. ex: "Jamie Lannister".
     - `:tax_id` [string]: holder's taxId (CPF/CNPJ) of the linked account. ex: "012.345.678-90".
@@ -112,10 +112,11 @@ defmodule StarkInfra.PixKey do
 
   ## Parameters (required):
     - `:id` [string]: struct unique id. ex: "5656565656565656".
-    - `:payer_id` [string]: tax id (CPF/CNPJ) of the individual or business requesting the PixKey information. This id is used by the Central Bank to limit request rates. ex: "20.018.183/0001-80".
+    - `:payer_id` [string]: deprecated and ignored by the API — the payer's tax ID is now always derived automatically from the calling Workspace's own registered tax ID for Central Bank rate-limiting purposes; do not rely on this value being sent to or used by the server.
 
   ## Options:
     - `:end_to_end_id` [string, default nil]: central bank's unique transaction id. If the request results in the creation of a PixRequest, the same endToEndId should be used. If this parameter is not passed, one endToEndId will be automatically created. Example: "E00002649202201172211u34srod19le"
+    - `:expand` [list of strings, default nil]: fields to expand in the response. Options: "statistics", "ownerStatistics".
     - `:user` [Organization/Project, default nil]: Organization or Project struct returned from StarkInfra.project(). Only necessary if default project or organization has not been set in configs.
 
   ## Return:

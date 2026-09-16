@@ -13,6 +13,7 @@ defmodule StarkInfra.Webhook do
   @doc """
   A Webhook is used to subscribe to notification events on a user-selected endpoint.
   Currently available services for subscription are contract, credit-note, signer, issuing-card, issuing-invoice, issuing-purchase, pix-request.in, pix-request.out, pix-reversal.in, pix-reversal.out, pix-claim, pix-key, pix-chargeback, pix-infraction.
+  If your endpoint does not return a 200 status, delivery is retried at most three times, at 5, 30 and 120 minutes after the previous attempt.
 
   ## Parameters (required):
     - `:url` [string]: Url that will be notified when an event occurs.
@@ -194,7 +195,8 @@ defmodule StarkInfra.Webhook do
   end
 
   @doc """
-  Delete a Webhook subscription entity previously created in the Stark Infra API
+  Delete a Webhook subscription entity previously created in the Stark Infra API. This action
+  cannot be undone.
 
   ## Parameters (required):
     - `id` [string]: Webhook unique id. ex: "5656565656565656"

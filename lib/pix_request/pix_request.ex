@@ -14,6 +14,13 @@ defmodule StarkInfra.PixRequest do
   @doc """
   PixRequests are used to receive or send instant payments to accounts
   hosted in any Pix participant.
+
+  Every time a participant sends you a Pix, an inbound PixRequest is created and a synchronous
+  POST authorization request is sent to your registered pixRequestUrl. You must answer with
+  approval or denial within 1 second (HTTP 200) — otherwise it is denied by default. Approve by
+  returning status "approved"; deny by returning status "denied" with a reason such as
+  "invalidAccountNumber".
+
   When you initialize a PixRequest, the entity will not be automatically
   created in the Stark Infra API. The 'create' function sends the structs
   to the Stark Infra API and returns the list of created structs.
@@ -25,7 +32,7 @@ defmodule StarkInfra.PixRequest do
     - `:sender_tax_id` [string]: sender's tax ID (CPF or CNPJ) with or without formatting. ex: "01234567890" or "20.018.183/0001-80"
     - `:sender_branch_code` [string]: sender's bank account branch code. Use '-' in case there is a verifier digit. ex: "1357-9"
     - `:sender_account_number` [string]: sender's bank account number. Use '-' before the verifier digit. ex: "876543-2"
-    - `:sender_account_type` [string, default "checking"]: sender's bank account type. ex: "checking", "savings", "salary" or "payment"
+    - `:sender_account_type` [string]: sender's bank account type. Options: "checking", "savings", "salary" or "payment"
     - `:receiver_name` [string]: receiver's full name. ex: "Edward Stark"
     - `:receiver_tax_id` [string]: receiver's tax ID (CPF or CNPJ) with or without formatting. ex: "01234567890" or "20.018.183/0001-80"
     - `:receiver_bank_code` [string]: receiver's bank institution code in Brazil. ex: "20018183"
@@ -43,7 +50,7 @@ defmodule StarkInfra.PixRequest do
     - `:cashier_bank_code` [string, default nil]: Cashier's bank code. ex: "00000000"
     - `:cashier_type` [string, default nil]: Cashier's type. ex: [merchant, other, participant]
     - `:tags` [list of strings, default nil]: list of strings for reference when searching for PixRequests. ex: ["employees", "monthly"]
-    - `:method` [string, default nil]: execution  method for thr creation of the PIX. ex: "manual", "payerQrcode", "dynamicQrcode".
+    - `:method` [string, default nil]: execution method for the creation of the Pix. Options: "manual", "dict", "initiator", "dynamicQrcode", "staticQrcode", "payerQrcode", "subscription", "contactless", "staticContactless". For "dict", resolve the receiver's PixKey with PixKey.get/2 first and use its data. For "staticQrcode"/"dynamicQrcode", preview the brcode with BrcodePreview first. For "subscription", pass the pull request's `:end_to_end_id` and a matching `:reconciliation_id`. To close a PixChargeback, map its `reversal_*` fields onto the receiver_* fields, set `:reason` to "fraud" and `:sender_tax_id` to your institution's CNPJ. For Pix Saque/Troco, set `:cash_amount` (<= `:amount`) together with `:cashier_type` and `:cashier_bank_code`. For an initiator-registered payment, pass `:initiator_tax_id` and issue `:end_to_end_id` under the initiator's ISPB.
 
   ## Attributes (return-only):
     - `:id` [string]: unique id returned when the PixRequest is created. ex: "5656565656565656"

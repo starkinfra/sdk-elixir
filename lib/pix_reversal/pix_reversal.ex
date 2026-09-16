@@ -11,8 +11,14 @@ defmodule StarkInfra.PixReversal do
   Groups PixReversal related functions
   """
   @doc """
-  PixReversals are instant payments used to revert PixReversals. You can only
-  revert inbound PixReversals.
+  PixReversals are instant payments used to revert PixRequests. You can only create a
+  PixReversal for an inbound PixRequest with status "success", referencing it by its
+  `:end_to_end_id`.
+
+  When another participant reverses a Pix you successfully sent, an authorization request is
+  sent to your pixReversalUrl (which must differ from your pixRequestUrl). You must answer
+  within 1 second (HTTP 200) or it is denied by default; if no pixReversalUrl is registered,
+  inbound PixReversals are accepted by default.
   When you initialize a PixReversal, the entity will not be automatically
   created in the Stark Infra API. The 'create' function sends the objects
   to the Stark Infra API and returns the list of created objects.
@@ -21,7 +27,7 @@ defmodule StarkInfra.PixReversal do
     - `:amount` [integer]: amount in cents to be reversed from the PixReversal. ex: 1234 (= R$ 12.34)
     - `:external_id` [string]: string that must be unique among all your PixReversals. Duplicated external IDs will cause failures. By default, this parameter will block any PixReversal that repeats amount and receiver information on the same date. ex: "my-internal-id-123456"
     - `:end_to_end_id` [string]: central bank's unique transaction ID. ex: "E79457883202101262140HHX553UPqeq"
-    - `:reason` [string]: reason why the PixReversal is being reversed. Options are "bankError", "fraud", "chashierError", "customerRequest"
+    - `:reason` [string]: reason why the PixReversal is being reversed. Options are "bankError", "fraud", "cashierError", "customerRequest" (fix the "chashierError" typo — sending that literal string is rejected by the API).
 
   ## Parameters (optional):
     - `:tags` [list of strings, default nil]: list of strings for reference when searching for PixReversals. ex: ["employees", "monthly"]
@@ -31,7 +37,7 @@ defmodule StarkInfra.PixReversal do
     - `:return_id` [string]: central bank's unique reversal transaction ID. ex: "D20018183202202030109X3OoBHG74wo".
     - `:bank_code` [string]: code of the bank institution in Brazil. ex: "20018183"
     - `:fee` [string]: fee charged by this PixReversal. ex: 200 (= R$ 2.00)
-    - `:status` [string]: current PixReversal status. ex: "registered" or "paid"
+    - `:status` [string]: current PixReversal status. Options are "created", "processing", "success" or "failed".
     - `:flow` [string]: direction of money flow. ex: "in" or "out"
     - `:created` [DateTime]: creation datetime for the PixReversal. ex: ~U[2020-03-10 10:30:0:0]
     - `:updated` [DateTime]: latest update datetime for the PixReversal. ex: ~U[2020-03-10 10:30:0:0]

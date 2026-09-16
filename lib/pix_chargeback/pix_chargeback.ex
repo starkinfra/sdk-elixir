@@ -14,6 +14,9 @@ defmodule StarkInfra.PixChargeback do
   A Pix chargeback can be created when fraud is detected on a transaction or a system malfunction
   results in an erroneous transaction.
   It notifies another participant of your request to reverse the payment they have received.
+  Create PixChargebacks after a corresponding PixInfraction has been completed (or after a system
+  malfunction). The other participant must answer within 24 hours of the PixChargeback's status
+  changing to "delivered".
   When you initialize a PixChargeback, the entity will not be automatically
   created in the Stark Infra API. The 'create' function sends the objects
   to the Stark Infra API and returns the created struct.
@@ -21,10 +24,10 @@ defmodule StarkInfra.PixChargeback do
   ## Parameters (required):
     - `:amount` [integer]: amount in cents to be reversed. ex: 11234 (= R$ 112.34)
     - `:reference_id` [string]: end_to_end_id or return_id of the transaction to be reversed. ex: "E20018183202201201450u34sDGd19lz"
-    - `:reason` [string]: reason why the reversal was requested. Options: "fraud", "flaw", "reversalChargeback"
+    - `:reason` [string]: reason why the reversal was requested. Options: "flaw", "fraud", "subscriptionFlaw" (the API also assigns "reversalChargeback" automatically when a chargeback stems from a closed Pix Infraction, but it cannot be passed on creation).
 
   ## Parameters (optional):
-    - `:description` [string, default nil]: description for the PixChargeback.
+    - `:description` [string, default nil]: description for the PixChargeback. Required when `:reason` is "flaw".
 
   ## Attributes (return-only):
     - `:id` [string]: unique id returned when the PixChargeback is created. ex: "5656565656565656"
@@ -36,6 +39,10 @@ defmodule StarkInfra.PixChargeback do
     - `:reversal_reference_id` [string]: return id of the reversal transaction. ex: "D20018183202202030109X3OoBHG74wo".
     - `:result` [string]: result after the analysis of the PixChargeback by the receiving party. Options: "rejected", "accepted", "partiallyAccepted"
     - `:status` [string]: current PixChargeback status. Options: "created", "failed", "delivered", "closed", "canceled".
+    - `:flow` [string]: direction of the chargeback. Options: "out" (you requested it), "in" (requested against you).
+    - `:dispute_id` [string]: unique id of the Pix dispute associated with the chargeback.
+    - `:is_monitoring_required` [boolean]: whether monitoring is required for this chargeback.
+    - `:reversal_bank_code`, `:reversal_branch_code`, `:reversal_account_number`, `:reversal_account_type`, `:reversal_tax_id` [string]: account data of the party that received the reversal.
     - `:created` [DateTime]: creation datetime for the PixChargeback. ex: ~U[2020-3-10 10:30:0:0]
     - `:updated` [DateTime]: latest update datetime for the PixChargeback. ex: ~U[2020-3-10 10:30:0:0]
   """
@@ -256,7 +263,7 @@ defmodule StarkInfra.PixChargeback do
     - `:result` [string]: result after the analysis of the PixChargeback. Options: "rejected", "accepted", "partiallyAccepted".
 
   ## Parameters (conditionally required):
-    - `rejection_reason` [string, default nil]: if the PixChargeback is rejected a reason is required. Options: "noBalance", "accountClosed", "unableToReverse",
+    - `rejection_reason` [string, default nil]: if the PixChargeback's result is "rejected", a reason is required. Options: "other", "noBalance", "accountClosed", "invalidRequest" ("unableToReverse" is not a valid value).
     - `reversal_reference_id` [string, default nil]: return_id of the reversal transaction. ex: "D20018183202201201450u34sDGd19lz"
 
   ## Parameters (optional):

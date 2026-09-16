@@ -24,7 +24,8 @@ defmodule StarkInfra.IssuingCard do
   ## Parameters (optional):
     - `:display_name` [string, default nil]: card displayed name. ex: "ANTHONY STARK"
     - `:rules` [list of IssuingRule, default nil]: [EXPANDABLE] list of card spending rules.
-    - `:bin_id` [string, default nil]: BIN ID to which the card is bound. ex: "53810200"
+    - `:bin_id` [string, default nil]: legacy alias for the IssuingProduct id to bind the card to (the API's current field is `productId`); optional — if omitted, a product is chosen automatically. ex: "53810200"
+    - `:type` [string, default "virtual"]: card type. Options: "virtual", "physical".
     - `:tags` [list of strings]: list of strings for tagging. ex: ["travel", "food"]
     - `:street_line_1` [string, default nil]: card holder main address. ex: "Av. Paulista, 200"
     - `:street_line_2` [string, default nil]: card holder address complement. ex: "Apto. 123"
@@ -84,7 +85,7 @@ defmodule StarkInfra.IssuingCard do
     - `:cards` [list of IssuingCard structs]: list of IssuingCard structs to be created in the API
 
   ## Options:
-    - `:expand` [list of strings, default []]: fields to expand information. ex: ["rules", "security_code", "number", "expiration"]
+    - `:expand` [list of strings, default []]: fields to expand information. Options: "rules", "security_code", "number", "expiration", "is_pin_defined". ex: ["rules", "security_code", "number", "expiration", "is_pin_defined"]
     - `:user` [Organization/Project, default nil]: Organization or Project struct returned from StarkInfra.project(). Only necessary if default project or organization has not been set in configs.
 
   ## Return:
@@ -132,6 +133,7 @@ defmodule StarkInfra.IssuingCard do
     - `:before` [Date or string, default nil]: date filter for structs created only before specified date. ex: ~D[2020-03-25]
     - `:tags` [list of strings, default nil]: tags to filter retrieved structs. ex: ["tony", "stark"]
     - `:ids` [list of strings, default nil]: list of ids to filter retrieved structs. ex: ["5656565656565656", "4545454545454545"]
+    - `:endings` [list of strings, default nil]: filter cards by their last 4 digits. Max 30 items. ex: ["1234", "5678"]
     - `:limit` [integer, default nil]: maximum number of structs to be retrieved. Unlimited if nil. ex: 35
     - `:expand` [list of strings, default []]: fields to expand information. ex: ["rules", "security_code", "number", "expiration"]
     - `:user` [Organization/Project, default nil]: Organization or Project struct returned from StarkInfra.project(). Only necessary if default project or organization has not been set in configs.
@@ -298,9 +300,10 @@ defmodule StarkInfra.IssuingCard do
     - `:id` [string]: IssuingCard id. ex: '5656565656565656'
 
   ## Parameters (Optional):
-    - `:status` [string]: You may block the IssuingCard by passing 'blocked' in the status
+    - `:status` [string]: new status for the card. Options: "active" (also required to activate a pending physical card, together with `:pin`), "blocked".
     - `:display_name` [string, default nil]: card displayed name
     - `:rules` [list of dictionaries, default nil]: list of dictionaries with "amount": int, "currencyCode": string, "id": string, "interval": string, "name": string pairs.
+    - `:pin` [string, default nil]: card PIN, a numeric string of 4 to 6 digits. Write-only — never returned by the API; pass `expand: ["is_pin_defined"]` on get/1 to check whether a PIN is set. A pending physical card must receive a PIN when you activate it (set `:status` to "active").
     - `:tags` [list of strings, default nil]: list of strings for tagging
     - `:user` [Organization/Project, default nil]: Organization or Project struct returned from StarkInfra.project(). Only necessary if default project or organization has not been set in configs.
 

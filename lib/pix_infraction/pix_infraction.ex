@@ -34,6 +34,13 @@ defmodule StarkInfra.PixInfraction do
     - reported_by [string]: agent that reported the PixInfraction. Options: "debited", "credited".
     - result [string]: result after the analysis of the PixInfraction by the receiving party. Options: "agreed", "disagreed"
     - status [string]: current PixInfraction status. Options: "created", "failed", "delivered", "closed", "canceled".
+    - fraud_id [string]: id of the Pix fraud marking associated with the infraction.
+    - fraud_type [string]: type of fraud associated with the infraction. Options: "identity", "mule", "scam", "other", "unknown".
+    - operator_email [string]: contact email of the operator responsible for the infraction.
+    - operator_phone [string]: contact phone number of the operator responsible for the infraction.
+    - dispute_id [string]: id of the Pix dispute associated with the infraction.
+    - amount [integer]: amount in cents related to the infraction. ex: 1234 (= R$ 12.34)
+    - flow [string]: direction of the infraction report. Options: "out" (reported by you), "in" (reported against you).
     - created [DateTime]: creation datetime for the PixInfraction. ex: ~U[2020-3-10 10:30:0:0]
     - updated [DateTime]: latest update datetime for the PixInfraction. ex: ~U[2020-3-10 10:30:0:0]
   """
@@ -259,6 +266,9 @@ defmodule StarkInfra.PixInfraction do
   ## Parameters (required):
     - `:id` [string]: PixInfraction id. ex: '5656565656565656'
     - `:result` [string]: result after the analysis of the PixInfraction. Options: "agreed", "disagreed"
+
+  ## Parameters (conditionally required):
+    - `:fraud_type` [string]: type of fraud associated with the infraction. Required when `:result` is "agreed", optional when "disagreed". Options: "identity", "mule", "scam", "other".
 
   ## Parameters (optional):
     - `:analysis` [string, default nil]: analysis that led to the result.

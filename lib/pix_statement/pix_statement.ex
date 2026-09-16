@@ -26,7 +26,7 @@ defmodule StarkInfra.PixStatement do
 
   ## Attributes (return-only):
     - `:id` [string]: unique id returned when the PixStatement is created. ex: "5656565656565656"
-    - `:status` [string]: current PixStatement status. ex: ["success", "failed"]
+    - `:status` [string]: current PixStatement status. Options: "created", "looking", "success", "failed".
     - `:transaction_count` [integer]: number of transactions that happened during the day that the PixStatement was requested. ex: 11
     - `:created` [DateTime]: creation datetime for the PixStatement. ex: ~U[2020-03-10 10:30:0:0]
     - `:updated` [DateTime]: latest update datetime for the PixStatement. ex: ~U[2020-03-10 10:30:0:0]
@@ -213,7 +213,7 @@ defmodule StarkInfra.PixStatement do
     - `:user` [Organization/Project, default nil]: Organization or Project struct returned from StarkInfra.project(). Only necessary if default project or organization has not been set in configs.
 
   ## Return:
-    - .zip file containing a PixStatement in .csv format
+    - .gzip file containing a PixStatement in .csv format
   """
   @spec csv(
     id: binary,
