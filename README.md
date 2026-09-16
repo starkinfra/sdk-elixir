@@ -1549,9 +1549,9 @@ StarkInfra.CreditPreview.create!([
     credit: %StarkInfra.CreditPreview.CreditNotePreview{
       type: "sac",
       nominal_amount: 100000,
-      scheduled: "2023-06-25",
+      scheduled: Date.utc_today |> Date.add(3) |> Date.to_string,
       tax_id: "012.345.678-90",
-      initial_due: "2023-07-25",
+      initial_due: Date.utc_today |> Date.add(33) |> Date.to_string,
       nominal_interest: 10,
       count: 12,
       interval: "month"

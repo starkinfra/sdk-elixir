@@ -20,9 +20,9 @@ defmodule StarkInfra.CreditHolmes do
 
   ## Parameters (required):
     - `:tax_id` [string]: customer's tax ID (CPF or CNPJ) for whom the credit operations will be verified. ex: "20.018.183/0001-80"
-    - `:competence` [string]: competence month of the operation verification, format: "YYYY-MM". ex: "2021-04"
 
   ## Parameters (optional):
+    - `:competence` [string, default 'two months before current date']: competence month of the operation verification, format: "YYYY-MM". ex: "2021-04"
     - `:tags` [list of strings, default []]: list of strings for reference when searching for CreditHolmes. ex: ["credit", "operation"]
 
   Attributes (return-only):
@@ -33,8 +33,7 @@ defmodule StarkInfra.CreditHolmes do
     - `:updated` [DateTime, default nil]: latest update datetime for the CreditHolmes. ex: ~U[2020-3-10 10:30:0:0]
   """
   @enforce_keys [
-    :tax_id,
-    :competence
+    :tax_id
   ]
   defstruct [
     :tax_id,
