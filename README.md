@@ -22,7 +22,7 @@ This SDK version is compatible with the Stark Infra API v2.
 - [Testing in Sandbox](#testing-in-sandbox) 
 - [Usage](#usage)
    - [Issuing](#issuing)
-    - [BINs](#query-issuingbins): View available sub-issuer BINs (a.k.a. card number ranges)
+    - [Products](#query-issuingproducts): View available sub-issuer card products (a.k.a. card number ranges)
     - [Holders](#create-issuingholders): Manage card holders
     - [Cards](#create-issuingcards): Create virtual and/or physical cards
     - [Purchases](#process-purchase-authorizations): Authorize and view your past purchases
@@ -321,12 +321,12 @@ Here are a few examples on how to use the SDK. If you have any doubts, use the b
 
 ## Issuing
 
-### Query IssuingBins
+### Query IssuingProducts
 
 To take a look at the sub-issuer BINs available to you, just run the following:
 
 ```elixir
-StarkInfra.IssuingBin.query!() 
+StarkInfra.IssuingProduct.query!() 
 |> Enum.take(10) 
 |> IO.inspect
 ```
@@ -512,13 +512,13 @@ If you do not approve or decline the authorization within 2 seconds, the authori
 ```elixir
 request = listen()  # this is the method you made to get the events posted to your webhook
 
-{authorization, _cache_pid} = StarkInfra.IssuingAuthorization.parse!(
+{authorization, _cache_pid} = StarkInfra.IssuingPurchase.parse!(
   content: request.content,
   signature: request.headers["Digital-Signature"]
 )
 
 send_response(  # you should also implement this method
-  StarkInfra.IssuingAuthorization.response!(
+  StarkInfra.IssuingPurchase.response!(
       "accepted",
       amount: authorization.amount,
       tags: ["my-purchase-id/123"]
@@ -528,7 +528,7 @@ send_response(  # you should also implement this method
 # or
 
 send_response(
-  StarkInfra.IssuingAuthorization.response!(
+  StarkInfra.IssuingPurchase.response!(
       "denied",
       reason: "other",
       tags: ["other-id/456"]

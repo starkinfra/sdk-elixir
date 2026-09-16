@@ -14,8 +14,15 @@ Given a version number MAJOR.MINOR.PATCH, increment:
 ## [Unreleased]
 ### Added
 - IssuingRule missing parameters
+### Changed
+- IssuingBin resource to IssuingProduct
+- settlement parameter to funding_type and client parameter to holder_type of IssuingProduct
+- IssuingAuthorization parse and response to IssuingPurchase.parse and IssuingPurchase.response
 ### Fixed
 - query parameters in post requests
+### Removed
+- IssuingAuthorization resource
+- category parameter of IssuingProduct resource
 
 ## [0.1.0] - 2022-06-03
 ### Added
