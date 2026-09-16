@@ -43,6 +43,9 @@ This SDK version is compatible with the Stark Infra API v2.
     - [PixDomain](#query-pixdomains): View registered SPI participants certificates
   - [Credit Note](#credit-note)
     - [CreditNote](#create-creditnotes): Create credit notes
+  - [Ledger](#ledger)
+    - [Ledger](#create-ledgers): Create and manage Ledgers to track balances
+    - [LedgerTransaction](#create-ledgertransactions): Create LedgerTransactions to update a Ledger's balance
   - [Webhook](#webhook):
     - [Webhook](#create-a-webhook-subscription): Configure your webhook endpoints and subscriptions
   - [Webhook Events](#webhook-events):
@@ -1390,6 +1393,133 @@ You can also get a specific log by its id.
 
 ```elixir
 StarkInfra.CreditNote.log.get!("5155165527080960") 
+|> IO.inspect
+```
+
+## Ledger
+
+### Create Ledgers
+
+You can create a Ledger to track the balance of a bank account, a digital wallet, an inventory
+product, etc:
+
+```elixir
+StarkInfra.Ledger.create!([
+  %StarkInfra.Ledger{
+    external_id: "my-internal-id-123456",
+    rules: [
+      %StarkInfra.Ledger.Rule{key: "minimumBalance", value: 0}
+    ],
+    tags: ["account/123", "savings"],
+    metadata: %{"accountId" => "123", "accountType" => "savings"}
+  }
+])
+|> IO.inspect
+```
+
+**Note**: Instead of using Ledger structs, you can also pass each Ledger element in map format
+
+### Query Ledgers
+
+You can query multiple Ledgers according to filters.
+
+```elixir
+StarkInfra.Ledger.query!(
+  limit: 10,
+  after: Date.utc_today |> Date.add(-30),
+  before: Date.utc_today |> Date.add(-1),
+  external_ids: ["my-internal-id-123456"],
+  tags: ["savings"]
+)
+|> Enum.take(10)
+|> IO.inspect
+```
+
+### Get a Ledger
+
+After its creation, information on a Ledger may be retrieved by its id.
+
+```elixir
+StarkInfra.Ledger.get!("5155165527080960")
+|> IO.inspect
+```
+
+### Update a Ledger
+
+You can update the rules, tags or metadata of a Ledger by passing its id.
+
+```elixir
+StarkInfra.Ledger.update!(
+  "5155165527080960",
+  rules: [%StarkInfra.Ledger.Rule{key: "minimumBalance", value: 0}]
+)
+|> IO.inspect
+```
+
+### Query Ledger logs
+
+You can query Ledger logs to better understand a Ledger's life cycle.
+
+```elixir
+StarkInfra.Ledger.Log.query!(
+  limit: 10,
+  after: "2020-11-01",
+  before: "2020-11-02"
+)
+|> Enum.take(10)
+|> IO.inspect
+```
+
+### Get a Ledger log
+
+You can also get a specific log by its id.
+
+```elixir
+StarkInfra.Ledger.Log.get!("5155165527080960")
+|> IO.inspect
+```
+
+### Create LedgerTransactions
+
+You can create a LedgerTransaction to update a Ledger's balance:
+
+```elixir
+StarkInfra.LedgerTransaction.create!([
+  %StarkInfra.LedgerTransaction{
+    amount: 11234,
+    ledger_id: "5155165527080960",
+    external_id: "my-internal-id-123456",
+    source: "bank-transfer/123",
+    tags: ["transfer/123", "savings"],
+    metadata: %{"orderId" => "123", "orderType" => "purchase"}
+  }
+])
+|> IO.inspect
+```
+
+**Note**: Instead of using LedgerTransaction structs, you can also pass each LedgerTransaction element in map format
+
+### Query LedgerTransactions
+
+You can query multiple LedgerTransactions according to filters.
+
+```elixir
+StarkInfra.LedgerTransaction.query!(
+  limit: 10,
+  ledger_id: "5155165527080960",
+  after: Date.utc_today |> Date.add(-30),
+  before: Date.utc_today |> Date.add(-1)
+)
+|> Enum.take(10)
+|> IO.inspect
+```
+
+### Get a LedgerTransaction
+
+After its creation, information on a LedgerTransaction may be retrieved by its id.
+
+```elixir
+StarkInfra.LedgerTransaction.get!("5155165527080960")
 |> IO.inspect
 ```
 

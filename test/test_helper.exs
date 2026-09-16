@@ -1,6 +1,9 @@
 # remove excluded tags to run specific module tests
 ExUnit.start(
   exclude: [
+    # :ledger,
+    # :ledger_log,
+    # :ledger_transaction,
     # :credit_note,
     # :credit_note_log,
     # :event,
@@ -44,6 +47,8 @@ Code.require_file("./test/utils/pix_infraction.exs")
 Code.require_file("./test/utils/pix_reversal.exs")
 Code.require_file("./test/utils/pix_chargeback.exs")
 Code.require_file("./test/utils/random.exs")
+Code.require_file("./test/utils/ledger.exs")
+Code.require_file("./test/utils/ledger_transaction.exs")
 Code.require_file("./test/utils/issuing_holder.exs")
 Code.require_file("./test/utils/issuing_withdrawal.exs")
 Code.require_file("./test/utils/issuing_invoice.exs")
