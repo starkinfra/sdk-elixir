@@ -17,6 +17,7 @@ defmodule StarkInfra.Event do
   alias StarkInfra.PixRequest.Log, as: PixRequest
   alias StarkInfra.PixReversal.Log, as: PixReversal
   alias StarkInfra.PixChargeback.Log, as: PixChargeback
+  alias StarkInfra.PixDispute.Log, as: PixDispute
   alias StarkInfra.PixInfraction.Log, as: PixInfraction
 
   @moduledoc """
@@ -319,6 +320,7 @@ defmodule StarkInfra.Event do
       "pix-claim" -> &PixClaim.resource_maker/1
       "pix-infraction" -> &PixInfraction.resource_maker/1
       "pix-chargeback" -> &PixChargeback.resource_maker/1
+      "pix-dispute" -> &PixDispute.resource_maker/1
       "issuing-card" -> &IssuingCard.resource_maker/1
       "issuing-invoice" -> &IssuingInvoice.resource_maker/1
       "issuing-purchase" -> &IssuingPurchase.resource_maker/1

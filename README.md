@@ -50,6 +50,7 @@ This SDK version is compatible with the Stark Infra API v2.
     - [PixUser](#get-a-pixuser): Get fraud statistics of a user
     - [PixChargeback](#create-pixchargebacks): Create Pix Chargeback requests
     - [PixDomain](#query-pixdomains): View registered SPI participants certificates
+    - [PixDispute](#create-pixdisputes): Create Pix Dispute requests
   - [Credit Note](#credit-note)
     - [CreditNote](#create-creditnotes): Create credit notes
   - [Credit Holmes](#credit-holmes)
@@ -1624,6 +1625,81 @@ You can query for domains of registered SPI participants able to issue dynamic Q
 
 ```elixir
 StarkInfra.PixDomain.query!() 
+|> IO.inspect
+```
+
+### Create PixDisputes
+
+Pix disputes can be created when a fraud is detected creating a chain of transactions in order to reverse the funds to the origin.
+
+```elixir
+StarkInfra.PixDispute.create!([
+  %StarkInfra.PixDispute{
+    reference_id: "E20018183202512191914WcfANNEIYnt",
+    method: "scam",
+    operator_phone: "+5511999999999",
+    operator_email: "operator@example.com"
+  }
+])
+|> IO.inspect
+```
+
+**Note**: Instead of using PixDispute structs, you can also pass each element in map format
+
+### Query PixDisputes
+
+You can query multiple PixDisputes according to filters.
+
+```elixir
+StarkInfra.PixDispute.query!(
+  limit: 10,
+  after: "2020-01-01",
+  before: "2020-04-01",
+  status: "success",
+  tags: ["iron", "suit"]
+)
+|> Enum.take(10)
+|> IO.inspect
+```
+
+### Get a PixDispute
+
+After its creation, information on a PixDispute may be retrieved by its id. Its status indicates whether it has been paid.
+
+```elixir
+StarkInfra.PixDispute.get!("5155165527080960") 
+|> IO.inspect
+```
+
+### Cancel a PixDispute
+
+Cancel a specific PixDispute using its id.
+
+```elixir
+StarkInfra.PixDispute.cancel!("5155165527080960") 
+|> IO.inspect
+```
+
+### Query PixDispute logs
+
+You can query PixDispute logs to better understand PixDispute life cycles. 
+
+```elixir
+StarkInfra.PixDispute.Log.query!(
+  limit: 50, 
+  after: "2022-01-01",
+  before: "2022-01-20"
+)
+|> Enum.take(50)
+|> IO.inspect
+```
+
+### Get a PixDispute log
+
+You can also get a specific log by its id.
+
+```elixir
+StarkInfra.PixDispute.Log.get!("5155165527080960") 
 |> IO.inspect
 ```
 
