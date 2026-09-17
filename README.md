@@ -43,6 +43,7 @@ This SDK version is compatible with the Stark Infra API v2.
     - [PixBalance](#get-your-pixbalance): View your account balance
     - [PixStatement](#create-a-pixstatement): Request your account statement
     - [PixKey](#create-a-pixkey): Create a Pix Key
+    - [PixKeyHolmes](#create-pixkeyholmes): Investigate the registration of a Pix Key in the DICT
     - [PixClaim](#create-a-pixclaim): Claim a Pix Key
     - [PixDirector](#create-a-pixdirector): Create a Pix Director
     - [PixInfraction](#create-pixinfractions): Create Pix Infraction reports
@@ -1340,6 +1341,72 @@ You can also get a specific log by its id.
 
 ```elixir
 StarkInfra.PixKey.Log.get!("5729405850615808") 
+|> IO.inspect
+```
+
+### Create PixKeyHolmes
+
+To investigate whether a Pix Key is registered in the Central Bank's DICT,
+open up a PixKeyHolmes for it:
+
+```elixir
+StarkInfra.PixKeyHolmes.create!(
+  [
+    %StarkInfra.PixKeyHolmes{
+      key_id: "+5511989898989"
+    },
+    %StarkInfra.PixKeyHolmes{
+      key_id: "valid@sandbox.com",
+      tags: ["sherlock"]
+    }
+  ]
+)
+|> IO.inspect
+```
+
+### Query PixKeyHolmes
+
+You can query multiple PixKeyHolmes according to filters.
+
+```elixir
+StarkInfra.PixKeyHolmes.query!(
+  after: Date.utc_today |> Date.add(-30),
+  before: Date.utc_today |> Date.add(-1),
+  status: ["solved"]
+)
+|> Enum.take(10)
+|> IO.inspect
+```
+
+### Get a PixKeyHolmes
+
+After its creation, information on a PixKeyHolmes may be retrieved by its id.
+
+```elixir
+StarkInfra.PixKeyHolmes.get!("5155165527080960")
+|> IO.inspect
+```
+
+### Query PixKeyHolmes logs
+
+You can query PixKeyHolmes logs to better understand their life cycles.
+
+```elixir
+StarkInfra.PixKeyHolmes.Log.query!(
+  limit: 50,
+  after: Date.utc_today |> Date.add(-30),
+  before: Date.utc_today |> Date.add(-1)
+)
+|> Enum.take(50)
+|> IO.inspect
+```
+
+### Get a PixKeyHolmes log
+
+You can also get a specific log by its id.
+
+```elixir
+StarkInfra.PixKeyHolmes.Log.get!("5155165527080960")
 |> IO.inspect
 ```
 

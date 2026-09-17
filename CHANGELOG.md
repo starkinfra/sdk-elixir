@@ -15,6 +15,8 @@ Given a version number MAJOR.MINOR.PATCH, increment:
 ### Added
 - StaticBrcode resource
 - DynamicBrcode resource
+- PixKeyHolmes resource
+- PixKeyHolmes.Log sub-resource
 - PixPullRequest resource
 - PixPullRequest.Log sub-resource
 - Ledger resource
