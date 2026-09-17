@@ -32,6 +32,9 @@ This SDK version is compatible with the Stark Infra API v2.
     - [Transactions](#query-issuingtransactions): View the transactions that have affected your issuing balance
     - [BillingInvoices](#query-issuingbillinginvoices): View the invoices charged for your Issuing costs
     - [BillingTransactions](#query-issuingbillingtransactions): View the transactions that compose your Issuing billing invoices
+    - [Designs](#query-issuingdesigns): View card and card package designs available to your Workspace
+    - [EmbossingKits](#query-issuingembossingkits): View the embossing kits available to your Workspace
+    - [EmbossingRequests](#create-issuingembossingrequests): Create embossing requests
   - [Pix](#pix)
     - [PixRequests](#create-pixrequests): Create Pix transactions
     - [PixReversals](#create-pixreversals): Reverse Pix transactions
@@ -761,6 +764,118 @@ StarkInfra.IssuingBillingTransaction.query!(
   invoice_id: "5155165527080960"
 )
 |> Enum.take(10)
+|> IO.inspect
+```
+
+### Query IssuingDesigns
+
+To view the card and card package designs available to your Workspace, run:
+
+```elixir
+StarkInfra.IssuingDesign.query!(limit: 10)
+|> Enum.take(10)
+|> IO.inspect
+```
+
+### Get an IssuingDesign
+
+You can get a specific design by its id.
+
+```elixir
+StarkInfra.IssuingDesign.get!("5155165527080960")
+|> IO.inspect
+```
+
+### Get an IssuingDesign pdf
+
+You can get the pdf file generated for a specific design by its id.
+
+```elixir
+{:ok, pdf} = StarkInfra.IssuingDesign.pdf("5155165527080960")
+file = File.open!("issuing_design.pdf", [:write])
+IO.binwrite(file, pdf)
+File.close(file)
+```
+
+### Query IssuingEmbossingKits
+
+To view the embossing kits available to your Workspace, run:
+
+```elixir
+StarkInfra.IssuingEmbossingKit.query!(limit: 10)
+|> Enum.take(10)
+|> IO.inspect
+```
+
+### Get an IssuingEmbossingKit
+
+You can get a specific embossing kit by its id.
+
+```elixir
+StarkInfra.IssuingEmbossingKit.get!("5155165527080960")
+|> IO.inspect
+```
+
+### Create IssuingEmbossingRequests
+
+You can create embossing requests to emboss a physical IssuingCard using an IssuingEmbossingKit.
+
+```elixir
+StarkInfra.IssuingEmbossingRequest.create!([
+  %StarkInfra.IssuingEmbossingRequest{
+    card_id: "5155165527080960",
+    kit_id: "5157536855658496",
+    display_name_1: "ANTHONY STARK",
+    shipping_city: "SAO PAULO",
+    shipping_country_code: "BRA",
+    shipping_district: "VILA MADALENA",
+    shipping_state_code: "SP",
+    shipping_street_line_1: "AVENIDA FARIA LIMA",
+    shipping_street_line_2: "Apto. 6",
+    shipping_service: "loggi",
+    shipping_tracking_number: "1234567890123456",
+    shipping_zip_code: "05433-000"
+  }
+]) |> IO.inspect
+```
+
+**Note**: Instead of using IssuingEmbossingRequest structs, you can also pass each IssuingEmbossingRequest element in map format
+
+### Query IssuingEmbossingRequests
+
+You can query multiple embossing requests according to filters.
+
+```elixir
+StarkInfra.IssuingEmbossingRequest.query!(limit: 10)
+|> Enum.take(10)
+|> IO.inspect
+```
+
+### Get an IssuingEmbossingRequest
+
+After its creation, information on an embossing request may be retrieved by its id.
+
+```elixir
+StarkInfra.IssuingEmbossingRequest.get!("5155165527080960")
+|> IO.inspect
+```
+
+### Query IssuingEmbossingRequests logs
+
+You can query embossing request logs to better understand an IssuingEmbossingRequest life cycle.
+
+```elixir
+StarkInfra.IssuingEmbossingRequest.Log.query!(limit: 10)
+|> Enum.take(10)
+|> IO.inspect
+```
+
+### Get an IssuingEmbossingRequest log
+
+You can also get a specific log by its id.
+
+```elixir
+StarkInfra.IssuingEmbossingRequest.Log.get!("5155165527080960")
 |> IO.inspect
 ```
 
