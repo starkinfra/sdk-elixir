@@ -578,6 +578,18 @@ StarkInfra.IssuingPurchase.get!("5155165527080960")
 |> IO.inspect
 ```
 
+### Update an IssuingPurchase
+
+You can update a specific IssuingPurchase by its id.
+
+```elixir
+StarkInfra.IssuingPurchase.update!(
+  "5155165527080960",
+  description: "Dinner",
+  tags: ["customer-x", "reimbursement"]
+) |> IO.inspect
+```
+
 ### Query IssuingPurchase logs
 
 Logs are pretty important to understand the life cycle of a purchase.
@@ -867,7 +879,7 @@ StarkInfra.IssuingEmbossingRequest.get!("5155165527080960")
 |> IO.inspect
 ```
 
-### Query IssuingEmbossingRequests logs
+### Query IssuingEmbossingRequest logs
 
 You can query embossing request logs to better understand an IssuingEmbossingRequest life cycle.
 
@@ -1032,6 +1044,38 @@ StarkInfra.PixRequest.get!("5155165527080960")
 |> IO.inspect
 ```
 
+### Process inbound PixRequest authorizations
+
+It's easy to process authorization requests that arrived at your endpoint.
+Remember to pass the signature header so the SDK can make sure it's StarkInfra that sent you the event.
+If you do not approve or decline the authorization within 1 second, the authorization will be denied.
+
+```elixir
+request = listen()  # this is your handler to listen for authorization requests
+
+{pix_request, _cache_pid} = StarkInfra.PixRequest.parse!(
+  content: request.content,
+  signature: request.headers["Digital-Signature"]
+)
+
+IO.inspect(pix_request)
+
+send_response(  # you should also implement this method
+  StarkInfra.PixRequest.response!(  # this optional method just helps you build the response JSON
+    "approved"
+  )
+)
+
+# or
+
+send_response(
+  StarkInfra.PixRequest.response!(
+    "denied",
+    reason: "orderRejected"
+  )
+)
+```
+
 ### Query PixRequest logs
 
 You can query Pix request logs to better understand Pix request life cycles. 
@@ -1092,6 +1136,38 @@ Its status indicates whether it has been successfully processed.
 ```elixir
 StarkInfra.PixReversal.get!("5155165527080960") 
 |> IO.inspect
+```
+
+### Process inbound PixReversal authorizations
+
+It's easy to process authorization requests that arrived at your endpoint.
+Remember to pass the signature header so the SDK can make sure it's StarkInfra that sent you the event.
+If you do not approve or decline the authorization within 1 second, the authorization will be denied.
+
+```elixir
+request = listen()  # this is your handler to listen for authorization requests
+
+{pix_reversal, _cache_pid} = StarkInfra.PixReversal.parse!(
+  content: request.content,
+  signature: request.headers["Digital-Signature"]
+)
+
+IO.inspect(pix_reversal)
+
+send_response(  # you should also implement this method
+  StarkInfra.PixReversal.response!(  # this optional method just helps you build the response JSON
+    "approved"
+  )
+)
+
+# or
+
+send_response(
+  StarkInfra.PixReversal.response!(
+    "denied",
+    reason: "orderRejected"
+  )
+)
 ```
 
 ### Query PixReversal logs
@@ -1217,7 +1293,7 @@ StarkInfra.PixKey.get!("+5511989898989", "012.345.678-90")
 |> IO.inspect
 ```
 
-### Patch a PixKey
+### Update a PixKey
 
 Update the account information linked to a Pix Key.
 
@@ -1229,7 +1305,7 @@ StarkInfra.PixKey.update!(
 ) |> IO.inspect
 ```
 
-### Cencel a PixKey
+### Cancel a PixKey
 
 Cancel a specific Pix Key using its id.
 
@@ -1310,7 +1386,7 @@ StarkInfra.PixClaim.get!("5729405850615808")
 |> IO.inspect
 ```
 
-### Patch a PixClaim
+### Update a PixClaim
 
 A Pix Claim can be confirmed or canceled by patching its status.
 A received Pix Claim must be confirmed by the donor to be completed.
@@ -2274,7 +2350,7 @@ StarkInfra.Webhook.create!(
 ) |> IO.inspect
 ```
 
-### Query Webhooks
+### Query Webhook subscriptions
 
 To search for registered webhooks, run:
 

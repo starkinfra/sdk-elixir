@@ -42,6 +42,10 @@ defmodule StarkInfra.IssuingInvoice do
     :tags,
     :id,
     :status,
+    :brcode,
+    :due,
+    :link,
+    :metadata,
     :issuing_transaction_id,
     :updated,
     :created
@@ -250,6 +254,10 @@ defmodule StarkInfra.IssuingInvoice do
       tags: json[:tags],
       id: json[:id],
       status: json[:status],
+      brcode: json[:brcode],
+      due: json[:due] |> Check.datetime(),
+      link: json[:link],
+      metadata: json[:metadata],
       issuing_transaction_id: json[:issuing_transaction_id],
       updated: json[:updated] |> Check.datetime(),
       created: json[:created] |> Check.datetime()

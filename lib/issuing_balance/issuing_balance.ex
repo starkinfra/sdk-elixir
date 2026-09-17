@@ -34,6 +34,8 @@ defmodule StarkInfra.IssuingBalance do
     :id,
     :amount,
     :currency,
+    :limit,
+    :max_limit,
     :updated
   ]
 
@@ -84,6 +86,8 @@ defmodule StarkInfra.IssuingBalance do
       id: json[:id],
       amount: json[:amount],
       currency: json[:currency],
+      limit: json[:limit],
+      max_limit: json[:max_limit],
       updated: json[:updated] |> Check.datetime()
     }
   end

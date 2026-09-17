@@ -28,6 +28,7 @@ defmodule StarkInfra.PixChargeback do
 
   ## Parameters (optional):
     - `:description` [string, default nil]: description for the PixChargeback. Required when `:reason` is "flaw".
+    - `:tags` [list of strings, default nil]: list of strings for tagging. ex: ["travel", "food"]
 
   ## Attributes (return-only):
     - `:id` [string]: unique id returned when the PixChargeback is created. ex: "5656565656565656"
@@ -56,6 +57,7 @@ defmodule StarkInfra.PixChargeback do
     :reference_id,
     :reason,
     :description,
+    :tags,
     :id,
     :analysis,
     :bacen_id,
@@ -64,6 +66,14 @@ defmodule StarkInfra.PixChargeback do
     :rejection_reason,
     :reversal_reference_id,
     :result,
+    :flow,
+    :dispute_id,
+    :is_monitoring_required,
+    :reversal_account_number,
+    :reversal_account_type,
+    :reversal_bank_code,
+    :reversal_branch_code,
+    :reversal_tax_id,
     :status,
     :created,
     :updated
@@ -162,6 +172,10 @@ defmodule StarkInfra.PixChargeback do
     - `:before` [Date or string, default nil]: date filter for structs created before a specified date. ex: ~D[2020-03-10]
     - `:status` [list of strings, default nil]: filter for status of retrieved objects. ex: ["created", "failed", "delivered", "closed", "canceled"]
     - `:ids` [list of strings, default nil]: list of ids to filter retrieved objects. ex: ["5656565656565656", "4545454545454545"]
+    - `:bacen_id` [string, default nil]: unique transaction id returned from Central Bank. ex: "ccf9bd9c-e99d-999e-bab9-b999ca999f99"
+    - `:reference_ids` [list of strings, default nil]: list of end_to_end_ids or return_ids of the reversed transactions to filter retrieved objects. Max = 30. ex: ["E20018183202201201450u34sDjD7334"]
+    - `:flow` [string, default nil]: direction of the Pix Chargeback. Options: "in" for received chargebacks, "out" for chargebacks you requested
+    - `:tags` [list of strings, default nil]: filter for tags of retrieved objects. ex: ["travel", "food"]
     - `:user` [Organization/Project, default nil]: Organization or Project struct returned from StarkInfra.project(). Only necessary if default project or organization has not been set in configs.
 
   ## Return:
@@ -173,6 +187,10 @@ defmodule StarkInfra.PixChargeback do
     before: Date.t() | binary,
     status: [binary],
     ids: [binary],
+    bacen_id: binary,
+    reference_ids: [binary],
+    flow: binary,
+    tags: [binary],
     user: Organization.t() | Project.t() | nil
   ) ::
     {:ok, [PixChargeback.t()]} |
@@ -193,6 +211,10 @@ defmodule StarkInfra.PixChargeback do
     before: Date.t() | binary,
     status: [binary],
     ids: [binary],
+    bacen_id: binary,
+    reference_ids: [binary],
+    flow: binary,
+    tags: [binary],
     user: Organization.t() | Project.t() | nil
   ) :: any
   def query!(options \\ []) do
@@ -212,6 +234,10 @@ defmodule StarkInfra.PixChargeback do
     - `:before` [Date or string, default nil]: date filter for structs created before a specified date. ex: ~D[2020-03-10]
     - `:status` [list of strings, default nil]: filter for status of retrieved objects. ex: ["created", "failed", "delivered", "closed", "canceled"]
     - `:ids` [list of strings, default nil]: list of ids to filter retrieved objects. ex: ["5656565656565656", "4545454545454545"]
+    - `:bacen_id` [string, default nil]: unique transaction id returned from Central Bank. ex: "ccf9bd9c-e99d-999e-bab9-b999ca999f99"
+    - `:reference_ids` [list of strings, default nil]: list of end_to_end_ids or return_ids of the reversed transactions to filter retrieved objects. Max = 30. ex: ["E20018183202201201450u34sDjD7334"]
+    - `:flow` [string, default nil]: direction of the Pix Chargeback. Options: "in" for received chargebacks, "out" for chargebacks you requested
+    - `:tags` [list of strings, default nil]: filter for tags of retrieved objects. ex: ["travel", "food"]
     - `:user` [Organization/Project, default nil]: Organization or Project struct returned from StarkInfra.project(). Only necessary if default project or organization has not been set in configs.
 
   ## Return:
@@ -225,6 +251,10 @@ defmodule StarkInfra.PixChargeback do
     before: Date.t() | binary,
     status: [binary],
     ids: [binary],
+    bacen_id: binary,
+    reference_ids: [binary],
+    flow: binary,
+    tags: [binary],
     user: Organization.t() | Project.t() | nil
   ) ::
     {:ok, {binary, [PixChargeback.t()]}} |
@@ -246,6 +276,10 @@ defmodule StarkInfra.PixChargeback do
     before: Date.t() | binary,
     status: [binary],
     ids: [binary],
+    bacen_id: binary,
+    reference_ids: [binary],
+    flow: binary,
+    tags: [binary],
     user: Organization.t() | Project.t() | nil
   ) :: any
   def page!(options \\ []) do
@@ -368,6 +402,7 @@ defmodule StarkInfra.PixChargeback do
       reference_id: json[:reference_id],
       reason: json[:reason],
       description: json[:description],
+      tags: json[:tags],
       analysis: json[:analysis],
       bacen_id: json[:bacen_id],
       sender_bank_code: json[:sender_bank_code],
@@ -376,6 +411,14 @@ defmodule StarkInfra.PixChargeback do
       reversal_reference_id: json[:reversal_reference_id],
       id: json[:id],
       result: json[:result],
+      flow: json[:flow],
+      dispute_id: json[:dispute_id],
+      is_monitoring_required: json[:is_monitoring_required],
+      reversal_account_number: json[:reversal_account_number],
+      reversal_account_type: json[:reversal_account_type],
+      reversal_bank_code: json[:reversal_bank_code],
+      reversal_branch_code: json[:reversal_branch_code],
+      reversal_tax_id: json[:reversal_tax_id],
       status: json[:status],
       created: json[:created] |> Check.datetime(),
       updated: json[:updated] |> Check.datetime(),

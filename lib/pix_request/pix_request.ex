@@ -5,6 +5,7 @@ defmodule StarkInfra.PixRequest do
   alias StarkInfra.Utils.Parse
   alias StarkInfra.Utils.Check
   alias StarkInfra.Utils.Rest
+  alias StarkInfra.Utils.JSON
   alias StarkInfra.Error
 
   @moduledoc """
@@ -51,6 +52,8 @@ defmodule StarkInfra.PixRequest do
     - `:cashier_type` [string, default nil]: Cashier's type. ex: [merchant, other, participant]
     - `:tags` [list of strings, default nil]: list of strings for reference when searching for PixRequests. ex: ["employees", "monthly"]
     - `:method` [string, default nil]: execution method for the creation of the Pix. Options: "manual", "dict", "initiator", "dynamicQrcode", "staticQrcode", "payerQrcode", "subscription", "contactless", "staticContactless". For "dict", resolve the receiver's PixKey with PixKey.get/2 first and use its data. For "staticQrcode"/"dynamicQrcode", preview the brcode with BrcodePreview first. For "subscription", pass the pull request's `:end_to_end_id` and a matching `:reconciliation_id`. To close a PixChargeback, map its `reversal_*` fields onto the receiver_* fields, set `:reason` to "fraud" and `:sender_tax_id` to your institution's CNPJ. For Pix Saque/Troco, set `:cash_amount` (<= `:amount`) together with `:cashier_type` and `:cashier_bank_code`. For an initiator-registered payment, pass `:initiator_tax_id` and issue `:end_to_end_id` under the initiator's ISPB.
+    - `:priority` [string, default nil]: Pix request processing priority, which selects the message channel used to send it: "high" uses the primary channel and "low" the secondary one. Default is "high". Options: "high", "low"
+    - `:reason` [string, default "customerRequest"]: underlying reason for the payment transaction. Options: "customerRequest", "fraud", "subscriptionFlaw". When reason is "fraud" (e.g. returning funds from a PixChargeback), `:sender_tax_id` must be your institution's organization tax ID (CNPJ).
 
   ## Attributes (return-only):
     - `:id` [string]: unique id returned when the PixRequest is created. ex: "5656565656565656"
@@ -102,6 +105,8 @@ defmodule StarkInfra.PixRequest do
     :cashier_type,
     :tags,
     :method,
+    :priority,
+    :reason,
     :id,
     :fee,
     :status,
@@ -381,6 +386,34 @@ defmodule StarkInfra.PixRequest do
     )
   end
 
+  @doc """
+  Helps you respond to a PixRequest authorization.
+
+  Authorization requests are posted at your registered pixRequestUrl whenever an inbound
+  PixRequest is received. You must answer this synchronous authorization webhook within
+  1 second; if you do not respond in time, or if no pixRequestUrl is registered, Stark Infra
+  denies the inbound PixRequest by default.
+
+  ## Parameters (required):
+    - `:status` [string]: response to the authorization. ex: "approved" or "denied"
+
+  ## Options
+    - `:reason` [string, default nil]: denial reason. Required if the status is "denied". Options: "invalidAccountNumber", "blockedAccount", "accountClosed", "invalidAccountType", "invalidTransactionType", "taxIdMismatch", "invalidTaxId", "orderRejected", "reversalTimeExpired", "settlementFailed"
+
+  ## Return:
+    - Dumped JSON string that must be returned to us on the PixRequest authorization request
+  """
+  @spec response!(
+    status: binary,
+    reason: binary
+  ) :: any
+  def response!(status, options \\ []) do
+    options = options ++ [status: status]
+    JSON.encode!(%{authorization:
+      Enum.into(options |> Check.enforced_keys([:status]), %{reason: nil})
+    })
+  end
+
   @doc false
   def resource() do
     {
@@ -415,6 +448,8 @@ defmodule StarkInfra.PixRequest do
       cashier_type: json[:cashier_type],
       tags: json[:tags],
       method: json[:method],
+      priority: json[:priority],
+      reason: json[:reason],
       id: json[:id],
       fee: json[:fee],
       status: json[:status],

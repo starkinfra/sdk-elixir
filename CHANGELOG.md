@@ -46,6 +46,19 @@ Given a version number MAJOR.MINOR.PATCH, increment:
 - PixDispute resource
 - PixDispute.Transaction sub-resource
 - PixDispute.Log sub-resource
+- priority and reason attributes and response method to PixRequest resource
+- description attribute and response method to PixReversal resource
+- tags, flow, dispute_id, is_monitoring_required and reversal attributes to PixChargeback resource
+- tags, bacen_id, flow and claimer_bank_code attributes to PixClaim resource
+- method, operator_email, operator_phone, tags, fraud_type, fraud_id, flow, amount and dispute_id attributes to PixInfraction resource
+- chunk_count attribute to PixStatement resource
+- update method and product_id, installment_count, merchant_category_type, merchant_category_number, confirmed, description, metadata and zip_code attributes to IssuingPurchase resource
+- installment attribute to IssuingPurchase.Log sub-resource
+- product_id and is_pin_defined attributes to IssuingCard resource
+- limit and max_limit attributes to IssuingBalance resource
+- brcode, due, link and metadata attributes to IssuingInvoice resource
+- customer_type attribute to IssuingProduct resource
+- Rule sub-resource and rules, debtor_workspace_id and nominal_interest attributes to CreditNote resource
 ### Changed
 - IssuingBin resource to IssuingProduct
 - settlement parameter to funding_type and client parameter to holder_type of IssuingProduct
@@ -54,6 +67,8 @@ Given a version number MAJOR.MINOR.PATCH, increment:
 - query parameters in post requests
 - ssl and public_key applications missing from extra_applications, breaking every request on OTP 26+
 - query parameters in delete requests
+- amount, expiration, document_id, status, transaction_ids, workspace_id and tax_amount attributes of CreditNote resource not being parsed
+- README headings for PixKey, PixClaim, IssuingEmbossingRequest and Webhook
 ### Removed
 - IssuingAuthorization resource
 - category parameter of IssuingProduct resource

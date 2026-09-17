@@ -24,7 +24,8 @@ defmodule StarkInfra.IssuingCard do
   ## Parameters (optional):
     - `:display_name` [string, default nil]: card displayed name. ex: "ANTHONY STARK"
     - `:rules` [list of IssuingRule, default nil]: [EXPANDABLE] list of card spending rules.
-    - `:bin_id` [string, default nil]: legacy alias for the IssuingProduct id to bind the card to (the API's current field is `productId`); optional — if omitted, a product is chosen automatically. ex: "53810200"
+    - `:bin_id` [string, default nil]: deprecated, use `:product_id`. Legacy alias for the IssuingProduct id to bind the card to (the API's current field is `productId`); optional — if omitted, a product is chosen automatically. ex: "53810200"
+    - `:product_id` [string, default nil]: id of the IssuingProduct to bind the card to. If omitted, a product is chosen automatically for the sub-issuer. ex: "53810200"
     - `:type` [string, default "virtual"]: card type. Options: "virtual", "physical".
     - `:tags` [list of strings]: list of strings for tagging. ex: ["travel", "food"]
     - `:street_line_1` [string, default nil]: card holder main address. ex: "Av. Paulista, 200"
@@ -42,6 +43,7 @@ defmodule StarkInfra.IssuingCard do
     - `:number` [string]: [EXPANDABLE] masked card number. Expand to unmask the value. ex: "123".
     - `:security_code` [string]: [EXPANDABLE] masked card verification value (cvv). Expand to unmask the value. ex: "123".
     - `:expiration` [string]: [EXPANDABLE] masked card expiration datetime. Expand to unmask the value. ex: '2020-03-10 10:30:00.000'.
+    - `:is_pin_defined` [bool]: [EXPANDABLE] whether the card has a PIN defined. Returned only when "expand=is_pin_defined" is informed in the request.
     - `:updated` [DateTime]: latest update DateTime for the IssuingCard. ex: ~U[2020-3-10 10:30:0:0]
     - `:created` [DateTime]: creation datetime for the IssuingCard. ex: ~U[2020-03-10 10:30:0:0]
   """
@@ -58,6 +60,7 @@ defmodule StarkInfra.IssuingCard do
     :display_name,
     :rules,
     :bin_id,
+    :product_id,
     :tags,
     :street_line_1,
     :street_line_2,
@@ -72,6 +75,7 @@ defmodule StarkInfra.IssuingCard do
     :number,
     :security_code,
     :expiration,
+    :is_pin_defined,
     :updated,
     :created
   ]
@@ -404,6 +408,7 @@ defmodule StarkInfra.IssuingCard do
       holder_external_id: json[:holder_external_id],
       display_name: json[:display_name],
       bin_id: json[:bin_id],
+      product_id: json[:product_id],
       tags: json[:tags],
       street_line_1: json[:street_line_1],
       street_line_2: json[:street_line_2],
@@ -419,6 +424,7 @@ defmodule StarkInfra.IssuingCard do
       number: json[:number],
       security_code: json[:security_code],
       expiration: json[:expiration],
+      is_pin_defined: json[:is_pin_defined],
       updated: json[:updated] |> Check.datetime(),
       created: json[:created] |> Check.datetime()
     }
