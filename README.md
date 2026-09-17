@@ -33,6 +33,7 @@ This SDK version is compatible with the Stark Infra API v2.
     - [BillingInvoices](#query-issuingbillinginvoices): View the invoices charged for your Issuing costs
     - [BillingTransactions](#query-issuingbillingtransactions): View the transactions that compose your Issuing billing invoices
     - [Designs](#query-issuingdesigns): View card and card package designs available to your Workspace
+    - [EmbossingKits](#query-issuingembossingkits): View the embossing kits available to your Workspace
   - [Pix](#pix)
     - [PixRequests](#create-pixrequests): Create Pix transactions
     - [PixReversals](#create-pixreversals): Reverse Pix transactions
@@ -793,6 +794,25 @@ You can get the pdf file generated for a specific design by its id.
 file = File.open!("issuing_design.pdf", [:write])
 IO.binwrite(file, pdf)
 File.close(file)
+```
+
+### Query IssuingEmbossingKits
+
+To view the embossing kits available to your Workspace, run:
+
+```elixir
+StarkInfra.IssuingEmbossingKit.query!(limit: 10)
+|> Enum.take(10)
+|> IO.inspect
+```
+
+### Get an IssuingEmbossingKit
+
+You can get a specific embossing kit by its id.
+
+```elixir
+StarkInfra.IssuingEmbossingKit.get!("5155165527080960")
+|> IO.inspect
 ```
 
 ## Pix

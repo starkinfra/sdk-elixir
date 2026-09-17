@@ -27,6 +27,7 @@ Given a version number MAJOR.MINOR.PATCH, increment:
 - IssuingBillingInvoice resource
 - IssuingBillingTransaction resource
 - IssuingDesign resource
+- IssuingEmbossingKit resource
 - IssuingRule missing parameters
 ### Changed
 - IssuingBin resource to IssuingProduct
