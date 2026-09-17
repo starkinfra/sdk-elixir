@@ -3,15 +3,14 @@ defmodule StarkInfraTest.PixInfraction do
 
   @tag :pix_infraction
   test "create pix infraction" do
-    {:error, errors} = StarkInfra.PixInfraction.create(StarkInfraTest.Utils.PixInfraction.example_pix_infraction())
-    assert Enum.any?(errors, fn error -> error.code == "routeNotFound" end)
+    infractions = [%StarkInfra.PixInfraction{reference_id: "E20018183202201201450u34sDGd19lz", type: "fraud"}]
+    assert {:error, [%StarkInfra.Error{code: "deprecated"}]} = StarkInfra.PixInfraction.create(infractions)
   end
 
   @tag :pix_infraction
   test "create! pix infraction" do
-    assert_raise RuntimeError, "Function deprecated since v0.2.0", fn ->
-      StarkInfra.PixInfraction.create!(StarkInfraTest.Utils.PixInfraction.example_pix_infraction())
-    end
+    infractions = [%StarkInfra.PixInfraction{reference_id: "E20018183202201201450u34sDGd19lz", type: "fraud"}]
+    assert_raise RuntimeError, fn -> StarkInfra.PixInfraction.create!(infractions) end
   end
 
   @tag :pix_infraction

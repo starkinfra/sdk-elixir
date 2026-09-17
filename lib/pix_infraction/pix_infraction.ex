@@ -1,6 +1,7 @@
 defmodule StarkInfra.PixInfraction do
   alias __MODULE__, as: PixInfraction
   alias StarkInfra.Utils.Rest
+  alias StarkInfra.Utils.API
   alias StarkInfra.Utils.Check
   alias StarkInfra.User.Project
   alias StarkInfra.User.Organization
@@ -79,6 +80,8 @@ defmodule StarkInfra.PixInfraction do
   @type t() :: %__MODULE__{}
 
   @doc """
+  Deprecated: Function deprecated since v0.2.0
+
   Create PixInfractions in the Stark Infra API
 
   ## Parameters (required):
@@ -88,21 +91,16 @@ defmodule StarkInfra.PixInfraction do
     - `:user` [Organization/Project, default nil]: Organization or Project struct returned from StarkInfra.project(). Only necessary if default project or organization has not been set in configs.
 
   ## Return:
-    - list of PixInfraction structs with updated attributes
+    - `{:error, errors}` with a single error of code `"deprecated"`; the request is never sent to the API
   """
+  @deprecated "Function deprecated since v0.2.0"
   @spec create(
     [PixInfraction.t() | map],
     user: Organization.t() | Project.t() | nil
   ) ::
-    {:ok, [PixInfraction.t() | map]} |
-    {:error, Error.t()}
-  @deprecated "Function deprecated since v0.2.0"
-  def create(infractions, options \\ []) do
-    Rest.post(
-      resource(),
-      infractions,
-      options
-    )
+    {:error, [Error.t()]}
+  def create(_infractions, _options \\ []) do
+    {:error, [%Error{code: "deprecated", message: "Function deprecated since v0.2.0"}]}
   end
 
   @doc """
@@ -114,7 +112,9 @@ defmodule StarkInfra.PixInfraction do
     user: Organization.t() | Project.t() | nil
   ) :: any
   def create!(infractions, options \\ []) do
-    raise "Function deprecated since v0.2.0"
+    case create(infractions, options) do
+      {:error, errors} -> raise API.errors_to_string(errors)
+    end
   end
 
   @doc """

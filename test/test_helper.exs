@@ -91,7 +91,6 @@ ExUnit.start(
 
 Code.require_file("./test/utils/page.exs")
 Code.require_file("./test/utils/end_to_end_id.exs")
-Code.require_file("./test/utils/pix_infraction.exs")
 Code.require_file("./test/utils/pix_reversal.exs")
 Code.require_file("./test/utils/pix_chargeback.exs")
 Code.require_file("./test/utils/pix_fraud.exs")

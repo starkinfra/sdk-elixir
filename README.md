@@ -1764,17 +1764,8 @@ StarkInfra.PixDirector.create!(
 
 ### Create PixInfractions
 
-Pix infractions are used to report transactions that raise fraud suspicion, to request a refund or to 
-reverse a refund. Pix infractions can be created by either participant of a transaction.
-
-```elixir
-StarkInfra.PixInfraction.create!([
-  %StarkInfra.PixInfraction{
-    reference_id: "E20018183202201201450u34sDGd19lz",
-    type: "fraud",
-  }
-]) |> IO.inspect
-```
+Creating Pix infractions through the SDK is deprecated: `StarkInfra.PixInfraction.create/2` returns a `deprecated`
+error and `create!/2` raises, without calling the API.
 
 ### Query PixInfractions
 

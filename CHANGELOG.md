@@ -12,9 +12,8 @@ Given a version number MAJOR.MINOR.PATCH, increment:
 - PATCH version when backwards compatible bug **fixes** are implemented.
 
 ## [Unreleased]
-- Deprecated create pix infraction
-
 ### Added
+- Deprecated create pix infraction
 - StaticBrcode resource
 - DynamicBrcode resource
 - PixKeyHolmes resource
