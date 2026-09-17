@@ -30,6 +30,8 @@ This SDK version is compatible with the Stark Infra API v2.
     - [Withdrawals](#create-issuingwithdrawals): Send money back to your Workspace from your issuing balance
     - [Balance](#get-your-issuingbalance): View your issuing balance
     - [Transactions](#query-issuingtransactions): View the transactions that have affected your issuing balance
+    - [BillingInvoices](#query-issuingbillinginvoices): View the invoices charged for your Issuing costs
+    - [BillingTransactions](#query-issuingbillingtransactions): View the transactions that compose your Issuing billing invoices
   - [Pix](#pix)
     - [PixRequests](#create-pixrequests): Create Pix transactions
     - [PixReversals](#create-pixreversals): Reverse Pix transactions
@@ -43,6 +45,10 @@ This SDK version is compatible with the Stark Infra API v2.
     - [PixDomain](#query-pixdomains): View registered SPI participants certificates
   - [Credit Note](#credit-note)
     - [CreditNote](#create-creditnotes): Create credit notes
+  - [Credit Holmes](#credit-holmes)
+    - [CreditHolmes](#create-creditholmes): Investigate your customers' debt information with the Central Bank
+  - [Credit Preview](#credit-preview)
+    - [CreditPreview](#create-creditpreviews): Preview credit notes before taking them
   - [Ledger](#ledger)
     - [Ledger](#create-ledgers): Create and manage Ledgers to track balances
     - [LedgerTransaction](#create-ledgertransactions): Create LedgerTransactions to update a Ledger's balance
@@ -717,6 +723,44 @@ You can get a specific transaction by its id:
 
 ```elixir
 StarkInfra.IssuingTransaction.get!("5155165527080960") 
+|> IO.inspect
+```
+
+### Query IssuingBillingInvoices
+
+To understand the amounts charged from your Workspace to cover the costs of your
+Issuing operations, you can query the invoices generated according to your billing plan.
+
+```elixir
+StarkInfra.IssuingBillingInvoice.query!(
+  limit: 10,
+  after: Date.utc_today |> Date.add(-30),
+  before: Date.utc_today |> Date.add(-1),
+  status: "paid"
+)
+|> Enum.take(10)
+|> IO.inspect
+```
+
+### Get an IssuingBillingInvoice
+
+You can get a specific billing invoice by its id.
+
+```elixir
+StarkInfra.IssuingBillingInvoice.get!("5155165527080960")
+|> IO.inspect
+```
+
+### Query IssuingBillingTransactions
+
+You can query the transactions that compose a given IssuingBillingInvoice by filtering on its id.
+
+```elixir
+StarkInfra.IssuingBillingTransaction.query!(
+  limit: 10,
+  invoice_id: "5155165527080960"
+)
+|> Enum.take(10)
 |> IO.inspect
 ```
 
@@ -1395,6 +1439,128 @@ You can also get a specific log by its id.
 StarkInfra.CreditNote.log.get!("5155165527080960") 
 |> IO.inspect
 ```
+
+### Get a CreditNote pdf
+
+You can get the CCB disbursement contract pdf associated with a CreditNote by its id.
+
+```elixir
+{:ok, pdf} = StarkInfra.CreditNote.pdf("5155165527080960")
+file = File.open!("credit_note.pdf", [:write])
+IO.binwrite(file, pdf)
+File.close(file)
+```
+
+### Get a CreditNote payment pdf
+
+You can also get the CCB disbursement payment receipt pdf by the CreditNote id.
+
+```elixir
+{:ok, payment} = StarkInfra.CreditNote.payment("5155165527080960")
+file = File.open!("credit_note_payment.pdf", [:write])
+IO.binwrite(file, payment)
+File.close(file)
+```
+
+### Resend a CreditNote signer's token
+
+If a signer did not receive the signing link or token, you can resend it by the signer's id.
+
+```elixir
+StarkInfra.CreditNote.Signer.resend_token!("5155165527080960")
+|> IO.inspect
+```
+
+## Credit Holmes
+
+### Create CreditHolmes
+
+Before you create a CreditHolmes, make sure you have your customer's express authorization
+to verify their information in the Central Bank's SCR.
+
+```elixir
+StarkInfra.CreditHolmes.create!([
+  %StarkInfra.CreditHolmes{
+    tax_id: "012.345.678-90",
+    competence: "2022-06"
+  }
+]) |> IO.inspect
+```
+
+**Note**: Instead of using CreditHolmes structs, you can also pass each CreditHolmes element in map format
+
+### Query CreditHolmes
+
+You can query multiple CreditHolmes according to filters.
+
+```elixir
+StarkInfra.CreditHolmes.query!(
+  limit: 10,
+  after: Date.utc_today |> Date.add(-30),
+  before: Date.utc_today |> Date.add(-1)
+)
+|> Enum.take(10)
+|> IO.inspect
+```
+
+### Get a CreditHolmes
+
+After its creation, information on a CreditHolmes investigation may be retrieved by its id.
+
+```elixir
+StarkInfra.CreditHolmes.get!("5155165527080960")
+|> IO.inspect
+```
+
+### Query CreditHolmes logs
+
+You can query CreditHolmes logs to better understand a CreditHolmes life cycle.
+
+```elixir
+StarkInfra.CreditHolmes.Log.query!(
+  limit: 10,
+  after: "2020-11-01",
+  before: "2020-11-02"
+)
+|> Enum.take(10)
+|> IO.inspect
+```
+
+### Get a CreditHolmes log
+
+You can also get a specific log by its id.
+
+```elixir
+StarkInfra.CreditHolmes.Log.get!("5155165527080960")
+|> IO.inspect
+```
+
+## Credit Preview
+
+### Create CreditPreviews
+
+You can preview a credit note before taking it, to check whether its computed fields
+match what you expect.
+
+```elixir
+StarkInfra.CreditPreview.create!([
+  %StarkInfra.CreditPreview{
+    type: "credit-note",
+    credit: %StarkInfra.CreditPreview.CreditNotePreview{
+      type: "sac",
+      nominal_amount: 100000,
+      scheduled: Date.utc_today |> Date.add(3) |> Date.to_string,
+      tax_id: "012.345.678-90",
+      initial_due: Date.utc_today |> Date.add(33) |> Date.to_string,
+      nominal_interest: 10,
+      count: 12,
+      interval: "month"
+    }
+  }
+]) |> IO.inspect
+```
+
+**Note**: Instead of using CreditPreview structs, you can also pass each CreditPreview element in map format
 
 ## Ledger
 
