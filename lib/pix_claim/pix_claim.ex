@@ -25,14 +25,20 @@ defmodule StarkInfra.PixClaim do
     - `:tax_id` [string]: holder's taxId of the account claiming the PixKey (CPF/CNPJ). ex: "012.345.678-90".
     - `:key_id` [string]: id of the registered Pix Key to be claimed. Allowed keyTypes are CPF, CNPJ, phone number or email. ex: "+5511989898989".
 
+  ## Parameters (optional):
+    - `:tags` [list of strings, default nil]: list of strings for tagging. ex: ["travel", "food"]
+
   ## Attributes (return-only):
     - `:id` [string]: unique id returned when the PixClaim is created. ex: "5656565656565656"
     - `:status` [string]: current PixClaim status. Options: "created", "failed", "delivered", "confirmed", "success", "canceled"
     - `:type` [string]: type of Pix Claim. Options: "ownership", "portability".
     - `:key_type` [string]: keyType of the claimed PixKey. Options: "CPF", "CNPJ", "phone" or "email"
-    - `:agent` [string]: Options: "claimer" if you requested the PixClaim or "claimed" if you received a PixClaim request.
-    - `:bank_code` [string]: bank_code of the account linked to the PixKey being claimed. ex: "20018183".
+    - `:bacen_id` [string, default nil]: unique transaction id returned from Central Bank. ex: "ccf9bd9c-e99d-999e-bab9-b999ca999f99"
+    - `:flow` [string]: direction of the Pix Claim. Options: "in" if you received the PixClaim or "out" if you created the PixClaim.
+    - `:claimer_bank_code` [string]: bank_code of the Pix participant that created the PixClaim. ex: "20018183"
     - `:claimed_bank_code` [string]: bank_code of the account donating the PixKey. ex: "20018183".
+    - `:agent` [string, default nil]: deprecated, use `:flow` instead.
+    - `:bank_code` [string, default nil]: deprecated, use `:claimer_bank_code` instead.
     - `:created` [DateTime]: creation DateTime for the PixClaim. ex: ~U[2020-3-10 10:30:0:0]
     - `:updated` [DateTime]: update DateTime for the PixClaim. ex: ~U[2020-3-10 10:30:0:0]
   """
@@ -53,10 +59,14 @@ defmodule StarkInfra.PixClaim do
     :name,
     :tax_id,
     :key_id,
+    :tags,
     :id,
     :status,
     :type,
     :key_type,
+    :bacen_id,
+    :flow,
+    :claimer_bank_code,
     :agent,
     :bank_code,
     :claimed_bank_code,
@@ -158,9 +168,12 @@ defmodule StarkInfra.PixClaim do
     - `:status` [list of strings, default nil]: filter for status of retrieved structs. Options: "created", "failed", "delivered", "confirmed", "success", "canceled".
     - `:ids` [list of strings, default nil]: list of ids to filter retrieved structs. ex: ["5656565656565656", "4545454545454545"]
     - `:type` [strings, default nil]: filter for the type of retrieved PixClaims. Options: "ownership" or "portability".
-    - `:agent` [string, default nil]: filter for the agent of retrieved PixClaims. Options: "claimer" or "claimed".
+    - `:agent` [string, default nil]: deprecated, use `:flow` instead.
     - `:key_type` [string, default nil]: filter for the PixKey type of retrieved PixClaims. Options: "cpf", "cnpj", "phone", "email", "evp".
     - `:key_id` [string, default nil]: filter PixClaims linked to a specific PixKey id. Example: "+5511989898989".
+    - `:bacen_id` [string, default nil]: unique transaction id returned from Central Bank. ex: "ccf9bd9c-e99d-999e-bab9-b999ca999f99"
+    - `:flow` [string, default nil]: filter for the direction of retrieved PixClaims. Options: "in" or "out".
+    - `:tags` [list of strings, default nil]: list of strings to filter retrieved structs. ex: ["travel", "food"]
     - `:user` [Organization/Project, default nil]: Organization or Project struct returned from StarkInfra.project(). Only necessary if default project or organization has not been set in configs.
 
   ## Return:
@@ -176,6 +189,9 @@ defmodule StarkInfra.PixClaim do
     agent: binary,
     key_type: binary,
     key_id: binary,
+    bacen_id: binary,
+    flow: binary,
+    tags: [binary],
     user: Project.t() | Organization.t() | nil
   ) ::
     {:ok, [PixClaim.t()]} | {:error, [error: Error.t()]}
@@ -199,6 +215,9 @@ defmodule StarkInfra.PixClaim do
     agent: binary,
     key_type: binary,
     key_id: binary,
+    bacen_id: binary,
+    flow: binary,
+    tags: [binary],
     user: Project.t() | Organization.t() | nil
   ) :: any
   def query!(options \\ []) do
@@ -220,9 +239,12 @@ defmodule StarkInfra.PixClaim do
     - `:status` [list of strings, default nil]: filter for status of retrieved structs. Options: "created", "failed", "delivered", "confirmed", "success", "canceled"
     - `:ids` [list of strings, default nil]: list of ids to filter retrieved structs. ex: ["5656565656565656", "4545454545454545"]
     - `:type` [strings, default nil]: filter for the type of retrieved PixClaims. Options: "ownership" or "portability".
-    - `:agent` [string, default nil]: filter for the agent of retrieved PixClaims. Options: "claimer" or "claimed".
+    - `:agent` [string, default nil]: deprecated, use `:flow` instead.
     - `:key_type` [string, default nil]: filter for the PixKey type of retrieved PixClaims. Options: "cpf", "cnpj", "phone", "email", "evp".
     - `:key_id` [string, default nil]: filter PixClaims linked to a specific PixKey id. Example: "+5511989898989".
+    - `:bacen_id` [string, default nil]: unique transaction id returned from Central Bank. ex: "ccf9bd9c-e99d-999e-bab9-b999ca999f99"
+    - `:flow` [string, default nil]: filter for the direction of retrieved PixClaims. Options: "in" or "out".
+    - `:tags` [list of strings, default nil]: list of strings to filter retrieved structs. ex: ["travel", "food"]
     - `:user` [Organization/Project, default nil]: Organization or Project struct returned from StarkInfra.project(). Only necessary if default project or organization has not been set in configs.
 
   ## Return:
@@ -240,6 +262,9 @@ defmodule StarkInfra.PixClaim do
     agent: binary,
     key_type: binary,
     key_id: binary,
+    bacen_id: binary,
+    flow: binary,
+    tags: [binary],
     user: Project.t() | Organization.t() | nil
   ) ::
     {:ok, {binary, [PixClaim.t()]}} |
@@ -265,6 +290,9 @@ defmodule StarkInfra.PixClaim do
     agent: binary,
     key_type: binary,
     key_id: binary,
+    bacen_id: binary,
+    flow: binary,
+    tags: [binary],
     user: Project.t() | Organization.t() | nil
   ) :: any
   def page!(options \\ []) do
@@ -346,10 +374,14 @@ defmodule StarkInfra.PixClaim do
       name: json[:name],
       tax_id: json[:tax_id],
       key_id: json[:key_id],
+      tags: json[:tags],
       id: json[:id],
       status: json[:status],
       type: json[:type],
       key_type: json[:key_type],
+      bacen_id: json[:bacen_id],
+      flow: json[:flow],
+      claimer_bank_code: json[:claimer_bank_code],
       agent: json[:agent],
       bank_code: json[:bank_code],
       claimed_bank_code: json[:claimed_bank_code],
