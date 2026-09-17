@@ -13,6 +13,8 @@ Given a version number MAJOR.MINOR.PATCH, increment:
 
 ## [Unreleased]
 ### Added
+- PixPullRequest resource
+- PixPullRequest.Log sub-resource
 - Ledger resource
 - Ledger.Rule sub-resource
 - Ledger.Log sub-resource

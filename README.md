@@ -50,6 +50,7 @@ This SDK version is compatible with the Stark Infra API v2.
     - [PixUser](#get-a-pixuser): Get fraud statistics of a user
     - [PixChargeback](#create-pixchargebacks): Create Pix Chargeback requests
     - [PixDomain](#query-pixdomains): View registered SPI participants certificates
+    - [PixPullRequest](#create-pixpullrequests): Charge against an active PixPullSubscription
     - [PixDispute](#create-pixdisputes): Create Pix Dispute requests
   - [Credit Note](#credit-note)
     - [CreditNote](#create-creditnotes): Create credit notes
@@ -1700,6 +1701,88 @@ You can also get a specific log by its id.
 
 ```elixir
 StarkInfra.PixDispute.Log.get!("5155165527080960") 
+|> IO.inspect
+```
+
+### Create PixPullRequests
+
+You can create PixPullRequests to trigger automatic debits against an active PixPullSubscription.
+
+```elixir
+StarkInfra.PixPullRequest.create!([
+  %StarkInfra.PixPullRequest{
+    amount: 11234,
+    due: ~U[2026-04-15 12:00:00Z],
+    end_to_end_id: "E00002649202201172211u34srod19le",
+    receiver_account_number: "876543-2",
+    receiver_account_type: "checking",
+    receiver_bank_code: "20018183",
+    reconciliation_id: "cycle-202604",
+    subscription_id: "5656565656565656",
+    tags: ["monthly"]
+  }
+])
+|> IO.inspect
+```
+
+### Query PixPullRequests
+
+```elixir
+StarkInfra.PixPullRequest.query!(
+  limit: 10,
+  after: "2026-01-01",
+  before: "2026-04-30",
+  status: ["created", "success"],
+  subscription_ids: ["5656565656565656"]
+)
+|> Enum.take(10)
+|> IO.inspect
+```
+
+### Get a PixPullRequest
+
+```elixir
+StarkInfra.PixPullRequest.get!("5656565656565656")
+|> IO.inspect
+```
+
+### Update a PixPullRequest
+
+Change the status to `"scheduled"` or `"denied"`. When denying, `:reason` is required.
+
+```elixir
+StarkInfra.PixPullRequest.update!(
+  "5656565656565656",
+  "denied",
+  reason: "senderAccountClosed"
+)
+|> IO.inspect
+```
+
+### Cancel a PixPullRequest
+
+```elixir
+StarkInfra.PixPullRequest.cancel!("5656565656565656", "senderUserRequested")
+|> IO.inspect
+```
+
+### Query PixPullRequest logs
+
+```elixir
+StarkInfra.PixPullRequest.Log.query!(
+  limit: 50,
+  after: "2026-01-01",
+  before: "2026-04-30",
+  request_ids: ["5656565656565656"]
+)
+|> Enum.take(50)
+|> IO.inspect
+```
+
+### Get a PixPullRequest log
+
+```elixir
+StarkInfra.PixPullRequest.Log.get!("5155165527080960")
 |> IO.inspect
 ```
 
