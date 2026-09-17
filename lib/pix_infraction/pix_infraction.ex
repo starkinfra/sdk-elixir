@@ -20,24 +20,26 @@ defmodule StarkInfra.PixInfraction do
   ## Parameters (required):
     - `:reference_id` [string]: end_to_end_id or return_id of the transaction being reported. ex: "E20018183202201201450u34sDGd19lz"
     - `:type` [string]: type of infraction report. Options: "fraud", "reversal", "reversalChargeback"
+    - `:method` [string]: method of Pix Infraction. Options: "scam", "unauthorized", "coercion", "invasion", "other", "unknown"
+    - `:operator_email` [string]: contact email of the operator responsible for the PixInfraction.
+    - `:operator_phone` [string]: contact phone number of the operator responsible for the PixInfraction.
 
   ## Parameters (optional):
     - `:description` [string, default nil]: description for any details that can help with the infraction investigation.
+    - `:tags` [list of strings, default nil]: list of strings for tagging. ex: ["travel", "food"]
+    - `:fraud_type` [string, default nil]: type of Pix Fraud. Options: "identity", "mule", "scam", "unknown", "other"
 
   ## Attributes (return-only):
     - id [string]: unique id returned when the PixInfraction is created. ex: "5656565656565656"
     - credited_bank_code [string]: bank_code of the credited Pix participant in the reported transaction. ex: "20018183"
     - debited_bank_code [string]: bank_code of the debited Pix participant in the reported transaction. ex: "20018183"
-    - agent [string]: Options: "reporter" if you created the PixInfraction, "reported" if you received the PixInfraction.
+    - agent [string, default nil]: deprecated, use `:flow` instead.
     - analysis [string]: analysis that led to the result.
     - bacen_id [string]: central bank's unique UUID that identifies the infraction report.
     - reported_by [string]: agent that reported the PixInfraction. Options: "debited", "credited".
     - result [string]: result after the analysis of the PixInfraction by the receiving party. Options: "agreed", "disagreed"
     - status [string]: current PixInfraction status. Options: "created", "failed", "delivered", "closed", "canceled".
     - fraud_id [string]: id of the Pix fraud marking associated with the infraction.
-    - fraud_type [string]: type of fraud associated with the infraction. Options: "identity", "mule", "scam", "other", "unknown".
-    - operator_email [string]: contact email of the operator responsible for the infraction.
-    - operator_phone [string]: contact phone number of the operator responsible for the infraction.
     - dispute_id [string]: id of the Pix dispute associated with the infraction.
     - amount [integer]: amount in cents related to the infraction. ex: 1234 (= R$ 12.34)
     - flow [string]: direction of the infraction report. Options: "out" (reported by you), "in" (reported against you).
@@ -51,7 +53,12 @@ defmodule StarkInfra.PixInfraction do
   defstruct [
     :reference_id,
     :type,
+    :method,
+    :operator_email,
+    :operator_phone,
     :description,
+    :tags,
+    :fraud_type,
     :id,
     :credited_bank_code,
     :debited_bank_code,
@@ -60,6 +67,10 @@ defmodule StarkInfra.PixInfraction do
     :bacen_id,
     :reported_by,
     :result,
+    :fraud_id,
+    :flow,
+    :amount,
+    :dispute_id,
     :status,
     :created,
     :updated
@@ -159,6 +170,7 @@ defmodule StarkInfra.PixInfraction do
     - `:status` [list of strings, default nil]: filter for status of retrieved objects. ex: ["created", "failed", "delivered", "closed", "canceled"]
     - `:ids` [list of strings, default nil]: list of ids to filter retrieved objects. ex: ["5656565656565656", "4545454545454545"]
     - `:type` [list of strings, default nil]: filter for the type of retrieved PixInfractions. Options: "fraud", "reversal", "reversalChargeback"
+    - `:tags` [list of strings, default nil]: list of strings for tagging. ex: ["travel", "food"]
     - `:user` [Organization/Project, default nil]: Organization or Project struct returned from StarkInfra.project(). Only necessary if default project or organization has not been set in configs.
 
   ## Return:
@@ -171,6 +183,7 @@ defmodule StarkInfra.PixInfraction do
     status: [binary] | nil,
     ids: [binary] | nil,
     type: [binary] | nil,
+    tags: [binary] | nil,
     user: Organization.t() | Project.t() | nil
   ) ::
     ({:cont, {:ok, [PixInfraction.t() | map]}} |
@@ -195,6 +208,7 @@ defmodule StarkInfra.PixInfraction do
     status: [binary] | nil,
     ids: [binary] | nil,
     type: [binary] | nil,
+    tags: [binary] | nil,
     user: Organization.t() | Project.t() | nil
   ) :: any
   def query!(options \\ []) do
@@ -216,6 +230,7 @@ defmodule StarkInfra.PixInfraction do
     - `:status` [list of strings, default nil]: filter for status of retrieved objects. ex: ["created", "failed", "delivered", "closed", "canceled"]
     - `:ids` [list of strings, default nil]: list of ids to filter retrieved objects. ex: ["5656565656565656", "4545454545454545"]
     - `:type` [list of strings, default nil]: filter for the type of retrieved PixInfractions. Options: "fraud", "reversal", "reversalChargeback"
+    - `:tags` [list of strings, default nil]: list of strings for tagging. ex: ["travel", "food"]
     - `:user` [Organization/Project, default nil]: Organization or Project struct returned from StarkInfra.project(). Only necessary if default project or organization has not been set in configs.
 
   ## Return:
@@ -229,6 +244,7 @@ defmodule StarkInfra.PixInfraction do
     status: [binary] | nil,
     ids: [binary] | nil,
     type: [binary] | nil,
+    tags: [binary] | nil,
     user: Organization.t() | Project.t() | nil
   ) ::
     {:ok, {binary, [PixInfraction.t() | map]}} |
@@ -251,6 +267,7 @@ defmodule StarkInfra.PixInfraction do
     status: [binary] | nil,
     ids: [binary] | nil,
     type: [binary] | nil,
+    tags: [binary] | nil,
     user: Organization.t() | Project.t() | nil
   ) :: any
   def page!(options \\ []) do
@@ -280,6 +297,7 @@ defmodule StarkInfra.PixInfraction do
   @spec update(
     binary,
     result: binary,
+    fraud_type: binary | nil,
     analysis: binary | nil,
     user: Organization.t() | Project.t() | nil
   ) ::
@@ -300,6 +318,7 @@ defmodule StarkInfra.PixInfraction do
   @spec update!(
     binary,
     result: binary,
+    fraud_type: binary | nil,
     analysis: binary | nil,
     user: Organization.t() | Project.t() | nil
   ) :: any
@@ -366,7 +385,12 @@ defmodule StarkInfra.PixInfraction do
     %PixInfraction{
       reference_id: json[:reference_id],
       type: json[:type],
+      method: json[:method],
+      operator_email: json[:operator_email],
+      operator_phone: json[:operator_phone],
       description: json[:description],
+      tags: json[:tags],
+      fraud_type: json[:fraud_type],
       id: json[:id],
       credited_bank_code: json[:credited_bank_code],
       debited_bank_code: json[:debited_bank_code],
@@ -375,6 +399,10 @@ defmodule StarkInfra.PixInfraction do
       bacen_id: json[:bacen_id],
       reported_by: json[:reported_by],
       result: json[:result],
+      fraud_id: json[:fraud_id],
+      flow: json[:flow],
+      amount: json[:amount],
+      dispute_id: json[:dispute_id],
       status: json[:status],
       created: json[:created] |> Check.datetime(),
       updated: json[:updated] |> Check.datetime()
