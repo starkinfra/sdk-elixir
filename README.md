@@ -57,6 +57,7 @@ This SDK version is compatible with the Stark Infra API v2.
     - [PixPullSubscription](#create-pixpullsubscriptions): Set up recurring Pix debit authorizations
     - [PixPullRequest](#create-pixpullrequests): Charge against an active PixPullSubscription
     - [PixDispute](#create-pixdisputes): Create Pix Dispute requests
+    - [PixInternalTransactionReport](#create-pixinternaltransactionreports): Report internal transactions to the Central Bank
   - [Credit Note](#credit-note)
     - [CreditNote](#create-creditnotes): Create credit notes
   - [Credit Holmes](#credit-holmes)
@@ -2243,6 +2244,84 @@ Inbound PixPullSubscription events will be POSTed at your registered endpoint. Y
 )
 
 IO.inspect(subscription)
+```
+
+### Create PixInternalTransactionReports
+
+Transactions that happen internally, outside of the SPI, must be reported to the
+Central Bank so they are reflected in your statements. You can do so by creating
+PixInternalTransactionReports:
+
+```elixir
+StarkInfra.PixInternalTransactionReport.create!(
+  [
+    %StarkInfra.PixInternalTransactionReport{
+      amount: 10000,
+      created: ~U[2024-01-01 12:00:00Z],
+      end_to_end_id: "E12345678202401011234567890123456",
+      method: "manual",
+      reference_type: "request",
+      sender_account_number: "12345",
+      sender_branch_code: "0001",
+      sender_account_type: "checking",
+      sender_bank_code: "12345678",
+      sender_tax_id: "123.456.789-01",
+      receiver_account_number: "67890",
+      receiver_branch_code: "0001",
+      receiver_account_type: "savings",
+      receiver_bank_code: "87654321",
+      receiver_tax_id: "987.654.321-00",
+      receiver_key_id: "user@example.com"
+    }
+  ]
+)
+|> IO.inspect
+```
+
+### Query PixInternalTransactionReports
+
+You can query multiple PixInternalTransactionReports according to filters.
+
+```elixir
+StarkInfra.PixInternalTransactionReport.query!(
+  after: Date.utc_today |> Date.add(-30),
+  before: Date.utc_today |> Date.add(-1),
+  status: ["success"]
+)
+|> Enum.take(10)
+|> IO.inspect
+```
+
+### Get a PixInternalTransactionReport
+
+After its creation, information on a PixInternalTransactionReport may be retrieved by its id.
+
+```elixir
+StarkInfra.PixInternalTransactionReport.get!("5656565656565656")
+|> IO.inspect
+```
+
+### Query PixInternalTransactionReport logs
+
+You can query PixInternalTransactionReport logs to better understand their life cycles.
+
+```elixir
+StarkInfra.PixInternalTransactionReport.Log.query!(
+  limit: 50,
+  after: Date.utc_today |> Date.add(-30),
+  before: Date.utc_today |> Date.add(-1)
+)
+|> Enum.take(50)
+|> IO.inspect
+```
+
+### Get a PixInternalTransactionReport log
+
+You can also get a specific log by its id.
+
+```elixir
+StarkInfra.PixInternalTransactionReport.Log.get!("5155165527080960")
+|> IO.inspect
 ```
 
 ## Credit Note
