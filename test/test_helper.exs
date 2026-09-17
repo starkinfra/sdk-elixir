@@ -27,6 +27,8 @@ ExUnit.start(
     # :pix_dispute_log,
     # :pix_pull_request,
     # :pix_pull_request_log,
+    # :pix_pull_subscription,
+    # :pix_pull_subscription_log,
     # :pix_infraction,
     # :pix_infraction_log,
     # :pix_domain,
