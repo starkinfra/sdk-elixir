@@ -36,6 +36,8 @@ Given a version number MAJOR.MINOR.PATCH, increment:
 - IssuingRestock.Log sub-resource
 - PixFraud resource
 - PixFraud.Log sub-resource
+- PixPullSubscription resource
+- PixPullSubscription.Log sub-resource
 - IssuingStock resource
 - IssuingStock.Log sub-resource
 - IssuingRule missing parameters
@@ -51,6 +53,7 @@ Given a version number MAJOR.MINOR.PATCH, increment:
 ### Fixed
 - query parameters in post requests
 - ssl and public_key applications missing from extra_applications, breaking every request on OTP 26+
+- query parameters in delete requests
 ### Removed
 - IssuingAuthorization resource
 - category parameter of IssuingProduct resource

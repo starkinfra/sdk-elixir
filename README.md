@@ -50,6 +50,7 @@ This SDK version is compatible with the Stark Infra API v2.
     - [PixUser](#get-a-pixuser): Get fraud statistics of a user
     - [PixChargeback](#create-pixchargebacks): Create Pix Chargeback requests
     - [PixDomain](#query-pixdomains): View registered SPI participants certificates
+    - [PixPullSubscription](#create-pixpullsubscriptions): Set up recurring Pix debit authorizations
     - [PixPullRequest](#create-pixpullrequests): Charge against an active PixPullSubscription
     - [PixDispute](#create-pixdisputes): Create Pix Dispute requests
   - [Credit Note](#credit-note)
@@ -1784,6 +1785,124 @@ StarkInfra.PixPullRequest.Log.query!(
 ```elixir
 StarkInfra.PixPullRequest.Log.get!("5155165527080960")
 |> IO.inspect
+```
+
+### Create PixPullSubscriptions
+
+You can create recurring Pix debit authorizations to allow a receiver to pull a series of Pix payments from a sender.
+
+```elixir
+StarkInfra.PixPullSubscription.create!([
+  %StarkInfra.PixPullSubscription{
+    bacen_id: "RR2017032900000000000000003",
+    external_id: "my-subscription-001",
+    installment_start: ~U[2026-04-01 12:00:00.000000Z],
+    interval: "month",
+    receiver_name: "Edward Stark",
+    receiver_tax_id: "20.018.183/0001-80",
+    receiver_bank_code: "20018183",
+    reference_code: "contract-202604",
+    sender_account_number: "876543-2",
+    sender_bank_code: "20018183",
+    sender_branch_code: "1357-9",
+    sender_city_code: "3550308",
+    sender_tax_id: "012.345.678-90",
+    type: "push",
+    amount: 11234,
+    description: "Monthly subscription",
+    tags: ["employees", "monthly"]
+  }
+])
+|> IO.inspect
+```
+
+### Query PixPullSubscriptions
+
+You can query multiple Pix pull subscriptions according to filters.
+
+```elixir
+StarkInfra.PixPullSubscription.query!(
+  limit: 10,
+  after: "2026-01-01",
+  before: "2026-04-30",
+  status: ["active"],
+  tags: ["monthly"]
+)
+|> Enum.take(10)
+|> IO.inspect
+```
+
+### Get a PixPullSubscription
+
+After its creation, information on a Pix pull subscription may be retrieved by its id.
+
+```elixir
+StarkInfra.PixPullSubscription.get!("5656565656565656")
+|> IO.inspect
+```
+
+### Update a PixPullSubscription
+
+You can update a Pix pull subscription by passing its id.
+
+When patching `status` to "confirmed", `sender_city_code` MUST be present in the patch.
+
+```elixir
+StarkInfra.PixPullSubscription.update!(
+  "5656565656565656",
+  "confirmed",
+  sender_city_code: "3550308"
+)
+|> IO.inspect
+```
+
+### Cancel a PixPullSubscription
+
+You can cancel a Pix pull subscription by passing its id and a reason. The reason is sent as a query parameter on the DELETE request.
+
+```elixir
+StarkInfra.PixPullSubscription.cancel!(
+  "5656565656565656",
+  reason: "accountClosed"
+)
+|> IO.inspect
+```
+
+### Query PixPullSubscription logs
+
+You can query Pix pull subscription logs to better understand Pix pull subscription life cycles.
+
+```elixir
+StarkInfra.PixPullSubscription.Log.query!(
+  limit: 50,
+  after: "2026-01-01",
+  before: "2026-04-30",
+  subscription_ids: ["5656565656565656"]
+)
+|> Enum.take(50)
+|> IO.inspect
+```
+
+### Get a PixPullSubscription log
+
+You can also get a specific log by its id.
+
+```elixir
+StarkInfra.PixPullSubscription.Log.get!("5155165527080960")
+|> IO.inspect
+```
+
+### Process inbound PixPullSubscription events
+
+Inbound PixPullSubscription events will be POSTed at your registered endpoint. You can use the `parse` function to verify the digital signature and reconstruct the PixPullSubscription object.
+
+```elixir
+{:ok, {subscription, cache_pid}} = StarkInfra.PixPullSubscription.parse(
+  content: "{\"bacenId\": \"RR2017032900000000000000003\", ...}",
+  signature: "MEUCIQC7FVhXdripx/aXg5yNLxmNoZlehpyvX3QYDXJ8o3PAZQIgVe1omKFh7Vd54ML4U1z7L+kpx+GHl+G2XLeFTLZeBJk="
+)
+
+IO.inspect(subscription)
 ```
 
 ## Credit Note
