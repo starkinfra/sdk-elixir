@@ -37,6 +37,8 @@ Given a version number MAJOR.MINOR.PATCH, increment:
 - IssuingStock resource
 - IssuingStock.Log sub-resource
 - IssuingRule missing parameters
+- PixUser resource
+- PixUser.Statistics sub-resource
 ### Changed
 - IssuingBin resource to IssuingProduct
 - settlement parameter to funding_type and client parameter to holder_type of IssuingProduct
