@@ -24,28 +24,34 @@ defmodule StarkInfra.BrcodePreview do
 
   ## Parameters (optional):
     - `:end_to_end_id` [string, default nil]: central bank's unique transaction id. ex: "E79457883202101262140HHX553UPqeq"
+    - `:scheduled` [DateTime, default nil]: date the payment is scheduled to be processed; affects the preview values for due dynamic QR codes. ex: ~U[2020-03-10 00:00:00Z]
 
   ## Attributes (return-only):
     - `:account_number` [string]: payment receiver account number. ex: "1234567"
-    - `:account_type` [string]: payment receiver account type. ex: "checking", "savings", "salary" or "payment"
+    - `:account_type` [string]: payment receiver account type. Options: "checking", "savings", "salary" or "payment"
     - `:amount` [integer]: amount in cents this BR Code is expecting to receive. 0 means any value is accepted. ex: 123 (= R$ 1.23)
-    - `:amount_type` [string]: whether the BR Code's amount is fixed or freely chosen at payment time. ex: "fixed" or "custom"
+    - `:amount_type` [string]: amount type of the BR Code. If the amount type is "custom" the BR Code's amount can be changed by the sender at the moment of payment. Options: "fixed" or "custom"
     - `:bank_code` [string]: payment receiver bank code. ex: "20018183"
     - `:branch_code` [string]: payment receiver branch code. ex: "0001"
     - `:cash_amount` [integer]: amount in cents to be withdrawn at the cashier (Pix Saque / Pix Troco). ex: 1000 (= R$ 10.00)
     - `:cashier_bank_code` [string]: cashier's bank code. ex: "20018183"
-    - `:cashier_type` [string]: cashier's type. ex: "merchant", "participant" or "other"
+    - `:cashier_type` [string]: cashier's type. Options: "merchant", "participant" or "other"
+    - `:data` [list of maps]: additional data of the dynamic QR code, in key/value pairs. ex: [%{"key" => "additional-info", "value" => "order #12345"}]
+    - `:description` [string]: description of the payment.
     - `:discount_amount` [integer]: discount value calculated over nominal_amount. ex: 3000
     - `:due` [DateTime]: BR Code due date. ex: ~U[2020-03-26 19:32:35.418698Z]
+    - `:expired` [DateTime]: date and time after which the dynamic QR code is considered expired. ex: ~U[2022-02-01 00:00:00Z]
     - `:fine_amount` [integer]: fine value calculated over nominal_amount. ex: 20000
     - `:interest_amount` [integer]: interest value calculated over nominal_amount. ex: 10000
+    - `:jws` [string]: JWS of the dynamic QR code. Returned only when "jws" is passed in the expand query parameter. ex: "eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9..."
     - `:key_id` [string]: receiver's Pix key id. ex: "+5511989898989"
     - `:name` [string]: payment receiver name. ex: "Tony Stark"
     - `:nominal_amount` [integer]: BR Code emission amount, before fines, fees and discounts. ex: 1234 (= R$ 12.34)
     - `:reconciliation_id` [string]: reconciliation id linked to this payment. Dynamic BR Codes carry 26-35 alphanumeric chars; static BR Codes carry up to 25. ex: "cd65c78aeb6543eaaa0170f68bd741ee"
     - `:reduction_amount` [integer]: reduction value to discount from nominal_amount. ex: 1000
-    - `:scheduled` [DateTime]: scheduled execution datetime of the payment. ex: ~U[2020-03-26 19:32:35.418698Z]
-    - `:status` [string]: BR Code lifecycle state. ex: "active", "paid", "canceled" or "unknown"
+    - `:sender_final_name` [string]: full name of the final sender (the debtor). ex: "Tony Stark"
+    - `:sender_final_tax_id` [string]: CPF or CNPJ of the final sender (the debtor). ex: "012.345.678-90"
+    - `:status` [string]: payment status. Options: "created", "overdue", "paid", "voided", "canceled" or "expired"
     - `:subscription` [BrcodePreview.Subscription]: embedded subscription snapshot when the BR Code carries Pix-recurring-debit metadata. nil for non-subscription BR Codes.
     - `:tax_id` [string]: payment receiver tax id. ex: "012.345.678-90"
   """
@@ -63,16 +69,22 @@ defmodule StarkInfra.BrcodePreview do
     :cash_amount,
     :cashier_bank_code,
     :cashier_type,
+    :data,
+    :description,
     :discount_amount,
     :due,
+    :expired,
     :fine_amount,
     :interest_amount,
+    :jws,
     :key_id,
     :name,
     :nominal_amount,
     :reconciliation_id,
     :reduction_amount,
     :scheduled,
+    :sender_final_name,
+    :sender_final_tax_id,
     :status,
     :subscription,
     :tax_id
@@ -121,10 +133,6 @@ defmodule StarkInfra.BrcodePreview do
     )
   end
 
-  defp parse_subscription(nil), do: nil
-  defp parse_subscription(value) when value == %{}, do: nil
-  defp parse_subscription(value), do: API.from_api_json(value, &Subscription.resource_maker/1)
-
   @doc false
   def resource() do
     {
@@ -148,19 +156,30 @@ defmodule StarkInfra.BrcodePreview do
       cash_amount: json[:cash_amount],
       cashier_bank_code: json[:cashier_bank_code],
       cashier_type: json[:cashier_type],
+      data: json[:data],
+      description: json[:description],
       discount_amount: json[:discount_amount],
       due: json[:due] |> Check.datetime(),
+      expired: json[:expired] |> Check.datetime(),
       fine_amount: json[:fine_amount],
       interest_amount: json[:interest_amount],
+      jws: json[:jws],
       key_id: json[:key_id],
       name: json[:name],
       nominal_amount: json[:nominal_amount],
       reconciliation_id: json[:reconciliation_id],
       reduction_amount: json[:reduction_amount],
       scheduled: json[:scheduled] |> Check.datetime(),
+      sender_final_name: json[:sender_final_name],
+      sender_final_tax_id: json[:sender_final_tax_id],
       status: json[:status],
       subscription: parse_subscription(json[:subscription]),
       tax_id: json[:tax_id]
     }
   end
+
+  defp parse_subscription(nil), do: nil
+  defp parse_subscription(value) when value == %{}, do: nil
+  defp parse_subscription(value), do: API.from_api_json(value, &Subscription.resource_maker/1)
+
 end

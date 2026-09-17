@@ -8,7 +8,7 @@ defmodule StarkInfraTest.Utils.StaticBrcode do
     {:ok, body} =
       Request.fetch(
         :post,
-        "/static-brcode",
+        "static-brcode",
         payload: %{
           brcodes: [
             %{name: "Tony Stark", keyId: key_id, city: "Sao Paulo"}

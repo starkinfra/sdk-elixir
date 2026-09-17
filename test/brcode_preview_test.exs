@@ -7,6 +7,9 @@ defmodule StarkInfraTest.BrcodePreview do
     preview = previews |> hd
 
     assert !is_nil(preview.id)
+    assert preview.key_id == "+5511989890096"
+    assert preview.amount_type in ["fixed", "custom"]
+    assert preview.status == "created"
   end
 
   @tag :brcode_preview
@@ -16,6 +19,9 @@ defmodule StarkInfraTest.BrcodePreview do
       |> hd
 
     assert !is_nil(preview.id)
+    assert preview.key_id == "+5511989890096"
+    assert !is_nil(preview.name)
+    assert preview.status == "created"
   end
 
   def example_brcode_preview() do

@@ -20,7 +20,7 @@ defmodule StarkInfra.BrcodePreview.Subscription do
     - `:description` [string]: additional information delivered to the sender.
     - `:installment_end` [DateTime]: end datetime of settlements allowed for this subscription. ex: ~U[2020-03-26 19:32:35.418698Z]
     - `:installment_start` [DateTime]: start datetime of settlements allowed for this subscription. ex: ~U[2020-03-26 19:32:35.418698Z]
-    - `:interval` [string]: cycle definition exposed verbatim from the server. ex: "monthly"
+    - `:interval` [string]: interval between two pulls of this subscription. Options: "week", "month", "quarter", "semester" or "year"
     - `:pull_retry_limit` [integer]: max number of retries the receiver may issue for a single failed pull cycle.
     - `:receiver_bank_code` [string]: receiver's bank institution code.
     - `:receiver_name` [string]: receiver's full name.
@@ -28,8 +28,8 @@ defmodule StarkInfra.BrcodePreview.Subscription do
     - `:reference_code` [string]: commercial-relation identifier (contract number, order id, or client code).
     - `:sender_final_name` [string]: final sender name when the sender differs from the originating institution.
     - `:sender_final_tax_id` [string]: final sender tax id when distinct from the originating sender.
-    - `:status` [string]: current lifecycle state of the subscription snapshot, verbatim from the server. ex: "created", "active", "canceled" or "failed"
-    - `:type` [string]: subscription journey type, verbatim from the server. ex: "push", "subscriptionAndPayment"
+    - `:status` [string]: status of the recurring authorization, read from its latest update at the Central Bank. Options: "created", "approved", "denied", "expired" or "canceled"
+    - `:type` [string]: how this BR Code combines payment and recurring authorization. Options: "qrcode" (authorization only, no payment data: name, tax_id, bank_code, branch_code, account_number, account_type, payer_id, status and amount_type come back empty), "qrcodeAndPayment" (immediate payment plus authorization) or "paymentAndOrQrcode" (static or due BR Code plus authorization)
     - `:updated` [DateTime]: latest update datetime of the subscription. ex: ~U[2020-03-26 19:32:35.418698Z]
   """
   defstruct [
