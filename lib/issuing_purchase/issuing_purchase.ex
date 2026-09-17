@@ -120,6 +120,14 @@ defmodule StarkInfra.IssuingPurchase do
     :end_to_end_id,
     :status,
     :tags,
+    :description,
+    :confirmed,
+    :metadata,
+    :zip_code,
+    :merchant_category_number,
+    :merchant_category_type,
+    :product_id,
+    :installment_count,
     :updated,
     :created,
     :purpose,
@@ -293,6 +301,53 @@ defmodule StarkInfra.IssuingPurchase do
     )
   end
 
+  @doc """
+  Update an IssuingPurchase by passing id.
+
+  ## Parameters (required):
+    - `:id` [string]: IssuingPurchase id. ex: '5656565656565656'
+
+  ## Parameters (optional):
+    - `:tags` [list of strings, default nil]: list of strings for tagging. ex: ["tony", "stark"]
+    - `:description` [string, default nil]: new IssuingPurchase description. Max of 140 characters. ex: "Office Supplies"
+    - `:user` [Organization/Project, default nil]: Organization or Project struct returned from StarkInfra.project(). Only necessary if default project or organization has not been set in configs.
+
+  ## Return:
+    - target IssuingPurchase with updated attributes
+  """
+  @spec update(
+    id: binary,
+    tags: [binary] | nil,
+    description: binary | nil,
+    user: Organization.t() | Project.t() | nil
+  ) ::
+    {:ok, IssuingPurchase.t()} |
+    {:error, [Error.t()]}
+  def update(id, parameters \\ []) do
+    Rest.patch_id(
+      resource(),
+      id,
+      parameters
+    )
+  end
+
+  @doc """
+  Same as update(), but it will unwrap the error tuple and raise in case of errors.
+  """
+  @spec update!(
+    id: binary,
+    tags: [binary] | nil,
+    description: binary | nil,
+    user: Organization.t() | Project.t() | nil
+  ) :: any
+  def update!(id, parameters \\ []) do
+    Rest.patch_id!(
+      resource(),
+      id,
+      parameters
+    )
+  end
+
   @doc false
   def resource() do
     {
@@ -329,6 +384,14 @@ defmodule StarkInfra.IssuingPurchase do
       end_to_end_id: json[:end_to_end_id],
       status: json[:status],
       tags: json[:tags],
+      description: json[:description],
+      confirmed: json[:confirmed] |> Check.datetime(),
+      metadata: json[:metadata],
+      zip_code: json[:zip_code],
+      merchant_category_number: json[:merchant_category_number],
+      merchant_category_type: json[:merchant_category_type],
+      product_id: json[:product_id],
+      installment_count: json[:installment_count],
       updated: json[:updated] |> Check.datetime(),
       created: json[:created] |> Check.datetime(),
       purpose: json[:purpose],

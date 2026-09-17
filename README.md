@@ -578,6 +578,18 @@ StarkInfra.IssuingPurchase.get!("5155165527080960")
 |> IO.inspect
 ```
 
+### Update an IssuingPurchase
+
+You can update a specific IssuingPurchase by its id.
+
+```elixir
+StarkInfra.IssuingPurchase.update!(
+  "5155165527080960",
+  description: "Dinner",
+  tags: ["customer-x", "reimbursement"]
+) |> IO.inspect
+```
+
 ### Query IssuingPurchase logs
 
 Logs are pretty important to understand the life cycle of a purchase.

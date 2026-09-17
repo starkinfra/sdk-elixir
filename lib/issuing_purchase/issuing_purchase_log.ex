@@ -19,6 +19,7 @@ defmodule StarkInfra.IssuingPurchase.Log do
   ## Attributes:
     - `:id` [string]: unique id returned when the log is created. ex: "5656565656565656"
     - `:purchase` [IssuingPurchase]: IssuingPurchase entity to which the log refers to.
+    - `:installment` [integer]: number of the installment that is being confirmed.
     - `:issuing_transaction_id` [string]: transaction ID related to the IssuingCard.
     - `:errors` [list of strings]: list of errors linked to this IssuingPurchase event
     - `:type` [string]: type of the IssuingPurchase event which triggered the log creation. ex: "approved", "canceled", "confirmed", "denied", "reversed", "voided".
@@ -35,6 +36,7 @@ defmodule StarkInfra.IssuingPurchase.Log do
   defstruct [
     :id,
     :purchase,
+    :installment,
     :issuing_transaction_id,
     :errors,
     :type,
@@ -206,6 +208,7 @@ defmodule StarkInfra.IssuingPurchase.Log do
       type: json[:type],
       errors: json[:errors],
       purchase: json[:purchase],
+      installment: json[:installment],
       issuing_transaction_id: json[:issuing_transaction_id],
       created: json[:created] |> Check.datetime(),
     }

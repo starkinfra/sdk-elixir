@@ -52,6 +52,8 @@ Given a version number MAJOR.MINOR.PATCH, increment:
 - tags, bacen_id, flow and claimer_bank_code attributes to PixClaim resource
 - method, operator_email, operator_phone, tags, fraud_type, fraud_id, flow, amount and dispute_id attributes to PixInfraction resource
 - chunk_count attribute to PixStatement resource
+- update method and product_id, installment_count, merchant_category_type, merchant_category_number, confirmed, description, metadata and zip_code attributes to IssuingPurchase resource
+- installment attribute to IssuingPurchase.Log sub-resource
 ### Changed
 - IssuingBin resource to IssuingProduct
 - settlement parameter to funding_type and client parameter to holder_type of IssuingProduct
