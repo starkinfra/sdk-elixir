@@ -9,6 +9,7 @@ defmodule StarkInfra.CreditNote do
   alias StarkInfra.CreditNote.Signer
   alias StarkInfra.CreditNote.Invoice
   alias StarkInfra.CreditNote.Transfer
+  alias StarkInfra.CreditNote.Rule
 
   @moduledoc """
   Groups CreditNote related functions
@@ -43,7 +44,7 @@ defmodule StarkInfra.CreditNote do
 
   ## Parameters (optional):
     - `:rebate_amount` [integer, default 0]: credit analysis fee deducted from lent amount. ex: 11234 (= R$ 112.34)
-    - `:rules` [list of maps, default nil]: list of rules modifying the credit note behavior, as %{key: ..., value: ...} maps. Currently available key: "invoiceCreationMode", with values "scheduled" (default — each installment invoice is issued a few days before its due date), "instant" (all invoices are issued as soon as the note is disbursed) or "never" (invoices are not issued automatically).
+    - `:rules` [list of Rule structs or maps, default nil]: list of rules modifying the credit note behavior, as %{key: ..., value: ...} maps or StarkInfra.CreditNote.Rule structs. Currently available key: "invoiceCreationMode", with values "scheduled" (default — each installment invoice is issued a few days before its due date), "instant" (all invoices are issued as soon as the note is disbursed) or "never" (invoices are not issued automatically).
     - `:tags` [list of strings, default []]: list of strings for reference when searching for CreditNotes. ex: [\"employees\", \"monthly\"]
 
   ## Attributes (return-only):
@@ -54,7 +55,9 @@ defmodule StarkInfra.CreditNote do
     - `:status` [string]: current status of the CreditNote. ex: "canceled", "created", "expired", "failed", "processing", "signed", "success"
     - `:transaction_ids` [list of strings]: ledger transaction ids linked to this CreditNote. ex: [\"19827356981273\"]
     - `:workspace_id` [string]: ID of the Workspace that generated this CreditNote. ex: "4545454545454545"
+    - `:debtor_workspace_id` [string]: ID of the debtor's Workspace, when it differs from the Workspace that generated this CreditNote. ex: "4545454545454545"
     - `:tax_amount` [integer]: tax amount included in the CreditNote. ex: 100
+    - `:nominal_interest` [float]: yearly nominal interest rate of the CreditNote, in percentage. ex: 11.5
     - `:interest` [float]: yearly effective interest rate of the CreditNote, in percentage. ex: 12.5
     - `:created` [DateTime]: creation DateTime for the CreditNote. ex: ~U[2020-3-10 10:30:0:0]
     - `:updated` [DateTime]: latest update DateTime for the CreditNote. ex: ~U[2020-3-10 10:30:0:0]
@@ -94,15 +97,18 @@ defmodule StarkInfra.CreditNote do
     :zip_code,
     :payment_type,
     :rebate_amount,
+    :rules,
     :tags,
     :id,
     :interest,
+    :nominal_interest,
     :amount,
     :expiration,
     :document_id,
     :status,
     :transaction_ids,
     :workspace_id,
+    :debtor_workspace_id,
     :tax_amount,
     :created,
     :updated
@@ -407,6 +413,13 @@ defmodule StarkInfra.CreditNote do
   @doc false
   def resource_maker(json) do
     %CreditNote{
+      amount: json[:amount],
+      expiration: json[:expiration],
+      document_id: json[:document_id],
+      status: json[:status],
+      transaction_ids: json[:transaction_ids],
+      workspace_id: json[:workspace_id],
+      tax_amount: json[:tax_amount],
       template_id: json[:template_id],
       name: json[:name],
       tax_id: json[:tax_id],
@@ -424,8 +437,11 @@ defmodule StarkInfra.CreditNote do
       state_code: json[:state_code],
       zip_code: json[:zip_code],
       interest: json[:interest],
+      nominal_interest: json[:nominal_interest],
       rebate_amount: json[:rebate_amount],
+      rules: json[:rules] && Enum.map(json[:rules], fn rule -> API.from_api_json(rule, &Rule.resource_maker/1) end),
       tags: json[:tags],
+      debtor_workspace_id: json[:debtor_workspace_id],
       created: json[:created] |> Check.datetime(),
       updated:  json[:updated] |> Check.datetime(),
       id: json[:id]

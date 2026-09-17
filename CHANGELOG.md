@@ -58,6 +58,7 @@ Given a version number MAJOR.MINOR.PATCH, increment:
 - limit and max_limit attributes to IssuingBalance resource
 - brcode, due, link and metadata attributes to IssuingInvoice resource
 - customer_type attribute to IssuingProduct resource
+- Rule sub-resource and rules, debtor_workspace_id and nominal_interest attributes to CreditNote resource
 ### Changed
 - IssuingBin resource to IssuingProduct
 - settlement parameter to funding_type and client parameter to holder_type of IssuingProduct
@@ -66,6 +67,7 @@ Given a version number MAJOR.MINOR.PATCH, increment:
 - query parameters in post requests
 - ssl and public_key applications missing from extra_applications, breaking every request on OTP 26+
 - query parameters in delete requests
+- amount, expiration, document_id, status, transaction_ids, workspace_id and tax_amount attributes of CreditNote resource not being parsed
 - README headings for PixKey, PixClaim, IssuingEmbossingRequest and Webhook
 ### Removed
 - IssuingAuthorization resource
