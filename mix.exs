@@ -33,7 +33,7 @@ defmodule StarkInfra.MixProject do
 
   def application do
     [
-      extra_applications: [:inets]
+      extra_applications: [:inets, :ssl, :public_key]
     ]
   end
 

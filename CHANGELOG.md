@@ -41,6 +41,7 @@ Given a version number MAJOR.MINOR.PATCH, increment:
 - IssuingAuthorization parse and response to IssuingPurchase.parse and IssuingPurchase.response
 ### Fixed
 - query parameters in post requests
+- ssl and public_key applications missing from extra_applications, breaking every request on OTP 26+
 ### Removed
 - IssuingAuthorization resource
 - category parameter of IssuingProduct resource
