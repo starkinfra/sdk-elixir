@@ -17,21 +17,23 @@ defmodule StarkInfraTest.IssuingStock do
 
   @tag :issuing_stock
   test "get issuing stock" do
-    StarkInfra.IssuingStock.query!(limit: 1)
-    |> Enum.take(1)
-    |> Enum.each(fn stock ->
-      {:ok, retrieved_stock} = StarkInfra.IssuingStock.get(stock.id)
-      assert stock.id == retrieved_stock.id
-    end)
+    stock =
+      StarkInfra.IssuingStock.query!(limit: 1)
+      |> Enum.take(1)
+      |> hd()
+
+    {:ok, retrieved_stock} = StarkInfra.IssuingStock.get(stock.id)
+    assert stock.id == retrieved_stock.id
   end
 
   @tag :issuing_stock
   test "get! issuing stock" do
-    StarkInfra.IssuingStock.query!(limit: 1)
-    |> Enum.take(1)
-    |> Enum.each(fn stock ->
-      assert stock.id == StarkInfra.IssuingStock.get!(stock.id).id
-    end)
+    stock =
+      StarkInfra.IssuingStock.query!(limit: 1)
+      |> Enum.take(1)
+      |> hd()
+
+    assert stock.id == StarkInfra.IssuingStock.get!(stock.id).id
   end
 
   @tag :issuing_stock
