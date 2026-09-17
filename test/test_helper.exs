@@ -56,7 +56,8 @@ ExUnit.start(
     # :issuing_transaction_log,
     # :issuing_withdrawal,
     # :issuing_withdrawal_log,
-    # :webhook
+    # :webhook,
+    # :brcode_preview
   ]
 )
 
@@ -74,3 +75,4 @@ Code.require_file("./test/utils/ledger_transaction.exs")
 Code.require_file("./test/utils/issuing_holder.exs")
 Code.require_file("./test/utils/issuing_withdrawal.exs")
 Code.require_file("./test/utils/issuing_invoice.exs")
+Code.require_file("./test/utils/static_brcode.exs")
