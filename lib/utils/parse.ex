@@ -63,6 +63,72 @@ defmodule StarkInfra.Utils.Parse do
     end
   end
 
+  @doc """
+  Verify the authenticity of a content string received from a request listening at the request url,
+  without parsing it as JSON.
+  If the provided digital signature does not check out with the StarkInfra public key, an "invalidSignature"
+  error will be returned.
+
+  ## Parameters (required):
+    - `content` [string]: response content from request received at user endpoint (not parsed)
+    - `signature` [string]: base-64 digital signature received at response header "Digital-Signature"
+
+  ## Options:
+    - `cache_pid` [PID, default nil]: PID of the process that holds the public key cache, returned on previous parses. If not provided, a new cache process will be generated.
+    - `user` [Organization/Project, default nil]: Organization or Project struct returned from StarkInfra.project(). Only necessary if default project or organization has not been set in configs.
+
+  ## Return:
+    - verified content string
+  """
+  @spec verify(
+    content: binary,
+    signature: binary,
+    cache_pid: PID,
+    user: Project.t() | Organization.t()
+  ) ::
+    {:ok, binary} | {:error, [Error.t()]}
+  def verify(parameters \\ []) do
+    parameters =
+    Enum.into(
+      parameters |> Check.enforced_keys([:content, :signature]),
+      %{cache_pid: nil, user: nil}
+    )
+    verify_content(parameters.user, parameters.content, parameters.signature, parameters.cache_pid, 0)
+  end
+
+  @doc """
+  Same as verify(), but it will unwrap the error tuple and raise in case of errors.
+  """
+  @spec verify!(
+    content: binary,
+    signature: binary,
+    cache_pid: PID,
+    user: Project.t() | Organization.t()
+  ) :: binary
+  def verify!(parameters \\ []) do
+    case verify(parameters) do
+      {:ok, content} -> content
+      {:error, errors} -> raise API.errors_to_string(errors)
+    end
+  end
+
+  defp verify_content(user, content, signature, cache_pid, counter) when is_nil(cache_pid) do
+    {:ok, new_cache_pid} = Agent.start_link(fn -> %{} end)
+    verify_content(user, content, signature, new_cache_pid, counter)
+  end
+
+  defp verify_content(user, content, signature, cache_pid, counter) do
+    case verify_signature(user, content, signature, cache_pid, counter) do
+      {:ok, true} ->
+        {:ok, content}
+
+      {:ok, false} ->
+        verify_content(user, content, signature, cache_pid |> update_public_key(nil), counter + 1)
+
+      {:error, errors} -> {:error, errors}
+    end
+  end
+
   defp parse(user, content, signature, cache_pid, resource_maker, key, counter) when is_nil(cache_pid) do
     {:ok, new_cache_pid} = Agent.start_link(fn -> %{} end)
     parse(user, content, signature, new_cache_pid, resource_maker, key, counter)

@@ -32,6 +32,12 @@ ExUnit.start(
     # :pix_infraction,
     # :pix_infraction_log,
     # :pix_domain,
+    # :static_brcode,
+    # :dynamic_brcode,
+    # :pix_key_holmes,
+    # :pix_key_holmes_log,
+    # :pix_internal_transaction_report,
+    # :pix_internal_transaction_report_log,
     # :issuing_balance,
     # :issuing_product,
     # :issuing_card,
@@ -70,9 +76,12 @@ Code.require_file("./test/utils/pix_fraud.exs")
 Code.require_file("./test/utils/pix_dispute.exs")
 Code.require_file("./test/utils/pix_pull_request.exs")
 Code.require_file("./test/utils/random.exs")
+Code.require_file("./test/utils/static_brcode.exs")
+Code.require_file("./test/utils/dynamic_brcode.exs")
+Code.require_file("./test/utils/pix_key_holmes.exs")
+Code.require_file("./test/utils/pix_internal_transaction_report.exs")
 Code.require_file("./test/utils/ledger.exs")
 Code.require_file("./test/utils/ledger_transaction.exs")
 Code.require_file("./test/utils/issuing_holder.exs")
 Code.require_file("./test/utils/issuing_withdrawal.exs")
 Code.require_file("./test/utils/issuing_invoice.exs")
-Code.require_file("./test/utils/static_brcode.exs")

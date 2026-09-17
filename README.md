@@ -43,6 +43,7 @@ This SDK version is compatible with the Stark Infra API v2.
     - [PixBalance](#get-your-pixbalance): View your account balance
     - [PixStatement](#create-a-pixstatement): Request your account statement
     - [PixKey](#create-a-pixkey): Create a Pix Key
+    - [PixKeyHolmes](#create-pixkeyholmes): Investigate the registration of a Pix Key in the DICT
     - [PixClaim](#create-a-pixclaim): Claim a Pix Key
     - [PixDirector](#create-a-pixdirector): Create a Pix Director
     - [PixInfraction](#create-pixinfractions): Create Pix Infraction reports
@@ -50,10 +51,13 @@ This SDK version is compatible with the Stark Infra API v2.
     - [PixUser](#get-a-pixuser): Get fraud statistics of a user
     - [PixChargeback](#create-pixchargebacks): Create Pix Chargeback requests
     - [PixDomain](#query-pixdomains): View registered SPI participants certificates
+    - [StaticBrcode](#create-staticbrcodes): Create static Pix BR codes
+    - [DynamicBrcode](#create-dynamicbrcodes): Create dynamic Pix BR codes
     - [BrcodePreview](#create-brcodepreviews): Preview information from a BR Code before paying it
     - [PixPullSubscription](#create-pixpullsubscriptions): Set up recurring Pix debit authorizations
     - [PixPullRequest](#create-pixpullrequests): Charge against an active PixPullSubscription
     - [PixDispute](#create-pixdisputes): Create Pix Dispute requests
+    - [PixInternalTransactionReport](#create-pixinternaltransactionreports): Report internal transactions to the Central Bank
   - [Credit Note](#credit-note)
     - [CreditNote](#create-creditnotes): Create credit notes
   - [Credit Holmes](#credit-holmes)
@@ -1341,6 +1345,72 @@ StarkInfra.PixKey.Log.get!("5729405850615808")
 |> IO.inspect
 ```
 
+### Create PixKeyHolmes
+
+To investigate whether a Pix Key is registered in the Central Bank's DICT,
+open up a PixKeyHolmes for it:
+
+```elixir
+StarkInfra.PixKeyHolmes.create!(
+  [
+    %StarkInfra.PixKeyHolmes{
+      key_id: "+5511989898989"
+    },
+    %StarkInfra.PixKeyHolmes{
+      key_id: "valid@sandbox.com",
+      tags: ["sherlock"]
+    }
+  ]
+)
+|> IO.inspect
+```
+
+### Query PixKeyHolmes
+
+You can query multiple PixKeyHolmes according to filters.
+
+```elixir
+StarkInfra.PixKeyHolmes.query!(
+  after: Date.utc_today |> Date.add(-30),
+  before: Date.utc_today |> Date.add(-1),
+  status: ["solved"]
+)
+|> Enum.take(10)
+|> IO.inspect
+```
+
+### Get a PixKeyHolmes
+
+After its creation, information on a PixKeyHolmes may be retrieved by its id.
+
+```elixir
+StarkInfra.PixKeyHolmes.get!("5155165527080960")
+|> IO.inspect
+```
+
+### Query PixKeyHolmes logs
+
+You can query PixKeyHolmes logs to better understand their life cycles.
+
+```elixir
+StarkInfra.PixKeyHolmes.Log.query!(
+  limit: 50,
+  after: Date.utc_today |> Date.add(-30),
+  before: Date.utc_today |> Date.add(-1)
+)
+|> Enum.take(50)
+|> IO.inspect
+```
+
+### Get a PixKeyHolmes log
+
+You can also get a specific log by its id.
+
+```elixir
+StarkInfra.PixKeyHolmes.Log.get!("5155165527080960")
+|> IO.inspect
+```
+
 ### Create a PixClaim
 
 You can create a Pix claim to request the transfer of a Pix key from another bank to one of your accounts:
@@ -1721,6 +1791,186 @@ StarkInfra.BrcodePreview.create!([
 ```
 
 **Note**: Instead of using BrcodePreview structs, you can also pass each BrcodePreview element in map format
+### Create StaticBrcodes
+
+StaticBrcodes store account information via a BR code or an image (QR code)
+that represents a PixKey and a few extra fixed parameters, such as an amount
+and a reconciliation ID. They can easily be used to receive Pix transactions.
+
+```elixir
+StarkInfra.StaticBrcode.create!([
+  %StarkInfra.StaticBrcode{
+    name: "Jamie Lannister",
+    key_id: "+5511988887777",
+    amount: 100,
+    reconciliation_id: "123",
+    city: "Rio de Janeiro"
+  }
+])
+|> IO.inspect
+```
+
+### Query StaticBrcodes
+
+You can query multiple StaticBrcodes according to filters.
+
+```elixir
+StarkInfra.StaticBrcode.query!(
+  limit: 1,
+  after: "2022-06-01",
+  before: "2022-06-30",
+  uuids: ["5ddde28043a245c2848b08cf315effa2"]
+)
+|> Enum.take(1)
+|> IO.inspect
+```
+
+### Get a StaticBrcode
+
+After its creation, information on a StaticBrcode may be retrieved by its UUID.
+
+```elixir
+StarkInfra.StaticBrcode.get!("5ddde28043a245c2848b08cf315effa2")
+|> IO.inspect
+```
+
+### Create DynamicBrcodes
+
+BR codes store information represented by Pix QR Codes, which are used to send
+or receive Pix transactions in a convenient way.
+DynamicBrcodes represent charges with information that can change at any time,
+since all data needed for the payment is requested dynamically to an URL stored
+in the BR Code. Stark Infra will receive the GET request and forward it to your
+registered endpoint with a GET request containing the UUID of the BR code for
+identification.
+
+```elixir
+StarkInfra.DynamicBrcode.create!([
+  %StarkInfra.DynamicBrcode{
+    name: "Jamie Lannister",
+    city: "Rio de Janeiro",
+    external_id: "my_unique_id_01",
+    type: "instant"
+  }
+])
+|> IO.inspect
+```
+
+### Query DynamicBrcodes
+
+You can query multiple DynamicBrcodes according to filters.
+
+```elixir
+StarkInfra.DynamicBrcode.query!(
+  limit: 1,
+  after: "2022-06-01",
+  before: "2022-06-30",
+  uuids: ["ac7caa14e601461dbd6b12bf7e4cc48e"]
+)
+|> Enum.take(1)
+|> IO.inspect
+```
+
+### Get a DynamicBrcode
+
+After its creation, information on a DynamicBrcode may be retrieved by its UUID.
+
+```elixir
+StarkInfra.DynamicBrcode.get!("ac7caa14e601461dbd6b12bf7e4cc48e")
+|> IO.inspect
+```
+
+### Verify a DynamicBrcode read
+
+When a DynamicBrcode is read by your user, a GET request will be made to your registered URL to
+retrieve additional information needed to complete the transaction.
+Use this method to verify the authenticity of a GET request received at your registered endpoint.
+If the provided digital signature does not check out with the StarkInfra public key, the returned
+error will have code "invalidSignature".
+
+```elixir
+request = listen() # this is the method you made to get the read requests posted to your registered endpoint
+
+uuid = StarkInfra.DynamicBrcode.verify!(
+  uuid: request.url.get_parameter("uuid"),
+  signature: request.headers["Digital-Signature"]
+)
+```
+
+### Answer to a Due DynamicBrcode read
+
+When a Due DynamicBrcode is read by your user, a GET request containing
+the BR code UUID will be made to your registered URL to retrieve additional
+information needed to complete the transaction.
+
+The GET request must be answered in the following format within 5 seconds
+and with an HTTP status code 200.
+
+```elixir
+request = listen() # this is the method you made to get the read requests posted to your registered endpoint
+
+uuid = StarkInfra.DynamicBrcode.verify!(
+  uuid: request.url.get_parameter("uuid"),
+  signature: request.headers["Digital-Signature"]
+)
+
+invoice = get_my_invoice(uuid) # you should implement this method to get the information of the BR code from its uuid
+
+send_response( # you should also implement this method to respond the read request
+  StarkInfra.DynamicBrcode.response_due!(
+    version: invoice.version,
+    created: invoice.created,
+    due: invoice.due,
+    key_id: invoice.key_id,
+    status: invoice.status,
+    reconciliation_id: invoice.reconciliation_id,
+    nominal_amount: invoice.amount,
+    sender_name: invoice.sender_name,
+    sender_tax_id: invoice.sender_tax_id,
+    receiver_name: invoice.receiver_name,
+    receiver_tax_id: invoice.receiver_tax_id,
+    receiver_street_line: invoice.receiver_street_line,
+    receiver_city: invoice.receiver_city,
+    receiver_state_code: invoice.receiver_state_code,
+    receiver_zip_code: invoice.receiver_zip_code
+  )
+)
+```
+
+### Answer to an Instant DynamicBrcode read
+
+When an Instant DynamicBrcode is read by your user, a GET request
+containing the BR code UUID will be made to your registered URL to retrieve
+additional information needed to complete the transaction.
+
+The get request must be answered in the following format
+within 5 seconds and with an HTTP status code 200.
+
+```elixir
+request = listen() # this is the method you made to get the read requests posted to your registered endpoint
+
+uuid = StarkInfra.DynamicBrcode.verify!(
+  uuid: request.url.get_parameter("uuid"),
+  signature: request.headers["Digital-Signature"]
+)
+
+invoice = get_my_invoice(uuid) # you should implement this method to get the information of the BR code from its uuid
+
+send_response( # you should also implement this method to respond the read request
+  StarkInfra.DynamicBrcode.response_instant!(
+    version: invoice.version,
+    created: invoice.created,
+    key_id: invoice.key_id,
+    status: invoice.status,
+    reconciliation_id: invoice.reconciliation_id,
+    amount: invoice.amount,
+    cashier_type: invoice.cashier_type,
+    cashier_bank_code: invoice.cashier_bank_code,
+    cash_amount: invoice.cash_amount
+  )
+)
+```
+
 ### Create PixDisputes
 
 Pix disputes can be created when a fraud is detected creating a chain of transactions in order to reverse the funds to the origin.
@@ -1994,6 +2244,84 @@ Inbound PixPullSubscription events will be POSTed at your registered endpoint. Y
 )
 
 IO.inspect(subscription)
+```
+
+### Create PixInternalTransactionReports
+
+Transactions that happen internally, outside of the SPI, must be reported to the
+Central Bank so they are reflected in your statements. You can do so by creating
+PixInternalTransactionReports:
+
+```elixir
+StarkInfra.PixInternalTransactionReport.create!(
+  [
+    %StarkInfra.PixInternalTransactionReport{
+      amount: 10000,
+      created: ~U[2024-01-01 12:00:00Z],
+      end_to_end_id: "E12345678202401011234567890123456",
+      method: "manual",
+      reference_type: "request",
+      sender_account_number: "12345",
+      sender_branch_code: "0001",
+      sender_account_type: "checking",
+      sender_bank_code: "12345678",
+      sender_tax_id: "123.456.789-01",
+      receiver_account_number: "67890",
+      receiver_branch_code: "0001",
+      receiver_account_type: "savings",
+      receiver_bank_code: "87654321",
+      receiver_tax_id: "987.654.321-00",
+      receiver_key_id: "user@example.com"
+    }
+  ]
+)
+|> IO.inspect
+```
+
+### Query PixInternalTransactionReports
+
+You can query multiple PixInternalTransactionReports according to filters.
+
+```elixir
+StarkInfra.PixInternalTransactionReport.query!(
+  after: Date.utc_today |> Date.add(-30),
+  before: Date.utc_today |> Date.add(-1),
+  status: ["success"]
+)
+|> Enum.take(10)
+|> IO.inspect
+```
+
+### Get a PixInternalTransactionReport
+
+After its creation, information on a PixInternalTransactionReport may be retrieved by its id.
+
+```elixir
+StarkInfra.PixInternalTransactionReport.get!("5656565656565656")
+|> IO.inspect
+```
+
+### Query PixInternalTransactionReport logs
+
+You can query PixInternalTransactionReport logs to better understand their life cycles.
+
+```elixir
+StarkInfra.PixInternalTransactionReport.Log.query!(
+  limit: 50,
+  after: Date.utc_today |> Date.add(-30),
+  before: Date.utc_today |> Date.add(-1)
+)
+|> Enum.take(50)
+|> IO.inspect
+```
+
+### Get a PixInternalTransactionReport log
+
+You can also get a specific log by its id.
+
+```elixir
+StarkInfra.PixInternalTransactionReport.Log.get!("5155165527080960")
+|> IO.inspect
 ```
 
 ## Credit Note
