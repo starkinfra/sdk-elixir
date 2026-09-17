@@ -35,6 +35,8 @@ This SDK version is compatible with the Stark Infra API v2.
     - [Designs](#query-issuingdesigns): View card and card package designs available to your Workspace
     - [EmbossingKits](#query-issuingembossingkits): View the embossing kits available to your Workspace
     - [EmbossingRequests](#create-issuingembossingrequests): Create embossing requests
+    - [Restocks](#create-issuingrestocks): Create restock orders for an IssuingStock
+    - [Stocks](#query-issuingstocks): View the stock of a certain IssuingDesign linked to an Embosser
   - [Pix](#pix)
     - [PixRequests](#create-pixrequests): Create Pix transactions
     - [PixReversals](#create-pixreversals): Reverse Pix transactions
@@ -876,6 +878,98 @@ You can also get a specific log by its id.
 
 ```elixir
 StarkInfra.IssuingEmbossingRequest.Log.get!("5155165527080960")
+|> IO.inspect
+```
+
+### Create IssuingRestocks
+
+You can create restock orders to replenish a specific IssuingStock.
+
+```elixir
+StarkInfra.IssuingRestock.create!([
+  %StarkInfra.IssuingRestock{
+    count: 100,
+    stock_id: "5136459887542272",
+    tags: ["card", "corporate"]
+  }
+]) |> IO.inspect
+```
+
+**Note**: Instead of using IssuingRestock structs, you can also pass each IssuingRestock element in map format
+
+### Query IssuingRestocks
+
+You can query multiple restock orders according to filters.
+
+```elixir
+StarkInfra.IssuingRestock.query!(limit: 10)
+|> Enum.take(10)
+|> IO.inspect
+```
+
+### Get an IssuingRestock
+
+After its creation, information on a restock order may be retrieved by its id.
+
+```elixir
+StarkInfra.IssuingRestock.get!("5155165527080960")
+|> IO.inspect
+```
+
+### Query IssuingRestock logs
+
+You can query restock logs to better understand an IssuingRestock life cycle.
+
+```elixir
+StarkInfra.IssuingRestock.Log.query!(limit: 10)
+|> Enum.take(10)
+|> IO.inspect
+```
+
+### Get an IssuingRestock log
+
+You can also get a specific log by its id.
+
+```elixir
+StarkInfra.IssuingRestock.Log.get!("5155165527080960")
+|> IO.inspect
+```
+
+### Query IssuingStocks
+
+You can query the current stock of a certain IssuingDesign linked to an Embosser.
+
+```elixir
+StarkInfra.IssuingStock.query!(limit: 10)
+|> Enum.take(10)
+|> IO.inspect
+```
+
+### Get an IssuingStock
+
+Information on an IssuingStock may be retrieved by its id.
+
+```elixir
+StarkInfra.IssuingStock.get!("5155165527080960")
+|> IO.inspect
+```
+
+### Query IssuingStock logs
+
+You can query stock logs to better understand an IssuingStock life cycle.
+
+```elixir
+StarkInfra.IssuingStock.Log.query!(limit: 10)
+|> Enum.take(10)
+|> IO.inspect
+```
+
+### Get an IssuingStock log
+
+You can also get a specific log by its id.
+
+```elixir
+StarkInfra.IssuingStock.Log.get!("5155165527080960")
 |> IO.inspect
 ```
 
