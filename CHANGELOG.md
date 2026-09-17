@@ -54,6 +54,7 @@ Given a version number MAJOR.MINOR.PATCH, increment:
 - query parameters in post requests
 - ssl and public_key applications missing from extra_applications, breaking every request on OTP 26+
 - query parameters in delete requests
+- README headings for PixKey, PixClaim, IssuingEmbossingRequest and Webhook
 ### Removed
 - IssuingAuthorization resource
 - category parameter of IssuingProduct resource

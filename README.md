@@ -867,7 +867,7 @@ StarkInfra.IssuingEmbossingRequest.get!("5155165527080960")
 |> IO.inspect
 ```
 
-### Query IssuingEmbossingRequests logs
+### Query IssuingEmbossingRequest logs
 
 You can query embossing request logs to better understand an IssuingEmbossingRequest life cycle.
 
@@ -1217,7 +1217,7 @@ StarkInfra.PixKey.get!("+5511989898989", "012.345.678-90")
 |> IO.inspect
 ```
 
-### Patch a PixKey
+### Update a PixKey
 
 Update the account information linked to a Pix Key.
 
@@ -1229,7 +1229,7 @@ StarkInfra.PixKey.update!(
 ) |> IO.inspect
 ```
 
-### Cencel a PixKey
+### Cancel a PixKey
 
 Cancel a specific Pix Key using its id.
 
@@ -1310,7 +1310,7 @@ StarkInfra.PixClaim.get!("5729405850615808")
 |> IO.inspect
 ```
 
-### Patch a PixClaim
+### Update a PixClaim
 
 A Pix Claim can be confirmed or canceled by patching its status.
 A received Pix Claim must be confirmed by the donor to be completed.
@@ -2274,7 +2274,7 @@ StarkInfra.Webhook.create!(
 ) |> IO.inspect
 ```
 
-### Query Webhooks
+### Query Webhook subscriptions
 
 To search for registered webhooks, run:
 
