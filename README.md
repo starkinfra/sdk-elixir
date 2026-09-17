@@ -50,6 +50,7 @@ This SDK version is compatible with the Stark Infra API v2.
     - [PixUser](#get-a-pixuser): Get fraud statistics of a user
     - [PixChargeback](#create-pixchargebacks): Create Pix Chargeback requests
     - [PixDomain](#query-pixdomains): View registered SPI participants certificates
+    - [StaticBrcode](#create-staticbrcodes): Create static Pix BR codes
     - [BrcodePreview](#create-brcodepreviews): Preview information from a BR Code before paying it
     - [PixPullSubscription](#create-pixpullsubscriptions): Set up recurring Pix debit authorizations
     - [PixPullRequest](#create-pixpullrequests): Charge against an active PixPullSubscription
@@ -1721,6 +1722,49 @@ StarkInfra.BrcodePreview.create!([
 ```
 
 **Note**: Instead of using BrcodePreview structs, you can also pass each BrcodePreview element in map format
+### Create StaticBrcodes
+
+StaticBrcodes store account information via a BR code or an image (QR code)
+that represents a PixKey and a few extra fixed parameters, such as an amount
+and a reconciliation ID. They can easily be used to receive Pix transactions.
+
+```elixir
+StarkInfra.StaticBrcode.create!([
+  %StarkInfra.StaticBrcode{
+    name: "Jamie Lannister",
+    key_id: "+5511988887777",
+    amount: 100,
+    reconciliation_id: "123",
+    city: "Rio de Janeiro"
+  }
+])
+|> IO.inspect
+```
+
+### Query StaticBrcodes
+
+You can query multiple StaticBrcodes according to filters.
+
+```elixir
+StarkInfra.StaticBrcode.query!(
+  limit: 1,
+  after: "2022-06-01",
+  before: "2022-06-30",
+  uuids: ["5ddde28043a245c2848b08cf315effa2"]
+)
+|> Enum.take(1)
+|> IO.inspect
+```
+
+### Get a StaticBrcode
+
+After its creation, information on a StaticBrcode may be retrieved by its UUID.
+
+```elixir
+StarkInfra.StaticBrcode.get!("5ddde28043a245c2848b08cf315effa2")
+|> IO.inspect
+```
+
 ### Create PixDisputes
 
 Pix disputes can be created when a fraud is detected creating a chain of transactions in order to reverse the funds to the origin.
