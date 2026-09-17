@@ -38,6 +38,8 @@ ExUnit.start(
     # :issuing_billing_transaction,
     # :issuing_design,
     # :issuing_embossing_kit,
+    # :issuing_embossing_request,
+    # :issuing_embossing_request_log,
     # :issuing_purchase,
     # :issuing_purchase_log,
     # :issuing_transaction,
