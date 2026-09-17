@@ -51,6 +51,7 @@ This SDK version is compatible with the Stark Infra API v2.
     - [PixChargeback](#create-pixchargebacks): Create Pix Chargeback requests
     - [PixDomain](#query-pixdomains): View registered SPI participants certificates
     - [StaticBrcode](#create-staticbrcodes): Create static Pix BR codes
+    - [DynamicBrcode](#create-dynamicbrcodes): Create dynamic Pix BR codes
     - [BrcodePreview](#create-brcodepreviews): Preview information from a BR Code before paying it
     - [PixPullSubscription](#create-pixpullsubscriptions): Set up recurring Pix debit authorizations
     - [PixPullRequest](#create-pixpullrequests): Charge against an active PixPullSubscription
@@ -1763,6 +1764,143 @@ After its creation, information on a StaticBrcode may be retrieved by its UUID.
 ```elixir
 StarkInfra.StaticBrcode.get!("5ddde28043a245c2848b08cf315effa2")
 |> IO.inspect
+```
+
+### Create DynamicBrcodes
+
+BR codes store information represented by Pix QR Codes, which are used to send
+or receive Pix transactions in a convenient way.
+DynamicBrcodes represent charges with information that can change at any time,
+since all data needed for the payment is requested dynamically to an URL stored
+in the BR Code. Stark Infra will receive the GET request and forward it to your
+registered endpoint with a GET request containing the UUID of the BR code for
+identification.
+
+```elixir
+StarkInfra.DynamicBrcode.create!([
+  %StarkInfra.DynamicBrcode{
+    name: "Jamie Lannister",
+    city: "Rio de Janeiro",
+    external_id: "my_unique_id_01",
+    type: "instant"
+  }
+])
+|> IO.inspect
+```
+
+### Query DynamicBrcodes
+
+You can query multiple DynamicBrcodes according to filters.
+
+```elixir
+StarkInfra.DynamicBrcode.query!(
+  limit: 1,
+  after: "2022-06-01",
+  before: "2022-06-30",
+  uuids: ["ac7caa14e601461dbd6b12bf7e4cc48e"]
+)
+|> Enum.take(1)
+|> IO.inspect
+```
+
+### Get a DynamicBrcode
+
+After its creation, information on a DynamicBrcode may be retrieved by its UUID.
+
+```elixir
+StarkInfra.DynamicBrcode.get!("ac7caa14e601461dbd6b12bf7e4cc48e")
+|> IO.inspect
+```
+
+### Verify a DynamicBrcode read
+
+When a DynamicBrcode is read by your user, a GET request will be made to your registered URL to
+retrieve additional information needed to complete the transaction.
+Use this method to verify the authenticity of a GET request received at your registered endpoint.
+If the provided digital signature does not check out with the StarkInfra public key, the returned
+error will have code "invalidSignature".
+
+```elixir
+request = listen() # this is the method you made to get the read requests posted to your registered endpoint
+
+uuid = StarkInfra.DynamicBrcode.verify!(
+  uuid: request.url.get_parameter("uuid"),
+  signature: request.headers["Digital-Signature"]
+)
+```
+
+### Answer to a Due DynamicBrcode read
+
+When a Due DynamicBrcode is read by your user, a GET request containing
+the BR code UUID will be made to your registered URL to retrieve additional
+information needed to complete the transaction.
+
+The GET request must be answered in the following format within 5 seconds
+and with an HTTP status code 200.
+
+```elixir
+request = listen() # this is the method you made to get the read requests posted to your registered endpoint
+
+uuid = StarkInfra.DynamicBrcode.verify!(
+  uuid: request.url.get_parameter("uuid"),
+  signature: request.headers["Digital-Signature"]
+)
+
+invoice = get_my_invoice(uuid) # you should implement this method to get the information of the BR code from its uuid
+
+send_response( # you should also implement this method to respond the read request
+  StarkInfra.DynamicBrcode.response_due!(
+    version: invoice.version,
+    created: invoice.created,
+    due: invoice.due,
+    key_id: invoice.key_id,
+    status: invoice.status,
+    reconciliation_id: invoice.reconciliation_id,
+    nominal_amount: invoice.amount,
+    sender_name: invoice.sender_name,
+    sender_tax_id: invoice.sender_tax_id,
+    receiver_name: invoice.receiver_name,
+    receiver_tax_id: invoice.receiver_tax_id,
+    receiver_street_line: invoice.receiver_street_line,
+    receiver_city: invoice.receiver_city,
+    receiver_state_code: invoice.receiver_state_code,
+    receiver_zip_code: invoice.receiver_zip_code
+  )
+)
+```
+
+### Answer to an Instant DynamicBrcode read
+
+When an Instant DynamicBrcode is read by your user, a GET request
+containing the BR code UUID will be made to your registered URL to retrieve
+additional information needed to complete the transaction.
+
+The get request must be answered in the following format
+within 5 seconds and with an HTTP status code 200.
+
+```elixir
+request = listen() # this is the method you made to get the read requests posted to your registered endpoint
+
+uuid = StarkInfra.DynamicBrcode.verify!(
+  uuid: request.url.get_parameter("uuid"),
+  signature: request.headers["Digital-Signature"]
+)
+
+invoice = get_my_invoice(uuid) # you should implement this method to get the information of the BR code from its uuid
+
+send_response( # you should also implement this method to respond the read request
+  StarkInfra.DynamicBrcode.response_instant!(
+    version: invoice.version,
+    created: invoice.created,
+    key_id: invoice.key_id,
+    status: invoice.status,
+    reconciliation_id: invoice.reconciliation_id,
+    amount: invoice.amount,
+    cashier_type: invoice.cashier_type,
+    cashier_bank_code: invoice.cashier_bank_code,
+    cash_amount: invoice.cash_amount
+  )
+)
 ```
 
 ### Create PixDisputes

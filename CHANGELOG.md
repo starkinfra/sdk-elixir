@@ -14,6 +14,7 @@ Given a version number MAJOR.MINOR.PATCH, increment:
 ## [Unreleased]
 ### Added
 - StaticBrcode resource
+- DynamicBrcode resource
 - PixPullRequest resource
 - PixPullRequest.Log sub-resource
 - Ledger resource
