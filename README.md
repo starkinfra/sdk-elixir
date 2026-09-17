@@ -1032,6 +1032,38 @@ StarkInfra.PixRequest.get!("5155165527080960")
 |> IO.inspect
 ```
 
+### Process inbound PixRequest authorizations
+
+It's easy to process authorization requests that arrived at your endpoint.
+Remember to pass the signature header so the SDK can make sure it's StarkInfra that sent you the event.
+If you do not approve or decline the authorization within 1 second, the authorization will be denied.
+
+```elixir
+request = listen()  # this is your handler to listen for authorization requests
+
+{pix_request, _cache_pid} = StarkInfra.PixRequest.parse!(
+  content: request.content,
+  signature: request.headers["Digital-Signature"]
+)
+
+IO.inspect(pix_request)
+
+send_response(  # you should also implement this method
+  StarkInfra.PixRequest.response!(  # this optional method just helps you build the response JSON
+    "approved"
+  )
+)
+
+# or
+
+send_response(
+  StarkInfra.PixRequest.response!(
+    "denied",
+    reason: "orderRejected"
+  )
+)
+```
+
 ### Query PixRequest logs
 
 You can query Pix request logs to better understand Pix request life cycles. 

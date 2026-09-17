@@ -109,6 +109,21 @@ defmodule StarkInfraTest.PixRequest do
     end)
   end
 
+  @tag :pix_request
+  test "response approved pix request" do
+    response = StarkInfra.PixRequest.response!("approved")
+
+    assert response =~ "approved"
+  end
+
+  @tag :pix_request
+  test "response denied pix request" do
+    response = StarkInfra.PixRequest.response!("denied", reason: "orderRejected")
+
+    assert response =~ "denied"
+    assert response =~ "orderRejected"
+  end
+
   def example_pix_request() do
     %StarkInfra.PixRequest{
       amount: 100,
