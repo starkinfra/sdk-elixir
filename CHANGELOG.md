@@ -55,6 +55,7 @@ Given a version number MAJOR.MINOR.PATCH, increment:
 - update method and product_id, installment_count, merchant_category_type, merchant_category_number, confirmed, description, metadata and zip_code attributes to IssuingPurchase resource
 - installment attribute to IssuingPurchase.Log sub-resource
 - product_id and is_pin_defined attributes to IssuingCard resource
+- limit and max_limit attributes to IssuingBalance resource
 ### Changed
 - IssuingBin resource to IssuingProduct
 - settlement parameter to funding_type and client parameter to holder_type of IssuingProduct
