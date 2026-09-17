@@ -20,6 +20,7 @@ defmodule StarkInfra.IssuingProduct do
     - `:funding_type` [string]: type of funding used for payment. ex: "credit", "debit"
     - `:holder_type` [string]: holder type. ex: "business", "individual"
     - `:code` [string]: internal code from card flag informing the product. ex: "MRW", "MCO", "MWB", "MCS"
+    - `:customer_type` [string]: same as holder_type. Kept for backward compatibility.
     - `:created` [DateTime]: creation datetime for the IssuingProduct. ex: ~U[2020-03-10 10:30:0:0]
   """
   @enforce_keys [
@@ -36,6 +37,7 @@ defmodule StarkInfra.IssuingProduct do
     :funding_type,
     :holder_type,
     :code,
+    :customer_type,
     :created
   ]
 
@@ -123,6 +125,7 @@ defmodule StarkInfra.IssuingProduct do
       funding_type: json[:funding_type],
       holder_type: json[:holder_type],
       code: json[:code],
+      customer_type: json[:customer_type],
       created: json[:created] |> Check.datetime()
     }
   end

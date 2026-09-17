@@ -57,6 +57,7 @@ Given a version number MAJOR.MINOR.PATCH, increment:
 - product_id and is_pin_defined attributes to IssuingCard resource
 - limit and max_limit attributes to IssuingBalance resource
 - brcode, due, link and metadata attributes to IssuingInvoice resource
+- customer_type attribute to IssuingProduct resource
 ### Changed
 - IssuingBin resource to IssuingProduct
 - settlement parameter to funding_type and client parameter to holder_type of IssuingProduct
