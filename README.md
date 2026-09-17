@@ -32,6 +32,7 @@ This SDK version is compatible with the Stark Infra API v2.
     - [Transactions](#query-issuingtransactions): View the transactions that have affected your issuing balance
     - [BillingInvoices](#query-issuingbillinginvoices): View the invoices charged for your Issuing costs
     - [BillingTransactions](#query-issuingbillingtransactions): View the transactions that compose your Issuing billing invoices
+    - [Designs](#query-issuingdesigns): View card and card package designs available to your Workspace
   - [Pix](#pix)
     - [PixRequests](#create-pixrequests): Create Pix transactions
     - [PixReversals](#create-pixreversals): Reverse Pix transactions
@@ -762,6 +763,36 @@ StarkInfra.IssuingBillingTransaction.query!(
 )
 |> Enum.take(10)
 |> IO.inspect
+```
+
+### Query IssuingDesigns
+
+To view the card and card package designs available to your Workspace, run:
+
+```elixir
+StarkInfra.IssuingDesign.query!(limit: 10)
+|> Enum.take(10)
+|> IO.inspect
+```
+
+### Get an IssuingDesign
+
+You can get a specific design by its id.
+
+```elixir
+StarkInfra.IssuingDesign.get!("5155165527080960")
+|> IO.inspect
+```
+
+### Get an IssuingDesign pdf
+
+You can get the pdf file generated for a specific design by its id.
+
+```elixir
+{:ok, pdf} = StarkInfra.IssuingDesign.pdf("5155165527080960")
+file = File.open!("issuing_design.pdf", [:write])
+IO.binwrite(file, pdf)
+File.close(file)
 ```
 
 ## Pix

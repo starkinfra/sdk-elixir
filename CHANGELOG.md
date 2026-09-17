@@ -26,6 +26,7 @@ Given a version number MAJOR.MINOR.PATCH, increment:
 - CreditNote.payment method
 - IssuingBillingInvoice resource
 - IssuingBillingTransaction resource
+- IssuingDesign resource
 - IssuingRule missing parameters
 ### Changed
 - IssuingBin resource to IssuingProduct

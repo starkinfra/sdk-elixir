@@ -36,6 +36,7 @@ ExUnit.start(
     # :issuing_invoice_log,
     # :issuing_billing_invoice,
     # :issuing_billing_transaction,
+    # :issuing_design,
     # :issuing_purchase,
     # :issuing_purchase_log,
     # :issuing_transaction,
