@@ -25,6 +25,8 @@ ExUnit.start(
     # :pix_chargeback_log,
     # :pix_dispute,
     # :pix_dispute_log,
+    # :pix_pull_request,
+    # :pix_pull_request_log,
     # :pix_infraction,
     # :pix_infraction_log,
     # :pix_domain,
@@ -63,6 +65,7 @@ Code.require_file("./test/utils/pix_reversal.exs")
 Code.require_file("./test/utils/pix_chargeback.exs")
 Code.require_file("./test/utils/pix_fraud.exs")
 Code.require_file("./test/utils/pix_dispute.exs")
+Code.require_file("./test/utils/pix_pull_request.exs")
 Code.require_file("./test/utils/random.exs")
 Code.require_file("./test/utils/ledger.exs")
 Code.require_file("./test/utils/ledger_transaction.exs")

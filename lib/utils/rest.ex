@@ -180,7 +180,12 @@ defmodule StarkInfra.Utils.Rest do
   def delete_id({resource_name, resource_maker}, id, options) do
   user = options[:user]
 
-  case Request.fetch(:delete, "#{API.endpoint(resource_name)}/#{id}", user: user) do
+  case Request.fetch(
+    :delete,
+    "#{API.endpoint(resource_name)}/#{id}",
+    query: Enum.into(options, %{}) |> Map.delete(:user) |> API.cast_json_to_api_format(),
+    user: user
+  ) do
     {:ok, response} -> {:ok, process_single_response(response, resource_name, resource_maker)}
     {:error, errors} -> {:error, errors}
   end
