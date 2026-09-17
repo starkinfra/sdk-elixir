@@ -188,7 +188,7 @@ defmodule StarkInfra.IssuingEmbossingKit do
     %IssuingEmbossingKit{
       id: json[:id],
       name: json[:name],
-      designs: json[:designs] |> Enum.map(fn design -> API.from_api_json(design, &IssuingDesign.resource_maker/1) end),
+      designs: json[:designs] && Enum.map(json[:designs], fn design -> API.from_api_json(design, &IssuingDesign.resource_maker/1) end),
       created: json[:created] |> Check.datetime(),
       updated: json[:updated] |> Check.datetime()
     }
