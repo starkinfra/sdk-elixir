@@ -28,6 +28,7 @@ defmodule StarkInfra.PixStatement do
     - `:id` [string]: unique id returned when the PixStatement is created. ex: "5656565656565656"
     - `:status` [string]: current PixStatement status. Options: "created", "looking", "success", "failed".
     - `:transaction_count` [integer]: number of transactions that happened during the day that the PixStatement was requested. ex: 11
+    - `:chunk_count` [integer]: number of chunks the statement file is split into. ex: 2
     - `:created` [DateTime]: creation datetime for the PixStatement. ex: ~U[2020-03-10 10:30:0:0]
     - `:updated` [DateTime]: latest update datetime for the PixStatement. ex: ~U[2020-03-10 10:30:0:0]
   """
@@ -43,6 +44,7 @@ defmodule StarkInfra.PixStatement do
     :id,
     :status,
     :transaction_count,
+    :chunk_count,
     :created,
     :updated
   ]
@@ -255,6 +257,7 @@ defmodule StarkInfra.PixStatement do
       id: json[:id],
       status: json[:status],
       transaction_count: json[:transaction_count],
+      chunk_count: json[:chunk_count],
       created:  json[:created] |> Check.datetime(),
       updated:  json[:updated] |> Check.datetime()
     }
