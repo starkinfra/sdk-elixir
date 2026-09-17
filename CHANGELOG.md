@@ -32,6 +32,8 @@ Given a version number MAJOR.MINOR.PATCH, increment:
 - IssuingEmbossingRequest.Log sub-resource
 - IssuingRestock resource
 - IssuingRestock.Log sub-resource
+- PixFraud resource
+- PixFraud.Log sub-resource
 - IssuingStock resource
 - IssuingStock.Log sub-resource
 - IssuingRule missing parameters

@@ -46,6 +46,7 @@ This SDK version is compatible with the Stark Infra API v2.
     - [PixClaim](#create-a-pixclaim): Claim a Pix Key
     - [PixDirector](#create-a-pixdirector): Create a Pix Director
     - [PixInfraction](#create-pixinfractions): Create Pix Infraction reports
+    - [PixFraud](#create-a-pixfraud): Create a Pix Fraud
     - [PixChargeback](#create-pixchargebacks): Create Pix Chargeback requests
     - [PixDomain](#query-pixdomains): View registered SPI participants certificates
   - [Credit Note](#credit-note)
@@ -1441,6 +1442,80 @@ You can also get a specific log by its id.
 
 ```elixir
 StarkInfra.PixInfraction.Log.get!("5155165527080960") 
+|> IO.inspect
+```
+
+### Create a PixFraud
+
+Pix Frauds can be created by either participant or automatically when a Pix Infraction is accepted.
+
+```elixir
+StarkInfra.PixFraud.create!(
+  [
+    %StarkInfra.PixFraud{
+      external_id: "my_external_id_1234",
+      type: "mule",
+      tax_id: "012.345.678-90"
+    }
+  ]
+)
+|> IO.inspect
+```
+
+### Query PixFrauds
+
+You can query multiple Pix frauds according to filters.
+
+```elixir
+StarkInfra.PixFraud.query!(
+  limit: 1,
+  after: "2022-01-01",
+  before: "2022-01-12",
+  status: ["created"],
+  ids: ["5155165527080960"]
+)
+|> Enum.take(1)
+|> IO.inspect
+```
+
+### Get a PixFraud
+
+After its creation, information on a Pix Fraud may be retrieved by its ID.
+
+```elixir
+StarkInfra.PixFraud.get!("5155165527080960") 
+|> IO.inspect
+```
+
+### Cancel a PixFraud
+
+Cancel a specific Pix Fraud using its id.
+
+```elixir
+StarkInfra.PixFraud.cancel!("5155165527080960") 
+|> IO.inspect
+```
+
+### Query PixFraud logs
+
+You can query PixFraud logs to better understand their life cycles.
+
+```elixir
+StarkInfra.PixFraud.Log.query!(
+  limit: 50,
+  after: "2022-01-01",
+  before: "2022-01-20"
+)
+|> Enum.take(50)
+|> IO.inspect
+```
+
+### Get a PixFraud log
+
+You can also get a specific log by its id.
+
+```elixir
+StarkInfra.PixFraud.Log.get!("5155165527080960") 
 |> IO.inspect
 ```
 
