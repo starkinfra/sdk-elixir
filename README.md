@@ -47,6 +47,7 @@ This SDK version is compatible with the Stark Infra API v2.
     - [PixDirector](#create-a-pixdirector): Create a Pix Director
     - [PixInfraction](#create-pixinfractions): Create Pix Infraction reports
     - [PixFraud](#create-a-pixfraud): Create a Pix Fraud
+    - [PixUser](#get-a-pixuser): Get fraud statistics of a user
     - [PixChargeback](#create-pixchargebacks): Create Pix Chargeback requests
     - [PixDomain](#query-pixdomains): View registered SPI participants certificates
   - [Credit Note](#credit-note)
@@ -1516,6 +1517,15 @@ You can also get a specific log by its id.
 
 ```elixir
 StarkInfra.PixFraud.Log.get!("5155165527080960") 
+|> IO.inspect
+```
+
+### Get a PixUser
+
+You can get a specific fraud statistics of a user with his taxId.
+
+```elixir
+StarkInfra.PixUser.get!("01234567890")
 |> IO.inspect
 ```
 
