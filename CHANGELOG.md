@@ -47,6 +47,7 @@ Given a version number MAJOR.MINOR.PATCH, increment:
 - PixDispute.Transaction sub-resource
 - PixDispute.Log sub-resource
 - priority and reason attributes and response method to PixRequest resource
+- description attribute and response method to PixReversal resource
 ### Changed
 - IssuingBin resource to IssuingProduct
 - settlement parameter to funding_type and client parameter to holder_type of IssuingProduct

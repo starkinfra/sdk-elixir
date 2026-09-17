@@ -1126,6 +1126,38 @@ StarkInfra.PixReversal.get!("5155165527080960")
 |> IO.inspect
 ```
 
+### Process inbound PixReversal authorizations
+
+It's easy to process authorization requests that arrived at your endpoint.
+Remember to pass the signature header so the SDK can make sure it's StarkInfra that sent you the event.
+If you do not approve or decline the authorization within 1 second, the authorization will be denied.
+
+```elixir
+request = listen()  # this is your handler to listen for authorization requests
+
+{pix_reversal, _cache_pid} = StarkInfra.PixReversal.parse!(
+  content: request.content,
+  signature: request.headers["Digital-Signature"]
+)
+
+IO.inspect(pix_reversal)
+
+send_response(  # you should also implement this method
+  StarkInfra.PixReversal.response!(  # this optional method just helps you build the response JSON
+    "approved"
+  )
+)
+
+# or
+
+send_response(
+  StarkInfra.PixReversal.response!(
+    "denied",
+    reason: "orderRejected"
+  )
+)
+```
+
 ### Query PixReversal logs
 
 You can query Pix reversal logs to better understand their life cycles. 

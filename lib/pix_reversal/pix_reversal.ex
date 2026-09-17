@@ -2,6 +2,7 @@ defmodule StarkInfra.PixReversal do
   alias __MODULE__, as: PixReversal
   alias StarkInfra.Utils.Rest
   alias StarkInfra.Utils.Check
+  alias StarkInfra.Utils.JSON
   alias StarkInfra.User.Project
   alias StarkInfra.Utils.Parse
   alias StarkInfra.User.Organization
@@ -31,11 +32,12 @@ defmodule StarkInfra.PixReversal do
 
   ## Parameters (optional):
     - `:tags` [list of strings, default nil]: list of strings for reference when searching for PixReversals. ex: ["employees", "monthly"]
+    - `:description` [string, default nil]: description of the reversal. ex: "Refund for order #1234"
 
   ## Attributes (return-only):
     - `:id` [string]: unique id returned when the PixReversal is created. ex: "5656565656565656".
     - `:return_id` [string]: central bank's unique reversal transaction ID. ex: "D20018183202202030109X3OoBHG74wo".
-    - `:bank_code` [string]: code of the bank institution in Brazil. ex: "20018183"
+    - `:bank_code` [string, default nil]: deprecated, no longer returned by the Stark Infra API.
     - `:fee` [string]: fee charged by this PixReversal. ex: 200 (= R$ 2.00)
     - `:status` [string]: current PixReversal status. Options are "created", "processing", "success" or "failed".
     - `:flow` [string]: direction of money flow. ex: "in" or "out"
@@ -62,6 +64,7 @@ defmodule StarkInfra.PixReversal do
     :created,
     :updated,
     :tags,
+    :description,
   ]
 
   @type t() :: %__MODULE__{}
@@ -364,8 +367,36 @@ defmodule StarkInfra.PixReversal do
       fee: json[:fee],
       status: json[:status],
       flow: json[:flow],
+      description: json[:description],
       created:  json[:created] |> Check.datetime(),
       updated:  json[:updated] |> Check.datetime()
     }
+  end
+
+  @doc """
+  Helps you respond to a PixReversal authorization.
+
+  You must answer this synchronous authorization webhook within 1 second. Unlike PixRequest,
+  an inbound PixReversal is accepted by default if you do not respond in time or have no
+  pixReversalUrl registered.
+
+  ## Parameters (required):
+    - `:status` [string]: response to the authorization. ex: "approved" or "denied"
+
+  ## Options
+    - `:reason` [string, default nil]: denial reason. Required if the status is "denied". Options: "invalidAccountNumber", "blockedAccount", "accountClosed", "invalidAccountType", "invalidTransactionType", "taxIdMismatch", "invalidTaxId", "orderRejected", "reversalTimeExpired", "settlementFailed"
+
+  ## Return:
+    - Dumped JSON string that must be returned to us on the PixReversal authorization request
+  """
+  @spec response!(
+    status: binary,
+    reason: binary
+  ) :: any
+  def response!(status, options \\ []) do
+    options = options ++ [status: status]
+    JSON.encode!(%{authorization:
+      Enum.into(options |> Check.enforced_keys([:status]), %{reason: nil})
+    })
   end
 end

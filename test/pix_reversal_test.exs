@@ -65,4 +65,19 @@ defmodule StarkInfraTest.PixReversal do
     {:ok, ids} = StarkInfraTest.Utils.Page.get(&StarkInfra.PixReversal.page/1, 2, limit: 5)
     assert length(ids) <= 10
   end
+
+  @tag :pix_reversal
+  test "response approved pix reversal" do
+    response = StarkInfra.PixReversal.response!("approved")
+
+    assert response =~ "approved"
+  end
+
+  @tag :pix_reversal
+  test "response denied pix reversal" do
+    response = StarkInfra.PixReversal.response!("denied", reason: "orderRejected")
+
+    assert response =~ "denied"
+    assert response =~ "orderRejected"
+  end
 end
