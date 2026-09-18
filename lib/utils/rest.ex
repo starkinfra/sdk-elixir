@@ -140,7 +140,7 @@ defmodule StarkInfra.Utils.Rest do
     :post,
     "#{API.endpoint(resource_name)}",
     payload: prepare_payload(resource_name, entities),
-    query: options,
+    query: Enum.into(options, %{}) |> Map.delete(:user) |> API.cast_json_to_api_format(),
     user: user
   ) do
     {:ok, response} -> {:ok, process_response(resource_name, resource_maker, response)}
@@ -162,7 +162,7 @@ defmodule StarkInfra.Utils.Rest do
     :post,
     "#{API.endpoint(resource_name)}",
     payload: API.api_json(entity),
-    query: options,
+    query: Enum.into(options, %{}) |> Map.delete(:user) |> API.cast_json_to_api_format(),
     user: user
   ) do
     {:ok, response} -> {:ok, process_single_response(response, resource_name, resource_maker)}

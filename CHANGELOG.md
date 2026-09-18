@@ -81,6 +81,7 @@ Given a version number MAJOR.MINOR.PATCH, increment:
 - IssuingAuthorization parse and response to IssuingPurchase.parse and IssuingPurchase.response
 ### Fixed
 - query parameters in post requests
+- user option sent as query string in post requests
 - ssl and public_key applications missing from extra_applications, breaking every request on OTP 26+
 - query parameters in delete requests
 - amount, expiration, document_id, status, transaction_ids, workspace_id and tax_amount attributes of CreditNote resource not being parsed
