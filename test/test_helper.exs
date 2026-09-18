@@ -83,6 +83,8 @@ ExUnit.start(
     # :business_identity_log,
     # :business_attachment,
     # :business_attachment_log,
+    # :business_account_request,
+    # :business_account_request_log
   ]
 )
 
@@ -109,3 +111,4 @@ Code.require_file("./test/utils/individual_account_attachment.exs")
 Code.require_file("./test/utils/individual_identity.exs")
 Code.require_file("./test/utils/business_identity.exs")
 Code.require_file("./test/utils/business_attachment.exs")
+Code.require_file("./test/utils/business_account_request.exs")

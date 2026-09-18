@@ -86,6 +86,10 @@ Given a version number MAJOR.MINOR.PATCH, increment:
 - BusinessIdentity.Log sub-resource
 - BusinessAttachment resource
 - BusinessAttachment.Log sub-resource
+- BusinessAccountRequest resource
+- BusinessAccountRequest.Address sub-resource
+- BusinessAccountRequest.Owner sub-resource
+- BusinessAccountRequest.Log sub-resource
 ### Changed
 - IssuingBin resource to IssuingProduct
 - settlement parameter to funding_type and client parameter to holder_type of IssuingProduct

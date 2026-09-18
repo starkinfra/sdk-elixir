@@ -79,6 +79,7 @@ This SDK version is compatible with the Stark Infra API v2.
     - [IndividualAccountAttachment](#create-individualaccountattachments): Attach document images to an IndividualAccountRequest
     - [BusinessIdentity](#create-businessidentities): Create business identities
     - [BusinessAttachment](#create-businessattachments): Create business attachments
+    - [BusinessAccountRequest](#create-businessaccountrequests): Create business account requests
   - [Webhook](#webhook):
     - [Webhook](#create-a-webhook-subscription): Configure your webhook endpoints and subscriptions
   - [Webhook Events](#webhook-events):
@@ -3344,6 +3345,100 @@ StarkInfra.BusinessAttachment.Log.get!("5155165527080960")
 |> IO.inspect
 ```
 
+### Create BusinessAccountRequests
+
+You can create a BusinessAccountRequest to request an account for a specific company, opening the account with
+identity verification by webview for each of its owners.
+
+```elixir
+StarkInfra.BusinessAccountRequest.create!([
+  %StarkInfra.BusinessAccountRequest{
+    name: "Stark Bank S.A.",
+    tax_id: "20.018.183/0001-80",
+    address: %StarkInfra.BusinessAccountRequest.Address{
+      street: "Av. Faria Lima",
+      number: "2000",
+      neighborhood: "Itaim Bibi",
+      city: "Sao Paulo",
+      state: "SP",
+      zip_code: "04538-132",
+      complement: "Sala 42"
+    },
+    revenue: 100000000,
+    owners: [
+      %StarkInfra.BusinessAccountRequest.Owner{
+        tax_id: "012.345.678-90",
+        name: "Jamie Lannister",
+        role: "partner"
+      },
+      %StarkInfra.BusinessAccountRequest.Owner{
+        tax_id: "812.531.960-36",
+        name: "Cersei Lannister",
+        role: "representative"
+      }
+    ]
+  }
+])
+|> IO.inspect
+```
+
+**Note**: Instead of using BusinessAccountRequest, Address and Owner structs, you can also pass each element in map format
+
+### Query BusinessAccountRequests
+
+You can query multiple business account requests according to filters.
+
+```elixir
+StarkInfra.BusinessAccountRequest.query!(
+  limit: 10,
+  after: Date.utc_today |> Date.add(-30),
+  before: Date.utc_today |> Date.add(-1),
+  status: ["approved"],
+  tags: ["breaking", "bad"]
+)
+|> Enum.take(10)
+|> IO.inspect
+```
+
+### Get a BusinessAccountRequest
+
+After its creation, information on a business account request may be retrieved by its id. Use it to read the
+per-owner verification status.
+
+```elixir
+request = StarkInfra.BusinessAccountRequest.get!("5155165527080960")
+
+for owner <- request.owners do
+  IO.inspect({owner.name, owner.status})
+end
+```
+
+Each owner also carries a `validator_link`, the webview where that owner completes biometrics and document
+capture. Treat it as a credential: deliver it to its owner through a secure channel, and never log it or write
+it to disk.
+
+### Query BusinessAccountRequest logs
+
+You can query business account request logs to better understand business account request life cycles.
+
+```elixir
+StarkInfra.BusinessAccountRequest.Log.query!(
+  limit: 50,
+  after: "2020-01-01",
+  before: "2020-01-20"
+)
+|> Enum.take(50)
+|> IO.inspect
+```
+
+### Get a BusinessAccountRequest log
+
+You can also get a specific log by its id.
+
+```elixir
+StarkInfra.BusinessAccountRequest.Log.get!("5155165527080960")
+|> IO.inspect
+```
 
 ## Webhook
 
