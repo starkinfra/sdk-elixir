@@ -63,6 +63,7 @@ ExUnit.start(
     # :issuing_token_design,
     # :issuing_token_request,
     # :issuing_token_activation,
+    # :issuing_stock_rule,
     # :issuing_transaction,
     # :issuing_transaction_log,
     # :issuing_withdrawal,

@@ -41,6 +41,7 @@ This SDK version is compatible with the Stark Infra API v2.
     - [EmbossingRequests](#create-issuingembossingrequests): Create embossing requests
     - [Restocks](#create-issuingrestocks): Create restock orders for an IssuingStock
     - [Stocks](#query-issuingstocks): View the stock of a certain IssuingDesign linked to an Embosser
+    - [StockRules](#create-issuingstockrules): Get notified when a specific IssuingStock reaches a minimum balance
   - [Pix](#pix)
     - [PixRequests](#create-pixrequests): Create Pix transactions
     - [PixReversals](#create-pixreversals): Reverse Pix transactions
@@ -1151,6 +1152,53 @@ You can also get a specific log by its id.
 
 ```elixir
 StarkInfra.IssuingStock.Log.get!("5155165527080960")
+|> IO.inspect
+```
+
+### Create IssuingStockRules
+
+You can create rules to be notified whenever a specific IssuingStock reaches a minimum balance.
+
+```elixir
+StarkInfra.IssuingStockRule.create!([
+  %StarkInfra.IssuingStockRule{
+    minimum_balance: 10000,
+    stock_id: "5136459887542272",
+    emails: ["john.doe@enterprise.com"],
+    phones: ["+55 (11) 91234 5678"]
+  }
+])
+|> IO.inspect
+```
+
+### Query IssuingStockRules
+
+You can get a list of created stock rules given some filters.
+
+```elixir
+StarkInfra.IssuingStockRule.query!(
+  after: Date.utc_today |> Date.add(-30),
+  before: Date.utc_today |> Date.add(-1)
+)
+|> Enum.take(10)
+|> IO.inspect
+```
+
+### Update an IssuingStockRule
+
+You can update a specific IssuingStockRule by its id.
+
+```elixir
+StarkInfra.IssuingStockRule.update!("5664445921492992", minimum_balance: 20000)
+|> IO.inspect
+```
+
+### Cancel an IssuingStockRule
+
+You can also cancel a specific IssuingStockRule by its id.
+
+```elixir
+StarkInfra.IssuingStockRule.cancel!("5664445921492992")
 |> IO.inspect
 ```
 
