@@ -3100,6 +3100,84 @@ StarkInfra.IndividualAccountRequest.Log.get!("5155165527080960")
 |> IO.inspect
 ```
 
+### Create IndividualAccountAttachments
+
+You can create an IndividualAccountAttachment to attach images of documents to a specific
+IndividualAccountRequest. You must reference the desired IndividualAccountRequest by its id.
+Pass the raw image bytes and a MIME content type; the SDK encodes them as a data url before sending.
+
+```elixir
+StarkInfra.IndividualAccountAttachment.create!([
+  %StarkInfra.IndividualAccountAttachment{
+    type: "identity-front",
+    content: File.read!("identity-front.png"),
+    content_type: "image/png",
+    account_request_id: "5155165527080960",
+    tags: ["breaking", "bad"]
+  }
+])
+|> IO.inspect
+```
+
+**Note**: The API accepts a single attachment per create call. Instead of using an IndividualAccountAttachment struct, you can also pass the element in map format
+
+### Query IndividualAccountAttachments
+
+You can query multiple individual account attachments according to filters.
+
+```elixir
+StarkInfra.IndividualAccountAttachment.query!(
+  limit: 10,
+  after: Date.utc_today |> Date.add(-100),
+  before: Date.utc_today,
+  status: "created",
+  tags: ["breaking", "bad"]
+)
+|> Enum.take(10)
+|> IO.inspect
+```
+
+### Get an IndividualAccountAttachment
+
+After its creation, information on an individual account attachment may be retrieved by its id.
+
+```elixir
+StarkInfra.IndividualAccountAttachment.get!("5155165527080960")
+|> IO.inspect
+```
+
+### Cancel an IndividualAccountAttachment
+
+You can cancel an individual account attachment by passing its id. The returned struct has status "deleted".
+
+```elixir
+StarkInfra.IndividualAccountAttachment.cancel!("5155165527080960")
+|> IO.inspect
+```
+
+### Query IndividualAccountAttachment logs
+
+You can query individual account attachment logs to better understand individual account attachment life cycles.
+
+```elixir
+StarkInfra.IndividualAccountAttachment.Log.query!(
+  limit: 50,
+  after: Date.utc_today |> Date.add(-100),
+  before: Date.utc_today
+)
+|> Enum.take(50)
+|> IO.inspect
+```
+
+### Get an IndividualAccountAttachment log
+
+You can also get a specific log by its id.
+
+```elixir
+StarkInfra.IndividualAccountAttachment.Log.get!("5155165527080960")
+|> IO.inspect
+```
+
 
 ## Webhook
 

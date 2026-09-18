@@ -78,6 +78,8 @@ Given a version number MAJOR.MINOR.PATCH, increment:
 - IndividualAccountRequest resource
 - IndividualAccountRequest.Address sub-resource
 - IndividualAccountRequest.Log sub-resource
+- IndividualAccountAttachment resource
+- IndividualAccountAttachment.Log sub-resource
 - IndividualIdentity resource
 - IndividualIdentity.Log sub-resource
 ### Changed

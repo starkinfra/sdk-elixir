@@ -75,6 +75,8 @@ ExUnit.start(
     # :brcode_preview,
     # :individual_account_request,
     # :individual_account_request_log,
+    # :individual_account_attachment,
+    # :individual_account_attachment_log,
     # :individual_identity,
     # :individual_identity_log,
   ]
@@ -99,4 +101,5 @@ Code.require_file("./test/utils/issuing_holder.exs")
 Code.require_file("./test/utils/issuing_withdrawal.exs")
 Code.require_file("./test/utils/issuing_invoice.exs")
 Code.require_file("./test/utils/individual_account_request.exs")
+Code.require_file("./test/utils/individual_account_attachment.exs")
 Code.require_file("./test/utils/individual_identity.exs")
