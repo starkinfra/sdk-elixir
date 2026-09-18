@@ -27,6 +27,7 @@ This SDK version is compatible with the Stark Infra API v2.
     - [Cards](#create-issuingcards): Create virtual and/or physical cards
     - [Purchases](#process-purchase-authorizations): Authorize and view your past purchases
     - [TokenRequest](#create-an-issuingtokenrequest): Generate the payload to create the token
+    - [Token](#process-token-authorizations): Authorize and manage your tokens
     - [TokenActivation](#process-token-activations): Get notified on how to inform the activation code to the holder
     - [TokenDesign](#get-an-issuingtokendesign): View your current token card arts
     - [Invoices](#create-issuinginvoices): Add money to your issuing balance
@@ -637,6 +638,29 @@ request = StarkInfra.IssuingTokenRequest.create!(
 IO.inspect(request)
 ```
 
+### Process Token authorizations
+
+It's easy to process token authorizations delivered to your endpoint.
+Remember to pass the signature header so the SDK can make sure it's StarkInfra that sent you the event.
+If you do not approve or decline the authorization within 2 seconds, the authorization will be denied.
+
+```elixir
+{:ok, {authorization, _cache_pid}} = StarkInfra.IssuingToken.parse(
+  content: content,
+  signature: signature
+)
+
+response = StarkInfra.IssuingToken.response_authorization!(
+  "approved",
+  activation_methods: [
+    %{"type" => "app", "value" => "com.subissuer.android"},
+    %{"type" => "text", "value" => "** *****-5678"}
+  ],
+  design_id: "4584031664472031",
+  tags: ["token", "user/1234"]
+)
+
+# or
 
 response = StarkInfra.IssuingToken.response_authorization!(
   "denied",
@@ -671,12 +695,57 @@ response = StarkInfra.IssuingToken.response_activation!(
   tags: ["token", "user/1234"]
 )
 
+# or
 
 response = StarkInfra.IssuingToken.response_activation!(
   "denied",
   reason: "other",
   tags: ["token", "user/1234"]
 )
+```
+
+### Get an IssuingToken
+
+You can get a single token by its id.
+
+```elixir
+StarkInfra.IssuingToken.get!("5749080709922816")
+|> IO.inspect
+```
+
+### Query IssuingTokens
+
+You can get a list of created tokens given some filters.
+
+```elixir
+StarkInfra.IssuingToken.query!(
+  limit: 5,
+  after: Date.utc_today |> Date.add(-100),
+  before: Date.utc_today,
+  status: "active",
+  card_ids: ["5656565656565656", "4545454545454545"],
+  external_ids: ["DSHRMC00002626944b0e3b539d4d459281bdba90c2588791", "DSHRMC00002626941c531164a0b14c66ad9602ee716f1e85"]
+)
+|> Enum.take(5)
+|> IO.inspect
+```
+
+### Update an IssuingToken
+
+You can update a specific token by its id.
+
+```elixir
+StarkInfra.IssuingToken.update!("5155165527080960", status: "blocked")
+|> IO.inspect
+```
+
+### Cancel an IssuingToken
+
+You can also cancel a token by its id.
+
+```elixir
+StarkInfra.IssuingToken.cancel!("5155165527080960")
+|> IO.inspect
 ```
 
 ### Get an IssuingTokenDesign
