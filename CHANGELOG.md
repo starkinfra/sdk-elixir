@@ -68,6 +68,7 @@ Given a version number MAJOR.MINOR.PATCH, increment:
 - BrcodePreview resource
 - IssuingTokenDesign resource
 - IssuingTokenRequest sub-resource
+- IssuingTokenActivation sub-resource
 ### Changed
 - IssuingBin resource to IssuingProduct
 - settlement parameter to funding_type and client parameter to holder_type of IssuingProduct

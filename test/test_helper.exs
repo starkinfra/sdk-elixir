@@ -60,6 +60,7 @@ ExUnit.start(
     # :issuing_purchase_log,
     # :issuing_token_design,
     # :issuing_token_request,
+    # :issuing_token_activation,
     # :issuing_transaction,
     # :issuing_transaction_log,
     # :issuing_withdrawal,

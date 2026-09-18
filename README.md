@@ -27,6 +27,7 @@ This SDK version is compatible with the Stark Infra API v2.
     - [Cards](#create-issuingcards): Create virtual and/or physical cards
     - [Purchases](#process-purchase-authorizations): Authorize and view your past purchases
     - [TokenRequest](#create-an-issuingtokenrequest): Generate the payload to create the token
+    - [TokenActivation](#process-token-activations): Get notified on how to inform the activation code to the holder
     - [TokenDesign](#get-an-issuingtokendesign): View your current token card arts
     - [Invoices](#create-issuinginvoices): Add money to your issuing balance
     - [Withdrawals](#create-issuingwithdrawals): Send money back to your Workspace from your issuing balance
@@ -642,6 +643,33 @@ response = StarkInfra.IssuingToken.response_authorization!(
   reason: "other"
 )
 ```
+
+### Process Token activations
+
+It's easy to process token activation notifications delivered to your endpoint.
+Remember to pass the signature header so the SDK can make sure it's Stark Infra that sent you the event.
+
+```elixir
+{:ok, {activation, _cache_pid}} = StarkInfra.IssuingTokenActivation.parse(
+  content: content,
+  signature: signature
+)
+```
+
+After that, you may generate the activation code and send it to the cardholder.
+The cardholder enters the received code in the wallet app. We'll receive and send it to
+tokenAuthorizationUrl for your validation, completing the provisioning process.
+
+```elixir
+{:ok, {activation, _cache_pid}} = StarkInfra.IssuingToken.parse(
+  content: content,
+  signature: signature
+)
+
+response = StarkInfra.IssuingToken.response_activation!(
+  "approved",
+  tags: ["token", "user/1234"]
+)
 
 
 response = StarkInfra.IssuingToken.response_activation!(
