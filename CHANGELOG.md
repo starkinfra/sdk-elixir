@@ -90,6 +90,7 @@ Given a version number MAJOR.MINOR.PATCH, increment:
 - BusinessAccountRequest.Address sub-resource
 - BusinessAccountRequest.Owner sub-resource
 - BusinessAccountRequest.Log sub-resource
+- CreditSigner resource
 ### Changed
 - IssuingBin resource to IssuingProduct
 - settlement parameter to funding_type and client parameter to holder_type of IssuingProduct

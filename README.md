@@ -2704,13 +2704,16 @@ IO.binwrite(file, payment)
 File.close(file)
 ```
 
-### Resend a CreditNote signer's token
+### CCB Token Resend
 
-If a signer did not receive the signing link or token, you can resend it by the signer's id.
+You can resend the CCB token to the signers in case they missed the original email or link.
 
 ```elixir
-StarkInfra.CreditNote.Signer.resend_token!("5155165527080960")
-|> IO.inspect
+note = StarkInfra.CreditNote.get!("5155165527080960")
+
+for signer <- note.signers do
+  StarkInfra.CreditSigner.resend_token!(signer.id)
+end
 ```
 
 ## Credit Holmes
