@@ -34,6 +34,7 @@ This SDK version is compatible with the Stark Infra API v2.
     - [Withdrawals](#create-issuingwithdrawals): Send money back to your Workspace from your issuing balance
     - [Balance](#get-your-issuingbalance): View your issuing balance
     - [Transactions](#query-issuingtransactions): View the transactions that have affected your issuing balance
+    - [Enums](#issuing-enums): Query enums related to the issuing purchases, such as merchant categories, countries and card purchase methods
     - [BillingInvoices](#query-issuingbillinginvoices): View the invoices charged for your Issuing costs
     - [BillingTransactions](#query-issuingbillingtransactions): View the transactions that compose your Issuing billing invoices
     - [Designs](#query-issuingdesigns): View card and card package designs available to your Workspace
@@ -910,6 +911,42 @@ You can get a specific transaction by its id:
 
 ```elixir
 StarkInfra.IssuingTransaction.get!("5155165527080960") 
+|> IO.inspect
+```
+
+### Issuing Enums
+
+#### Query MerchantCategories
+
+You can query any merchant categories using this resource.
+You may also use MerchantCategories to define specific category filters in IssuingRules.
+Either codes (which represents specific MCCs) or types (code groups) will be accepted as filters.
+
+```elixir
+StarkInfra.MerchantCategory.query!(search: "food")
+|> Enum.take(10)
+|> IO.inspect
+```
+
+#### Query MerchantCountries
+
+You can query any merchant countries using this resource.
+You may also use MerchantCountries to define specific country filters in IssuingRules.
+
+```elixir
+StarkInfra.MerchantCountry.query!(search: "brazil")
+|> Enum.take(10)
+|> IO.inspect
+```
+
+#### Query CardMethods
+
+You can query available card methods using this resource.
+You may also use CardMethods to define specific purchase method filters in IssuingRules.
+
+```elixir
+StarkInfra.CardMethod.query!(search: "token")
+|> Enum.take(10)
 |> IO.inspect
 ```
 

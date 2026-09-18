@@ -72,6 +72,9 @@ Given a version number MAJOR.MINOR.PATCH, increment:
 - IssuingTokenRequest sub-resource
 - IssuingTokenActivation sub-resource
 - IssuingStockRule resource
+- CardMethod sub-resource
+- MerchantCategory sub-resource
+- MerchantCountry sub-resource
 ### Changed
 - IssuingBin resource to IssuingProduct
 - settlement parameter to funding_type and client parameter to holder_type of IssuingProduct
