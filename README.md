@@ -26,6 +26,7 @@ This SDK version is compatible with the Stark Infra API v2.
     - [Holders](#create-issuingholders): Manage card holders
     - [Cards](#create-issuingcards): Create virtual and/or physical cards
     - [Purchases](#process-purchase-authorizations): Authorize and view your past purchases
+    - [TokenRequest](#create-an-issuingtokenrequest): Generate the payload to create the token
     - [TokenDesign](#get-an-issuingtokendesign): View your current token card arts
     - [Invoices](#create-issuinginvoices): Add money to your issuing balance
     - [Withdrawals](#create-issuingwithdrawals): Send money back to your Workspace from your issuing balance
@@ -617,6 +618,37 @@ You can get a single log by its id.
 ```elixir
 StarkInfra.IssuingPurchase.Log.get!("5155165527080960") 
 |> IO.inspect
+```
+
+### Create an IssuingTokenRequest
+
+You can create a request that provides the required data you must send to the wallet app.
+
+```elixir
+request = StarkInfra.IssuingTokenRequest.create!(
+  %StarkInfra.IssuingTokenRequest{
+    card_id: "5189831499972623",
+    wallet_id: "google",
+    method_code: "app"
+  }
+)
+
+IO.inspect(request)
+```
+
+
+response = StarkInfra.IssuingToken.response_authorization!(
+  "denied",
+  reason: "other"
+)
+```
+
+
+response = StarkInfra.IssuingToken.response_activation!(
+  "denied",
+  reason: "other",
+  tags: ["token", "user/1234"]
+)
 ```
 
 ### Get an IssuingTokenDesign

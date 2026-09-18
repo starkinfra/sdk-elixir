@@ -67,6 +67,7 @@ Given a version number MAJOR.MINOR.PATCH, increment:
 - Rule sub-resource and rules, debtor_workspace_id and nominal_interest attributes to CreditNote resource
 - BrcodePreview resource
 - IssuingTokenDesign resource
+- IssuingTokenRequest sub-resource
 ### Changed
 - IssuingBin resource to IssuingProduct
 - settlement parameter to funding_type and client parameter to holder_type of IssuingProduct
