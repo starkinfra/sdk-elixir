@@ -78,6 +78,7 @@ This SDK version is compatible with the Stark Infra API v2.
     - [IndividualAccountRequest](#create-individualaccountrequests): Request the opening of an account for a specific individual
     - [IndividualAccountAttachment](#create-individualaccountattachments): Attach document images to an IndividualAccountRequest
     - [BusinessIdentity](#create-businessidentities): Create business identities
+    - [BusinessAttachment](#create-businessattachments): Create business attachments
   - [Webhook](#webhook):
     - [Webhook](#create-a-webhook-subscription): Configure your webhook endpoints and subscriptions
   - [Webhook Events](#webhook-events):
@@ -3264,6 +3265,82 @@ You can also get a specific log by its id.
 
 ```elixir
 StarkInfra.BusinessIdentity.Log.get!("5155165527080960")
+|> IO.inspect
+```
+
+### Create BusinessAttachments
+
+You can create a BusinessAttachment to attach a document (e.g. articles of incorporation) to a specific BusinessIdentity.
+You must reference the desired business identity by its id. A BusinessIdentity accepts at most 2 attachments.
+
+```elixir
+StarkInfra.BusinessAttachment.create!([
+  %StarkInfra.BusinessAttachment{
+    name: "articles-of-incorporation.pdf",
+    content: "data:application/pdf;base64,JVBERi0xLjQ...",
+    business_identity_id: "5155165527080960",
+    tags: ["doc-principal"]
+  }
+])
+|> IO.inspect
+```
+
+**Note**: Instead of using BusinessAttachment structs, you can also pass each element in map format
+
+### Query BusinessAttachments
+
+You can query multiple business attachments according to filters.
+
+```elixir
+StarkInfra.BusinessAttachment.query!(
+  limit: 10,
+  after: Date.utc_today |> Date.add(-30),
+  before: Date.utc_today |> Date.add(-1),
+  status: ["approved"],
+  tags: ["doc-principal"]
+)
+|> Enum.take(10)
+|> IO.inspect
+```
+
+### Get a BusinessAttachment
+
+After its creation, information on a business attachment may be retrieved by its id. Pass `expand: ["content"]` to also retrieve the document content.
+
+```elixir
+StarkInfra.BusinessAttachment.get!("5155165527080960", expand: ["content"])
+|> IO.inspect
+```
+
+### Cancel a BusinessAttachment
+
+You can cancel a business attachment by passing its id, while it is in the "created" status.
+
+```elixir
+StarkInfra.BusinessAttachment.cancel!("5155165527080960")
+|> IO.inspect
+```
+
+### Query BusinessAttachment logs
+
+You can query business attachment logs to better understand business attachment life cycles.
+
+```elixir
+StarkInfra.BusinessAttachment.Log.query!(
+  limit: 50,
+  after: "2022-01-01",
+  before: "2022-01-20"
+)
+|> Enum.take(50)
+|> IO.inspect
+```
+
+### Get a BusinessAttachment log
+
+You can also get a specific log by its id.
+
+```elixir
+StarkInfra.BusinessAttachment.Log.get!("5155165527080960")
 |> IO.inspect
 ```
 
