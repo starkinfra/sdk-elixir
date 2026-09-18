@@ -13,6 +13,7 @@ Given a version number MAJOR.MINOR.PATCH, increment:
 
 ## [Unreleased]
 ### Added
+- Deprecated create pix infraction
 - StaticBrcode resource
 - DynamicBrcode resource
 - PixKeyHolmes resource

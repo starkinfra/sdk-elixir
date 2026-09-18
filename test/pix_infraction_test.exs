@@ -3,17 +3,14 @@ defmodule StarkInfraTest.PixInfraction do
 
   @tag :pix_infraction
   test "create pix infraction" do
-    {:ok, pix_infractions} = StarkInfra.PixInfraction.create(StarkInfraTest.Utils.PixInfraction.example_pix_infraction())
-    pix_infraction = pix_infractions |> hd
-    {:ok, canceled_pix} = StarkInfra.PixInfraction.cancel(pix_infraction.id)
-    assert !is_nil(canceled_pix.id)
+    infractions = [%StarkInfra.PixInfraction{reference_id: "E20018183202201201450u34sDGd19lz", type: "fraud"}]
+    assert {:error, [%StarkInfra.Error{code: "deprecated"}]} = StarkInfra.PixInfraction.create(infractions)
   end
 
   @tag :pix_infraction
   test "create! pix infraction" do
-    pix_infraction = StarkInfra.PixInfraction.create!(StarkInfraTest.Utils.PixInfraction.example_pix_infraction()) |> hd
-    canceled_pix = StarkInfra.PixInfraction.cancel!(pix_infraction.id)
-    assert !is_nil(canceled_pix.id)
+    infractions = [%StarkInfra.PixInfraction{reference_id: "E20018183202201201450u34sDGd19lz", type: "fraud"}]
+    assert_raise RuntimeError, fn -> StarkInfra.PixInfraction.create!(infractions) end
   end
 
   @tag :pix_infraction
