@@ -73,6 +73,7 @@ This SDK version is compatible with the Stark Infra API v2.
   - [Ledger](#ledger)
     - [Ledger](#create-ledgers): Create and manage Ledgers to track balances
     - [LedgerTransaction](#create-ledgertransactions): Create LedgerTransactions to update a Ledger's balance
+    - [IndividualIdentity](#create-individualidentities): Run an end-to-end identity verification on an individual
   - [Webhook](#webhook):
     - [Webhook](#create-a-webhook-subscription): Configure your webhook endpoints and subscriptions
   - [Webhook Events](#webhook-events):
@@ -2921,6 +2922,94 @@ After its creation, information on a LedgerTransaction may be retrieved by its i
 
 ```elixir
 StarkInfra.LedgerTransaction.get!("5155165527080960")
+|> IO.inspect
+```
+
+### Create IndividualIdentities
+
+You can create an IndividualIdentity to run an end-to-end identity verification on a natural person.
+Stark Infra collects the requested proofs and delivers the result through the webhook subscription.
+
+```elixir
+StarkInfra.IndividualIdentity.create!([
+  %StarkInfra.IndividualIdentity{
+    name: "Walter White",
+    email: "walter.white@email.com",
+    delivery_method: "automatic",
+    proofs: ["identity"],
+    tax_id: "012.345.678-90",
+    tags: ["breaking", "bad"]
+  }
+])
+|> IO.inspect
+```
+
+**Note**: Instead of using IndividualIdentity structs, you can also pass each element in map format
+
+### Query IndividualIdentity
+
+You can query multiple individual identities according to filters.
+
+```elixir
+StarkInfra.IndividualIdentity.query!(
+  limit: 10,
+  after: Date.utc_today |> Date.add(-100),
+  before: Date.utc_today,
+  status: "success",
+  tags: ["breaking", "bad"]
+)
+|> Enum.take(10)
+|> IO.inspect
+```
+
+### Get an IndividualIdentity
+
+After its creation, information on an individual identity may be retrieved by its id.
+
+```elixir
+StarkInfra.IndividualIdentity.get!("5155165527080960")
+|> IO.inspect
+```
+
+### Update an IndividualIdentity
+
+You can update the tax_id of an individual identity, useful when the CPF is unknown at
+creation time and is only collected during the proof submission flow.
+
+```elixir
+StarkInfra.IndividualIdentity.update!("5155165527080960", tax_id: "012.345.678-90")
+|> IO.inspect
+```
+
+### Cancel an IndividualIdentity
+
+You can cancel an individual identity while it is still in "created" or "pending" status.
+
+```elixir
+StarkInfra.IndividualIdentity.cancel!("5155165527080960")
+|> IO.inspect
+```
+
+### Query IndividualIdentity logs
+
+You can query individual identity logs to better understand individual identity life cycles.
+
+```elixir
+StarkInfra.IndividualIdentity.Log.query!(
+  limit: 50,
+  after: Date.utc_today |> Date.add(-100),
+  before: Date.utc_today
+)
+|> Enum.take(50)
+|> IO.inspect
+```
+
+### Get an IndividualIdentity log
+
+You can also get a specific log by its id.
+
+```elixir
+StarkInfra.IndividualIdentity.Log.get!("5155165527080960")
 |> IO.inspect
 ```
 

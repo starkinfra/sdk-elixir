@@ -75,6 +75,8 @@ Given a version number MAJOR.MINOR.PATCH, increment:
 - CardMethod sub-resource
 - MerchantCategory sub-resource
 - MerchantCountry sub-resource
+- IndividualIdentity resource
+- IndividualIdentity.Log sub-resource
 ### Changed
 - IssuingBin resource to IssuingProduct
 - settlement parameter to funding_type and client parameter to holder_type of IssuingProduct
