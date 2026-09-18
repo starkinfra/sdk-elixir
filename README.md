@@ -26,6 +26,7 @@ This SDK version is compatible with the Stark Infra API v2.
     - [Holders](#create-issuingholders): Manage card holders
     - [Cards](#create-issuingcards): Create virtual and/or physical cards
     - [Purchases](#process-purchase-authorizations): Authorize and view your past purchases
+    - [TokenDesign](#get-an-issuingtokendesign): View your current token card arts
     - [Invoices](#create-issuinginvoices): Add money to your issuing balance
     - [Withdrawals](#create-issuingwithdrawals): Send money back to your Workspace from your issuing balance
     - [Balance](#get-your-issuingbalance): View your issuing balance
@@ -616,6 +617,35 @@ You can get a single log by its id.
 ```elixir
 StarkInfra.IssuingPurchase.Log.get!("5155165527080960") 
 |> IO.inspect
+```
+
+### Get an IssuingTokenDesign
+
+You can get a single design by its id.
+
+```elixir
+StarkInfra.IssuingTokenDesign.get!("5749080709922816")
+|> IO.inspect
+```
+
+### Query IssuingTokenDesigns
+
+You can get a list of available designs given some filters.
+
+```elixir
+StarkInfra.IssuingTokenDesign.query!(limit: 5)
+|> Enum.take(5)
+|> IO.inspect
+```
+
+### Get an IssuingTokenDesign PDF
+
+A design PDF can be retrieved by its id.
+
+```elixir
+pdf = StarkInfra.IssuingTokenDesign.pdf!("5155165527080960")
+
+File.write!("design.pdf", pdf)
 ```
 
 ### Create IssuingInvoices

@@ -58,6 +58,7 @@ ExUnit.start(
     # :issuing_stock_log,
     # :issuing_purchase,
     # :issuing_purchase_log,
+    # :issuing_token_design,
     # :issuing_transaction,
     # :issuing_transaction_log,
     # :issuing_withdrawal,
