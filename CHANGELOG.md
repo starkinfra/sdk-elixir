@@ -75,6 +75,9 @@ Given a version number MAJOR.MINOR.PATCH, increment:
 - CardMethod sub-resource
 - MerchantCategory sub-resource
 - MerchantCountry sub-resource
+- IndividualAccountRequest resource
+- IndividualAccountRequest.Address sub-resource
+- IndividualAccountRequest.Log sub-resource
 - IndividualIdentity resource
 - IndividualIdentity.Log sub-resource
 ### Changed

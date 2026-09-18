@@ -74,6 +74,8 @@ This SDK version is compatible with the Stark Infra API v2.
     - [Ledger](#create-ledgers): Create and manage Ledgers to track balances
     - [LedgerTransaction](#create-ledgertransactions): Create LedgerTransactions to update a Ledger's balance
     - [IndividualIdentity](#create-individualidentities): Run an end-to-end identity verification on an individual
+    - [IndividualAccountRequest](#create-individualaccountrequests): Request the opening of an account for a specific individual
+    - [IndividualAccountAttachment](#create-individualaccountattachments): Attach document images to an IndividualAccountRequest
   - [Webhook](#webhook):
     - [Webhook](#create-a-webhook-subscription): Configure your webhook endpoints and subscriptions
   - [Webhook Events](#webhook-events):
@@ -3012,6 +3014,92 @@ You can also get a specific log by its id.
 StarkInfra.IndividualIdentity.Log.get!("5155165527080960")
 |> IO.inspect
 ```
+
+### Create IndividualAccountRequests
+
+You can create an IndividualAccountRequest to request the opening of an account for a specific individual.
+
+```elixir
+StarkInfra.IndividualAccountRequest.create!([
+  %StarkInfra.IndividualAccountRequest{
+    name: "Walter White",
+    tax_id: "012.345.678-90",
+    address: %StarkInfra.IndividualAccountRequest.Address{
+      street: "Rua do Estilo Barroco",
+      number: "648",
+      neighborhood: "Santo Amaro",
+      city: "Sao Paulo",
+      state: "SP",
+      zip_code: "05724005"
+    },
+    income: 1000000,
+    birth_date: "1965-09-07",
+    tags: ["breaking", "bad"]
+  }
+])
+|> IO.inspect
+```
+
+**Note**: Instead of using IndividualAccountRequest structs, you can also pass each element in map format
+
+### Query IndividualAccountRequests
+
+You can query multiple individual account requests according to filters.
+
+```elixir
+StarkInfra.IndividualAccountRequest.query!(
+  limit: 10,
+  after: Date.utc_today |> Date.add(-100),
+  before: Date.utc_today,
+  status: "created",
+  tags: ["breaking", "bad"]
+)
+|> Enum.take(10)
+|> IO.inspect
+```
+
+### Get an IndividualAccountRequest
+
+After its creation, information on an individual account request may be retrieved by its id.
+
+```elixir
+StarkInfra.IndividualAccountRequest.get!("5155165527080960")
+|> IO.inspect
+```
+
+### Update an IndividualAccountRequest
+
+You can update a specific individual account request by passing its id. Send it to validation
+by patching its status to "processing" once the required documents have been attached.
+
+```elixir
+StarkInfra.IndividualAccountRequest.update!("5155165527080960", status: "processing")
+|> IO.inspect
+```
+
+### Query IndividualAccountRequest logs
+
+You can query individual account request logs to better understand individual account request life cycles.
+
+```elixir
+StarkInfra.IndividualAccountRequest.Log.query!(
+  limit: 50,
+  after: Date.utc_today |> Date.add(-100),
+  before: Date.utc_today
+)
+|> Enum.take(50)
+|> IO.inspect
+```
+
+### Get an IndividualAccountRequest log
+
+You can also get a specific log by its id.
+
+```elixir
+StarkInfra.IndividualAccountRequest.Log.get!("5155165527080960")
+|> IO.inspect
+```
+
 
 ## Webhook
 
