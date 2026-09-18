@@ -1,6 +1,7 @@
 defmodule StarkInfra.CreditNote.Signer do
   alias __MODULE__, as: Signer
   alias StarkInfra.Utils.Rest
+  alias StarkInfra.Utils.Check
   alias StarkInfra.User.Project
   alias StarkInfra.User.Organization
   alias StarkInfra.Error
@@ -19,6 +20,7 @@ defmodule StarkInfra.CreditNote.Signer do
 
   Attributes (return-only):
     - `:id` [string, default nil]: unique id returned when the Signer is created. ex: "5656565656565656"
+    - `:signed` [DateTime, default nil]: datetime when the signer signed the contract. nil until the signature happens. ex: ~U[2022-06-02 00:00:00.000000Z]
   """
   @enforce_keys [
     :name,
@@ -29,7 +31,8 @@ defmodule StarkInfra.CreditNote.Signer do
     :name,
     :contact,
     :method,
-    :id
+    :id,
+    :signed
   ]
 
   @type t() :: %__MODULE__{}
@@ -81,7 +84,8 @@ defmodule StarkInfra.CreditNote.Signer do
       name: json[:name],
       contact: json[:contact],
       method: json[:method],
-      id: json[:id]
+      id: json[:id],
+      signed: json[:signed] |> Check.datetime()
     }
   end
 end
