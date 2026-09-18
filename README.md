@@ -73,9 +73,11 @@ This SDK version is compatible with the Stark Infra API v2.
   - [Ledger](#ledger)
     - [Ledger](#create-ledgers): Create and manage Ledgers to track balances
     - [LedgerTransaction](#create-ledgertransactions): Create LedgerTransactions to update a Ledger's balance
+  - [Identity](#identity)
     - [IndividualIdentity](#create-individualidentities): Run an end-to-end identity verification on an individual
     - [IndividualAccountRequest](#create-individualaccountrequests): Request the opening of an account for a specific individual
     - [IndividualAccountAttachment](#create-individualaccountattachments): Attach document images to an IndividualAccountRequest
+    - [BusinessIdentity](#create-businessidentities): Create business identities
   - [Webhook](#webhook):
     - [Webhook](#create-a-webhook-subscription): Configure your webhook endpoints and subscriptions
   - [Webhook Events](#webhook-events):
@@ -2927,6 +2929,11 @@ StarkInfra.LedgerTransaction.get!("5155165527080960")
 |> IO.inspect
 ```
 
+## Identity
+
+Individual identities run an end-to-end identity verification on a Brazilian individual, and
+individual account requests ask Stark Infra to open an account for a natural person.
+
 ### Create IndividualIdentities
 
 You can create an IndividualIdentity to run an end-to-end identity verification on a natural person.
@@ -3175,6 +3182,88 @@ You can also get a specific log by its id.
 
 ```elixir
 StarkInfra.IndividualAccountAttachment.Log.get!("5155165527080960")
+|> IO.inspect
+```
+
+### Create BusinessIdentities
+
+You can create a BusinessIdentity to verify the identity of a company (PJ) by its tax ID (CNPJ).
+
+```elixir
+StarkInfra.BusinessIdentity.create!([
+  %StarkInfra.BusinessIdentity{
+    tax_id: "20.018.183/0001-80",
+    tags: ["onboarding-123"]
+  }
+])
+|> IO.inspect
+```
+
+**Note**: Instead of using BusinessIdentity structs, you can also pass each element in map format
+
+### Query BusinessIdentities
+
+You can query multiple business identities according to filters.
+
+```elixir
+StarkInfra.BusinessIdentity.query!(
+  limit: 10,
+  after: Date.utc_today |> Date.add(-30),
+  before: Date.utc_today |> Date.add(-1),
+  status: ["success"],
+  tags: ["onboarding-123"]
+)
+|> Enum.take(10)
+|> IO.inspect
+```
+
+### Get a BusinessIdentity
+
+After its creation, information on a business identity may be retrieved by its id.
+
+```elixir
+StarkInfra.BusinessIdentity.get!("5155165527080960")
+|> IO.inspect
+```
+
+### Update a BusinessIdentity
+
+You can update a specific business identity by passing its id. Send it to processing by passing "processing" in the status (the identity must have attachments).
+
+```elixir
+StarkInfra.BusinessIdentity.update!("5155165527080960", status: "processing")
+|> IO.inspect
+```
+
+### Cancel a BusinessIdentity
+
+You can cancel a business identity by passing its id, while it is in the "created" or "pending" status.
+
+```elixir
+StarkInfra.BusinessIdentity.cancel!("5155165527080960")
+|> IO.inspect
+```
+
+### Query BusinessIdentity logs
+
+You can query business identity logs to better understand business identity life cycles.
+
+```elixir
+StarkInfra.BusinessIdentity.Log.query!(
+  limit: 50,
+  after: "2022-01-01",
+  before: "2022-01-20"
+)
+|> Enum.take(50)
+|> IO.inspect
+```
+
+### Get a BusinessIdentity log
+
+You can also get a specific log by its id.
+
+```elixir
+StarkInfra.BusinessIdentity.Log.get!("5155165527080960")
 |> IO.inspect
 ```
 

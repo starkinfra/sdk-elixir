@@ -79,6 +79,8 @@ ExUnit.start(
     # :individual_account_attachment_log,
     # :individual_identity,
     # :individual_identity_log,
+    # :business_identity,
+    # :business_identity_log,
   ]
 )
 
@@ -103,3 +105,4 @@ Code.require_file("./test/utils/issuing_invoice.exs")
 Code.require_file("./test/utils/individual_account_request.exs")
 Code.require_file("./test/utils/individual_account_attachment.exs")
 Code.require_file("./test/utils/individual_identity.exs")
+Code.require_file("./test/utils/business_identity.exs")
