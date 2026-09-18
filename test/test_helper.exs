@@ -85,6 +85,7 @@ ExUnit.start(
     # :business_attachment_log,
     # :business_account_request,
     # :business_account_request_log
+    # :credit_signer
   ]
 )
 
