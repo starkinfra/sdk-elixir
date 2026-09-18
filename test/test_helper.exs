@@ -72,7 +72,19 @@ ExUnit.start(
     # :issuing_withdrawal,
     # :issuing_withdrawal_log,
     # :webhook,
-    # :brcode_preview
+    # :brcode_preview,
+    # :individual_account_request,
+    # :individual_account_request_log,
+    # :individual_account_attachment,
+    # :individual_account_attachment_log,
+    # :individual_identity,
+    # :individual_identity_log,
+    # :business_identity,
+    # :business_identity_log,
+    # :business_attachment,
+    # :business_attachment_log,
+    # :business_account_request,
+    # :business_account_request_log
   ]
 )
 
@@ -94,3 +106,9 @@ Code.require_file("./test/utils/ledger_transaction.exs")
 Code.require_file("./test/utils/issuing_holder.exs")
 Code.require_file("./test/utils/issuing_withdrawal.exs")
 Code.require_file("./test/utils/issuing_invoice.exs")
+Code.require_file("./test/utils/individual_account_request.exs")
+Code.require_file("./test/utils/individual_account_attachment.exs")
+Code.require_file("./test/utils/individual_identity.exs")
+Code.require_file("./test/utils/business_identity.exs")
+Code.require_file("./test/utils/business_attachment.exs")
+Code.require_file("./test/utils/business_account_request.exs")

@@ -21,6 +21,7 @@ defmodule StarkInfra.Event do
   alias StarkInfra.PixInfraction.Log, as: PixInfraction
   alias StarkInfra.PixPullRequest.Log, as: PixPullRequest
   alias StarkInfra.PixPullSubscription.Log, as: PixPullSubscription
+  alias StarkInfra.BusinessIdentity.Log, as: BusinessIdentity
 
   @moduledoc """
   Groups Webhook-Event related functions
@@ -328,6 +329,7 @@ defmodule StarkInfra.Event do
       "issuing-card" -> &IssuingCard.resource_maker/1
       "issuing-invoice" -> &IssuingInvoice.resource_maker/1
       "issuing-purchase" -> &IssuingPurchase.resource_maker/1
+      "business-identity" -> &BusinessIdentity.resource_maker/1
     end
   end
 end

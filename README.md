@@ -73,6 +73,13 @@ This SDK version is compatible with the Stark Infra API v2.
   - [Ledger](#ledger)
     - [Ledger](#create-ledgers): Create and manage Ledgers to track balances
     - [LedgerTransaction](#create-ledgertransactions): Create LedgerTransactions to update a Ledger's balance
+  - [Identity](#identity)
+    - [IndividualIdentity](#create-individualidentities): Run an end-to-end identity verification on an individual
+    - [IndividualAccountRequest](#create-individualaccountrequests): Request the opening of an account for a specific individual
+    - [IndividualAccountAttachment](#create-individualaccountattachments): Attach document images to an IndividualAccountRequest
+    - [BusinessIdentity](#create-businessidentities): Create business identities
+    - [BusinessAttachment](#create-businessattachments): Create business attachments
+    - [BusinessAccountRequest](#create-businessaccountrequests): Create business account requests
   - [Webhook](#webhook):
     - [Webhook](#create-a-webhook-subscription): Configure your webhook endpoints and subscriptions
   - [Webhook Events](#webhook-events):
@@ -2921,6 +2928,515 @@ After its creation, information on a LedgerTransaction may be retrieved by its i
 
 ```elixir
 StarkInfra.LedgerTransaction.get!("5155165527080960")
+|> IO.inspect
+```
+
+## Identity
+
+Individual identities run an end-to-end identity verification on a Brazilian individual, and
+individual account requests ask Stark Infra to open an account for a natural person.
+
+### Create IndividualIdentities
+
+You can create an IndividualIdentity to run an end-to-end identity verification on a natural person.
+Stark Infra collects the requested proofs and delivers the result through the webhook subscription.
+
+```elixir
+StarkInfra.IndividualIdentity.create!([
+  %StarkInfra.IndividualIdentity{
+    name: "Walter White",
+    email: "walter.white@email.com",
+    delivery_method: "automatic",
+    proofs: ["identity"],
+    tax_id: "012.345.678-90",
+    tags: ["breaking", "bad"]
+  }
+])
+|> IO.inspect
+```
+
+**Note**: Instead of using IndividualIdentity structs, you can also pass each element in map format
+
+### Query IndividualIdentity
+
+You can query multiple individual identities according to filters.
+
+```elixir
+StarkInfra.IndividualIdentity.query!(
+  limit: 10,
+  after: Date.utc_today |> Date.add(-100),
+  before: Date.utc_today,
+  status: "success",
+  tags: ["breaking", "bad"]
+)
+|> Enum.take(10)
+|> IO.inspect
+```
+
+### Get an IndividualIdentity
+
+After its creation, information on an individual identity may be retrieved by its id.
+
+```elixir
+StarkInfra.IndividualIdentity.get!("5155165527080960")
+|> IO.inspect
+```
+
+### Update an IndividualIdentity
+
+You can update the tax_id of an individual identity, useful when the CPF is unknown at
+creation time and is only collected during the proof submission flow.
+
+```elixir
+StarkInfra.IndividualIdentity.update!("5155165527080960", tax_id: "012.345.678-90")
+|> IO.inspect
+```
+
+### Cancel an IndividualIdentity
+
+You can cancel an individual identity while it is still in "created" or "pending" status.
+
+```elixir
+StarkInfra.IndividualIdentity.cancel!("5155165527080960")
+|> IO.inspect
+```
+
+### Query IndividualIdentity logs
+
+You can query individual identity logs to better understand individual identity life cycles.
+
+```elixir
+StarkInfra.IndividualIdentity.Log.query!(
+  limit: 50,
+  after: Date.utc_today |> Date.add(-100),
+  before: Date.utc_today
+)
+|> Enum.take(50)
+|> IO.inspect
+```
+
+### Get an IndividualIdentity log
+
+You can also get a specific log by its id.
+
+```elixir
+StarkInfra.IndividualIdentity.Log.get!("5155165527080960")
+|> IO.inspect
+```
+
+### Create IndividualAccountRequests
+
+You can create an IndividualAccountRequest to request the opening of an account for a specific individual.
+
+```elixir
+StarkInfra.IndividualAccountRequest.create!([
+  %StarkInfra.IndividualAccountRequest{
+    name: "Walter White",
+    tax_id: "012.345.678-90",
+    address: %StarkInfra.IndividualAccountRequest.Address{
+      street: "Rua do Estilo Barroco",
+      number: "648",
+      neighborhood: "Santo Amaro",
+      city: "Sao Paulo",
+      state: "SP",
+      zip_code: "05724005"
+    },
+    income: 1000000,
+    birth_date: "1965-09-07",
+    tags: ["breaking", "bad"]
+  }
+])
+|> IO.inspect
+```
+
+**Note**: Instead of using IndividualAccountRequest structs, you can also pass each element in map format
+
+### Query IndividualAccountRequests
+
+You can query multiple individual account requests according to filters.
+
+```elixir
+StarkInfra.IndividualAccountRequest.query!(
+  limit: 10,
+  after: Date.utc_today |> Date.add(-100),
+  before: Date.utc_today,
+  status: "created",
+  tags: ["breaking", "bad"]
+)
+|> Enum.take(10)
+|> IO.inspect
+```
+
+### Get an IndividualAccountRequest
+
+After its creation, information on an individual account request may be retrieved by its id.
+
+```elixir
+StarkInfra.IndividualAccountRequest.get!("5155165527080960")
+|> IO.inspect
+```
+
+### Update an IndividualAccountRequest
+
+You can update a specific individual account request by passing its id. Send it to validation
+by patching its status to "processing" once the required documents have been attached.
+
+```elixir
+StarkInfra.IndividualAccountRequest.update!("5155165527080960", status: "processing")
+|> IO.inspect
+```
+
+### Query IndividualAccountRequest logs
+
+You can query individual account request logs to better understand individual account request life cycles.
+
+```elixir
+StarkInfra.IndividualAccountRequest.Log.query!(
+  limit: 50,
+  after: Date.utc_today |> Date.add(-100),
+  before: Date.utc_today
+)
+|> Enum.take(50)
+|> IO.inspect
+```
+
+### Get an IndividualAccountRequest log
+
+You can also get a specific log by its id.
+
+```elixir
+StarkInfra.IndividualAccountRequest.Log.get!("5155165527080960")
+|> IO.inspect
+```
+
+### Create IndividualAccountAttachments
+
+You can create an IndividualAccountAttachment to attach images of documents to a specific
+IndividualAccountRequest. You must reference the desired IndividualAccountRequest by its id.
+Pass the raw image bytes and a MIME content type; the SDK encodes them as a data url before sending.
+
+```elixir
+StarkInfra.IndividualAccountAttachment.create!([
+  %StarkInfra.IndividualAccountAttachment{
+    type: "identity-front",
+    content: File.read!("identity-front.png"),
+    content_type: "image/png",
+    account_request_id: "5155165527080960",
+    tags: ["breaking", "bad"]
+  }
+])
+|> IO.inspect
+```
+
+**Note**: The API accepts a single attachment per create call. Instead of using an IndividualAccountAttachment struct, you can also pass the element in map format
+
+### Query IndividualAccountAttachments
+
+You can query multiple individual account attachments according to filters.
+
+```elixir
+StarkInfra.IndividualAccountAttachment.query!(
+  limit: 10,
+  after: Date.utc_today |> Date.add(-100),
+  before: Date.utc_today,
+  status: "created",
+  tags: ["breaking", "bad"]
+)
+|> Enum.take(10)
+|> IO.inspect
+```
+
+### Get an IndividualAccountAttachment
+
+After its creation, information on an individual account attachment may be retrieved by its id.
+
+```elixir
+StarkInfra.IndividualAccountAttachment.get!("5155165527080960")
+|> IO.inspect
+```
+
+### Cancel an IndividualAccountAttachment
+
+You can cancel an individual account attachment by passing its id. The returned struct has status "deleted".
+
+```elixir
+StarkInfra.IndividualAccountAttachment.cancel!("5155165527080960")
+|> IO.inspect
+```
+
+### Query IndividualAccountAttachment logs
+
+You can query individual account attachment logs to better understand individual account attachment life cycles.
+
+```elixir
+StarkInfra.IndividualAccountAttachment.Log.query!(
+  limit: 50,
+  after: Date.utc_today |> Date.add(-100),
+  before: Date.utc_today
+)
+|> Enum.take(50)
+|> IO.inspect
+```
+
+### Get an IndividualAccountAttachment log
+
+You can also get a specific log by its id.
+
+```elixir
+StarkInfra.IndividualAccountAttachment.Log.get!("5155165527080960")
+|> IO.inspect
+```
+
+### Create BusinessIdentities
+
+You can create a BusinessIdentity to verify the identity of a company (PJ) by its tax ID (CNPJ).
+
+```elixir
+StarkInfra.BusinessIdentity.create!([
+  %StarkInfra.BusinessIdentity{
+    tax_id: "20.018.183/0001-80",
+    tags: ["onboarding-123"]
+  }
+])
+|> IO.inspect
+```
+
+**Note**: Instead of using BusinessIdentity structs, you can also pass each element in map format
+
+### Query BusinessIdentities
+
+You can query multiple business identities according to filters.
+
+```elixir
+StarkInfra.BusinessIdentity.query!(
+  limit: 10,
+  after: Date.utc_today |> Date.add(-30),
+  before: Date.utc_today |> Date.add(-1),
+  status: ["success"],
+  tags: ["onboarding-123"]
+)
+|> Enum.take(10)
+|> IO.inspect
+```
+
+### Get a BusinessIdentity
+
+After its creation, information on a business identity may be retrieved by its id.
+
+```elixir
+StarkInfra.BusinessIdentity.get!("5155165527080960")
+|> IO.inspect
+```
+
+### Update a BusinessIdentity
+
+You can update a specific business identity by passing its id. Send it to processing by passing "processing" in the status (the identity must have attachments).
+
+```elixir
+StarkInfra.BusinessIdentity.update!("5155165527080960", status: "processing")
+|> IO.inspect
+```
+
+### Cancel a BusinessIdentity
+
+You can cancel a business identity by passing its id, while it is in the "created" or "pending" status.
+
+```elixir
+StarkInfra.BusinessIdentity.cancel!("5155165527080960")
+|> IO.inspect
+```
+
+### Query BusinessIdentity logs
+
+You can query business identity logs to better understand business identity life cycles.
+
+```elixir
+StarkInfra.BusinessIdentity.Log.query!(
+  limit: 50,
+  after: "2022-01-01",
+  before: "2022-01-20"
+)
+|> Enum.take(50)
+|> IO.inspect
+```
+
+### Get a BusinessIdentity log
+
+You can also get a specific log by its id.
+
+```elixir
+StarkInfra.BusinessIdentity.Log.get!("5155165527080960")
+|> IO.inspect
+```
+
+### Create BusinessAttachments
+
+You can create a BusinessAttachment to attach a document (e.g. articles of incorporation) to a specific BusinessIdentity.
+You must reference the desired business identity by its id. A BusinessIdentity accepts at most 2 attachments.
+
+```elixir
+StarkInfra.BusinessAttachment.create!([
+  %StarkInfra.BusinessAttachment{
+    name: "articles-of-incorporation.pdf",
+    content: "data:application/pdf;base64,JVBERi0xLjQ...",
+    business_identity_id: "5155165527080960",
+    tags: ["doc-principal"]
+  }
+])
+|> IO.inspect
+```
+
+**Note**: Instead of using BusinessAttachment structs, you can also pass each element in map format
+
+### Query BusinessAttachments
+
+You can query multiple business attachments according to filters.
+
+```elixir
+StarkInfra.BusinessAttachment.query!(
+  limit: 10,
+  after: Date.utc_today |> Date.add(-30),
+  before: Date.utc_today |> Date.add(-1),
+  status: ["approved"],
+  tags: ["doc-principal"]
+)
+|> Enum.take(10)
+|> IO.inspect
+```
+
+### Get a BusinessAttachment
+
+After its creation, information on a business attachment may be retrieved by its id. Pass `expand: ["content"]` to also retrieve the document content.
+
+```elixir
+StarkInfra.BusinessAttachment.get!("5155165527080960", expand: ["content"])
+|> IO.inspect
+```
+
+### Cancel a BusinessAttachment
+
+You can cancel a business attachment by passing its id, while it is in the "created" status.
+
+```elixir
+StarkInfra.BusinessAttachment.cancel!("5155165527080960")
+|> IO.inspect
+```
+
+### Query BusinessAttachment logs
+
+You can query business attachment logs to better understand business attachment life cycles.
+
+```elixir
+StarkInfra.BusinessAttachment.Log.query!(
+  limit: 50,
+  after: "2022-01-01",
+  before: "2022-01-20"
+)
+|> Enum.take(50)
+|> IO.inspect
+```
+
+### Get a BusinessAttachment log
+
+You can also get a specific log by its id.
+
+```elixir
+StarkInfra.BusinessAttachment.Log.get!("5155165527080960")
+|> IO.inspect
+```
+
+### Create BusinessAccountRequests
+
+You can create a BusinessAccountRequest to request an account for a specific company, opening the account with
+identity verification by webview for each of its owners.
+
+```elixir
+StarkInfra.BusinessAccountRequest.create!([
+  %StarkInfra.BusinessAccountRequest{
+    name: "Stark Bank S.A.",
+    tax_id: "20.018.183/0001-80",
+    address: %StarkInfra.BusinessAccountRequest.Address{
+      street: "Av. Faria Lima",
+      number: "2000",
+      neighborhood: "Itaim Bibi",
+      city: "Sao Paulo",
+      state: "SP",
+      zip_code: "04538-132",
+      complement: "Sala 42"
+    },
+    revenue: 100000000,
+    owners: [
+      %StarkInfra.BusinessAccountRequest.Owner{
+        tax_id: "012.345.678-90",
+        name: "Jamie Lannister",
+        role: "partner"
+      },
+      %StarkInfra.BusinessAccountRequest.Owner{
+        tax_id: "812.531.960-36",
+        name: "Cersei Lannister",
+        role: "representative"
+      }
+    ]
+  }
+])
+|> IO.inspect
+```
+
+**Note**: Instead of using BusinessAccountRequest, Address and Owner structs, you can also pass each element in map format
+
+### Query BusinessAccountRequests
+
+You can query multiple business account requests according to filters.
+
+```elixir
+StarkInfra.BusinessAccountRequest.query!(
+  limit: 10,
+  after: Date.utc_today |> Date.add(-30),
+  before: Date.utc_today |> Date.add(-1),
+  status: ["approved"],
+  tags: ["breaking", "bad"]
+)
+|> Enum.take(10)
+|> IO.inspect
+```
+
+### Get a BusinessAccountRequest
+
+After its creation, information on a business account request may be retrieved by its id. Use it to read the
+per-owner verification status.
+
+```elixir
+request = StarkInfra.BusinessAccountRequest.get!("5155165527080960")
+
+for owner <- request.owners do
+  IO.inspect({owner.name, owner.status})
+end
+```
+
+Each owner also carries a `validator_link`, the webview where that owner completes biometrics and document
+capture. Treat it as a credential: deliver it to its owner through a secure channel, and never log it or write
+it to disk.
+
+### Query BusinessAccountRequest logs
+
+You can query business account request logs to better understand business account request life cycles.
+
+```elixir
+StarkInfra.BusinessAccountRequest.Log.query!(
+  limit: 50,
+  after: "2020-01-01",
+  before: "2020-01-20"
+)
+|> Enum.take(50)
+|> IO.inspect
+```
+
+### Get a BusinessAccountRequest log
+
+You can also get a specific log by its id.
+
+```elixir
+StarkInfra.BusinessAccountRequest.Log.get!("5155165527080960")
 |> IO.inspect
 ```
 

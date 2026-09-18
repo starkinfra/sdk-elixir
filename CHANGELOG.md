@@ -75,12 +75,28 @@ Given a version number MAJOR.MINOR.PATCH, increment:
 - CardMethod sub-resource
 - MerchantCategory sub-resource
 - MerchantCountry sub-resource
+- IndividualAccountRequest resource
+- IndividualAccountRequest.Address sub-resource
+- IndividualAccountRequest.Log sub-resource
+- IndividualAccountAttachment resource
+- IndividualAccountAttachment.Log sub-resource
+- IndividualIdentity resource
+- IndividualIdentity.Log sub-resource
+- BusinessIdentity resource
+- BusinessIdentity.Log sub-resource
+- BusinessAttachment resource
+- BusinessAttachment.Log sub-resource
+- BusinessAccountRequest resource
+- BusinessAccountRequest.Address sub-resource
+- BusinessAccountRequest.Owner sub-resource
+- BusinessAccountRequest.Log sub-resource
 ### Changed
 - IssuingBin resource to IssuingProduct
 - settlement parameter to funding_type and client parameter to holder_type of IssuingProduct
 - IssuingAuthorization parse and response to IssuingPurchase.parse and IssuingPurchase.response
 ### Fixed
 - query parameters in post requests
+- user option sent as query string in post requests
 - ssl and public_key applications missing from extra_applications, breaking every request on OTP 26+
 - query parameters in delete requests
 - amount, expiration, document_id, status, transaction_ids, workspace_id and tax_amount attributes of CreditNote resource not being parsed
