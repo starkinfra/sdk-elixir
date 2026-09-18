@@ -26,10 +26,15 @@ This SDK version is compatible with the Stark Infra API v2.
     - [Holders](#create-issuingholders): Manage card holders
     - [Cards](#create-issuingcards): Create virtual and/or physical cards
     - [Purchases](#process-purchase-authorizations): Authorize and view your past purchases
+    - [TokenRequest](#create-an-issuingtokenrequest): Generate the payload to create the token
+    - [Token](#process-token-authorizations): Authorize and manage your tokens
+    - [TokenActivation](#process-token-activations): Get notified on how to inform the activation code to the holder
+    - [TokenDesign](#get-an-issuingtokendesign): View your current token card arts
     - [Invoices](#create-issuinginvoices): Add money to your issuing balance
     - [Withdrawals](#create-issuingwithdrawals): Send money back to your Workspace from your issuing balance
     - [Balance](#get-your-issuingbalance): View your issuing balance
     - [Transactions](#query-issuingtransactions): View the transactions that have affected your issuing balance
+    - [Enums](#issuing-enums): Query enums related to the issuing purchases, such as merchant categories, countries and card purchase methods
     - [BillingInvoices](#query-issuingbillinginvoices): View the invoices charged for your Issuing costs
     - [BillingTransactions](#query-issuingbillingtransactions): View the transactions that compose your Issuing billing invoices
     - [Designs](#query-issuingdesigns): View card and card package designs available to your Workspace
@@ -37,6 +42,7 @@ This SDK version is compatible with the Stark Infra API v2.
     - [EmbossingRequests](#create-issuingembossingrequests): Create embossing requests
     - [Restocks](#create-issuingrestocks): Create restock orders for an IssuingStock
     - [Stocks](#query-issuingstocks): View the stock of a certain IssuingDesign linked to an Embosser
+    - [StockRules](#create-issuingstockrules): Get notified when a specific IssuingStock reaches a minimum balance
   - [Pix](#pix)
     - [PixRequests](#create-pixrequests): Create Pix transactions
     - [PixReversals](#create-pixreversals): Reverse Pix transactions
@@ -618,6 +624,161 @@ StarkInfra.IssuingPurchase.Log.get!("5155165527080960")
 |> IO.inspect
 ```
 
+### Create an IssuingTokenRequest
+
+You can create a request that provides the required data you must send to the wallet app.
+
+```elixir
+request = StarkInfra.IssuingTokenRequest.create!(
+  %StarkInfra.IssuingTokenRequest{
+    card_id: "5189831499972623",
+    wallet_id: "google",
+    method_code: "app"
+  }
+)
+
+IO.inspect(request)
+```
+
+### Process Token authorizations
+
+It's easy to process token authorizations delivered to your endpoint.
+Remember to pass the signature header so the SDK can make sure it's StarkInfra that sent you the event.
+If you do not approve or decline the authorization within 2 seconds, the authorization will be denied.
+
+```elixir
+{:ok, {authorization, _cache_pid}} = StarkInfra.IssuingToken.parse(
+  content: content,
+  signature: signature
+)
+
+response = StarkInfra.IssuingToken.response_authorization!(
+  "approved",
+  activation_methods: [
+    %{"type" => "app", "value" => "com.subissuer.android"},
+    %{"type" => "text", "value" => "** *****-5678"}
+  ],
+  design_id: "4584031664472031",
+  tags: ["token", "user/1234"]
+)
+
+# or
+
+response = StarkInfra.IssuingToken.response_authorization!(
+  "denied",
+  reason: "other"
+)
+```
+
+### Process Token activations
+
+It's easy to process token activation notifications delivered to your endpoint.
+Remember to pass the signature header so the SDK can make sure it's Stark Infra that sent you the event.
+
+```elixir
+{:ok, {activation, _cache_pid}} = StarkInfra.IssuingTokenActivation.parse(
+  content: content,
+  signature: signature
+)
+```
+
+After that, you may generate the activation code and send it to the cardholder.
+The cardholder enters the received code in the wallet app. We'll receive and send it to
+tokenAuthorizationUrl for your validation, completing the provisioning process.
+
+```elixir
+{:ok, {activation, _cache_pid}} = StarkInfra.IssuingToken.parse(
+  content: content,
+  signature: signature
+)
+
+response = StarkInfra.IssuingToken.response_activation!(
+  "approved",
+  tags: ["token", "user/1234"]
+)
+
+# or
+
+response = StarkInfra.IssuingToken.response_activation!(
+  "denied",
+  reason: "other",
+  tags: ["token", "user/1234"]
+)
+```
+
+### Get an IssuingToken
+
+You can get a single token by its id.
+
+```elixir
+StarkInfra.IssuingToken.get!("5749080709922816")
+|> IO.inspect
+```
+
+### Query IssuingTokens
+
+You can get a list of created tokens given some filters.
+
+```elixir
+StarkInfra.IssuingToken.query!(
+  limit: 5,
+  after: Date.utc_today |> Date.add(-100),
+  before: Date.utc_today,
+  status: "active",
+  card_ids: ["5656565656565656", "4545454545454545"],
+  external_ids: ["DSHRMC00002626944b0e3b539d4d459281bdba90c2588791", "DSHRMC00002626941c531164a0b14c66ad9602ee716f1e85"]
+)
+|> Enum.take(5)
+|> IO.inspect
+```
+
+### Update an IssuingToken
+
+You can update a specific token by its id.
+
+```elixir
+StarkInfra.IssuingToken.update!("5155165527080960", status: "blocked")
+|> IO.inspect
+```
+
+### Cancel an IssuingToken
+
+You can also cancel a token by its id.
+
+```elixir
+StarkInfra.IssuingToken.cancel!("5155165527080960")
+|> IO.inspect
+```
+
+### Get an IssuingTokenDesign
+
+You can get a single design by its id.
+
+```elixir
+StarkInfra.IssuingTokenDesign.get!("5749080709922816")
+|> IO.inspect
+```
+
+### Query IssuingTokenDesigns
+
+You can get a list of available designs given some filters.
+
+```elixir
+StarkInfra.IssuingTokenDesign.query!(limit: 5)
+|> Enum.take(5)
+|> IO.inspect
+```
+
+### Get an IssuingTokenDesign PDF
+
+A design PDF can be retrieved by its id.
+
+```elixir
+pdf = StarkInfra.IssuingTokenDesign.pdf!("5155165527080960")
+
+File.write!("design.pdf", pdf)
+```
+
 ### Create IssuingInvoices
 
 Issuing invoices are requests to transfer money to your Issuing Balance. When an Issuing Invoice you created is paid, the amount will be added to your Issuing Balance.
@@ -750,6 +911,42 @@ You can get a specific transaction by its id:
 
 ```elixir
 StarkInfra.IssuingTransaction.get!("5155165527080960") 
+|> IO.inspect
+```
+
+### Issuing Enums
+
+#### Query MerchantCategories
+
+You can query any merchant categories using this resource.
+You may also use MerchantCategories to define specific category filters in IssuingRules.
+Either codes (which represents specific MCCs) or types (code groups) will be accepted as filters.
+
+```elixir
+StarkInfra.MerchantCategory.query!(search: "food")
+|> Enum.take(10)
+|> IO.inspect
+```
+
+#### Query MerchantCountries
+
+You can query any merchant countries using this resource.
+You may also use MerchantCountries to define specific country filters in IssuingRules.
+
+```elixir
+StarkInfra.MerchantCountry.query!(search: "brazil")
+|> Enum.take(10)
+|> IO.inspect
+```
+
+#### Query CardMethods
+
+You can query available card methods using this resource.
+You may also use CardMethods to define specific purchase method filters in IssuingRules.
+
+```elixir
+StarkInfra.CardMethod.query!(search: "token")
+|> Enum.take(10)
 |> IO.inspect
 ```
 
@@ -992,6 +1189,53 @@ You can also get a specific log by its id.
 
 ```elixir
 StarkInfra.IssuingStock.Log.get!("5155165527080960")
+|> IO.inspect
+```
+
+### Create IssuingStockRules
+
+You can create rules to be notified whenever a specific IssuingStock reaches a minimum balance.
+
+```elixir
+StarkInfra.IssuingStockRule.create!([
+  %StarkInfra.IssuingStockRule{
+    minimum_balance: 10000,
+    stock_id: "5136459887542272",
+    emails: ["john.doe@enterprise.com"],
+    phones: ["+55 (11) 91234 5678"]
+  }
+])
+|> IO.inspect
+```
+
+### Query IssuingStockRules
+
+You can get a list of created stock rules given some filters.
+
+```elixir
+StarkInfra.IssuingStockRule.query!(
+  after: Date.utc_today |> Date.add(-30),
+  before: Date.utc_today |> Date.add(-1)
+)
+|> Enum.take(10)
+|> IO.inspect
+```
+
+### Update an IssuingStockRule
+
+You can update a specific IssuingStockRule by its id.
+
+```elixir
+StarkInfra.IssuingStockRule.update!("5664445921492992", minimum_balance: 20000)
+|> IO.inspect
+```
+
+### Cancel an IssuingStockRule
+
+You can also cancel a specific IssuingStockRule by its id.
+
+```elixir
+StarkInfra.IssuingStockRule.cancel!("5664445921492992")
 |> IO.inspect
 ```
 
