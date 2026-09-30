@@ -15,6 +15,18 @@ defmodule StarkInfraTest.PixInternalTransactionReport do
   end
 
   @tag :pix_internal_transaction_report
+  test "create reversal pix internal transaction report with library return id" do
+    report = StarkInfraTest.Utils.PixInternalTransactionReport.generate_example_reversal_pix_internal_transaction_report()
+    assert String.length(report.return_id) == 32
+    assert String.starts_with?(report.return_id, "D")
+
+    {:ok, reports} = StarkInfra.PixInternalTransactionReport.create([report])
+    created = reports |> hd
+    assert !is_nil(created.id)
+    assert created.reference_type == "reversal"
+  end
+
+  @tag :pix_internal_transaction_report
   test "get pix internal transaction report" do
     pix_internal_transaction_report =
       StarkInfra.PixInternalTransactionReport.query!(limit: 1)

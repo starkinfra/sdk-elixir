@@ -74,7 +74,7 @@ defmodule StarkInfraTest.PixChargeback do
       pix_chargeback.id,
       "rejected",
       rejection_reason: Enum.take_random(["noBalance", "accountClosed", "unableToReverse"], 1) |> hd(),
-      reversal_reference_id: StarkInfra.Utils.ReturnId.create("35547753")
+      reversal_reference_id: StarkInfra.Utils.ReturnId.create(System.get_env("SANDBOX_BANK_CODE"))
     )
 
     assert chargeback.status == "rejected"
@@ -91,7 +91,7 @@ defmodule StarkInfraTest.PixChargeback do
       pix_chargeback.id,
       "rejected",
       rejection_reason: Enum.take_random(["noBalance", "accountClosed", "unableToReverse"], 1) |> hd(),
-      reversal_reference_id: StarkInfra.Utils.ReturnId.create("35547753")
+      reversal_reference_id: StarkInfra.Utils.ReturnId.create(System.get_env("SANDBOX_BANK_CODE"))
     )
 
     assert chargeback.status == "rejected"

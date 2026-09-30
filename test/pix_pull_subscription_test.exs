@@ -154,7 +154,7 @@ defmodule StarkInfraTest.PixPullSubscription do
   def example_pix_pull_subscription() do
     bank_code = System.get_env("SANDBOX_BANK_CODE")
     %StarkInfra.PixPullSubscription{
-      bacen_id: bacen_id(bank_code),
+      bacen_id: StarkInfra.Utils.PixSubscriptionBacenId.create(bank_code, "RR"),
       external_id: StarkInfraTest.Utils.Random.random_string(32),
       installment_start: StarkInfraTest.Utils.Random.get_future_datetime(1),
       interval: "month",
@@ -173,11 +173,6 @@ defmodule StarkInfraTest.PixPullSubscription do
       description: "Monthly subscription",
       tags: ["employees", "monthly"]
     }
-  end
-
-  # Central Bank recurrence id: "RR" + participant ISPB + YYYYMMDDHHmm + 7 digits
-  defp bacen_id(bank_code) do
-    "RR" <> bank_code <> Calendar.strftime(DateTime.utc_now(), "%Y%m%d%H%M") <> random_digits(7)
   end
 
   defp random_digits(length) do
