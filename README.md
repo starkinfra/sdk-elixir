@@ -80,6 +80,14 @@ This SDK version is compatible with the Stark Infra API v2.
     - [BusinessIdentity](#create-businessidentities): Create business identities
     - [BusinessAttachment](#create-businessattachments): Create business attachments
     - [BusinessAccountRequest](#create-businessaccountrequests): Create business account requests
+  - [AI](#ai)
+    - [AiKnowledgeBase](#create-an-aiknowledgebase): Turn a website into knowledge your agents can answer from
+    - [AiVoice](#create-an-aivoice): Clone a voice from a recording
+    - [AiSpeech](#create-an-aispeech): Read a text out loud with a cloned voice
+    - [AiTranscript](#create-an-aitranscript): Turn a recording into text
+    - [AiAgent](#create-an-aiagent): Configure an assistant with a model, instructions, knowledge and a voice
+    - [AiChat](#create-an-aichat): Open a conversation thread with an agent
+    - [AiMessage](#create-an-aimessage): Talk to an agent and read the history
   - [Webhook](#webhook):
     - [Webhook](#create-a-webhook-subscription): Configure your webhook endpoints and subscriptions
   - [Webhook Events](#webhook-events):
@@ -3432,6 +3440,469 @@ You can also get a specific log by its id.
 ```elixir
 StarkInfra.BusinessAccountRequest.Log.get!("5155165527080960")
 |> IO.inspect
+```
+
+## AI
+
+### Create an AiKnowledgeBase
+
+An AiKnowledgeBase turns a website into material an agent can read. Stark Infra crawls the root URL, follows its
+links, converts every page to Markdown and indexes it. The call returns at once with the base in "processing" status.
+
+```elixir
+StarkInfra.AiKnowledgeBase.create!(
+  %StarkInfra.AiKnowledgeBase{
+    name: "Product Documentation",
+    root_url: "https://docs.starkinfra.com",
+    is_recursive: false,
+    tags: ["support", "public"]
+  }
+)
+|> IO.inspect
+```
+
+**Note**: Instead of using AiKnowledgeBase structs, you can also pass the knowledge base in map format
+
+### Get an AiKnowledgeBase
+
+Poll a knowledge base by its id until its status leaves "processing".
+
+```elixir
+StarkInfra.AiKnowledgeBase.get!("5155165527080960")
+|> IO.inspect
+```
+
+### Query AiKnowledgeBases
+
+You can list your knowledge bases, optionally filtered by ids, by a substring of the name or by status.
+The cursor is followed for you until the list ends or the limit is reached.
+
+```elixir
+StarkInfra.AiKnowledgeBase.query!(
+  name: "documentation",
+  status: "success",
+  limit: 35
+)
+|> Enum.to_list
+|> IO.inspect
+```
+
+### Get paged AiKnowledgeBases
+
+To get one page at a time, use page. It returns up to 100 AiKnowledgeBases and the cursor of the next page, which is `nil` on the last one.
+
+```elixir
+defmodule AiKnowledgeBasePages do
+  def get!(cursor \\ nil, knowledge_bases \\ []) do
+    {next_cursor, page} = StarkInfra.AiKnowledgeBase.page!(cursor: cursor, status: "success")
+    knowledge_bases = knowledge_bases ++ page
+
+    case next_cursor do
+      nil -> knowledge_bases
+      _cursor -> get!(next_cursor, knowledge_bases)
+    end
+  end
+end
+
+AiKnowledgeBasePages.get!()
+|> IO.inspect
+```
+
+### Update an AiKnowledgeBase
+
+Rename a knowledge base, retag it or change whether its crawl is recursive. The root URL cannot be changed.
+
+```elixir
+StarkInfra.AiKnowledgeBase.update!("5155165527080960", name: "Public Documentation", tags: ["support"])
+|> IO.inspect
+```
+
+### List the pages of an AiKnowledgeBase
+
+Get every page the crawler has seen, grouped by host, with the status of each one.
+
+```elixir
+StarkInfra.AiKnowledgeBase.hosts!("5155165527080960")
+|> IO.inspect
+```
+
+### Delete AiKnowledgeBases
+
+Delete up to 100 knowledge bases at once. Agents that still reference a deleted base simply retrieve nothing from it.
+
+```elixir
+StarkInfra.AiKnowledgeBase.delete!(["5155165527080960", "4545454545454545"])
+|> IO.inspect
+```
+
+### Create an AiVoice
+
+An AiVoice is a voice cloned from a recording you upload, sent in base64. Cloning is asynchronous: the voice is
+created in "processing" status and can speak once it reaches "success".
+
+```elixir
+StarkInfra.AiVoice.create!(
+  %StarkInfra.AiVoice{
+    audio: "UklGRiQAAABXQVZFZm10IBAAAAABAAEA...",
+    name: "Helena",
+    description: "Calm voice",
+    language: "portuguese",
+    gender: "female"
+  }
+)
+|> IO.inspect
+```
+
+**Note**: Instead of using AiVoice structs, you can also pass the voice in map format
+
+### Query AiVoices
+
+You can list your voices. The cursor is followed for you until the list ends or the limit is reached.
+
+```elixir
+StarkInfra.AiVoice.query!(limit: 35)
+|> Enum.to_list
+|> IO.inspect
+```
+
+### Get paged AiVoices
+
+To get one page at a time, use page. It returns up to 100 AiVoices and the cursor of the next page, which is `nil` on the last one.
+
+```elixir
+defmodule AiVoicePages do
+  def get!(cursor \\ nil, voices \\ []) do
+    {next_cursor, page} = StarkInfra.AiVoice.page!(cursor: cursor)
+    voices = voices ++ page
+
+    case next_cursor do
+      nil -> voices
+      _cursor -> get!(next_cursor, voices)
+    end
+  end
+end
+
+AiVoicePages.get!()
+|> IO.inspect
+```
+
+### Delete AiVoices
+
+Delete up to 100 voices at once.
+
+```elixir
+StarkInfra.AiVoice.delete!(["5155165527080960", "4545454545454545"])
+|> IO.inspect
+```
+
+### Create an AiSpeech
+
+An AiSpeech is one text read out loud by a voice in "success" status. The audio is synthesized during the call
+and comes back in base64. AiSpeech has no delete.
+
+```elixir
+StarkInfra.AiSpeech.create!(
+  %StarkInfra.AiSpeech{
+    voice_id: "5155165527080960",
+    text: "Hello, how can I help you?"
+  }
+)
+|> IO.inspect
+```
+
+### Get an AiSpeech
+
+The audio comes back with the speech. Ask for the name of the voice with expand.
+
+```elixir
+StarkInfra.AiSpeech.get!(
+  "5155165527080960",
+  expand: ["voiceName"]
+)
+|> IO.inspect
+```
+
+### Query AiSpeeches
+
+The list leaves the audio out. The cursor is followed for you until the list ends or the limit is reached.
+
+```elixir
+StarkInfra.AiSpeech.query!(limit: 35, expand: ["voiceName"])
+|> Enum.to_list
+|> IO.inspect
+```
+
+### Get paged AiSpeeches
+
+To get one page at a time, use page. It returns up to 100 AiSpeeches and the cursor of the next page, which is `nil` on the last one.
+
+```elixir
+defmodule AiSpeechPages do
+  def get!(cursor \\ nil, speeches \\ []) do
+    {next_cursor, page} = StarkInfra.AiSpeech.page!(cursor: cursor, expand: ["voiceName"])
+    speeches = speeches ++ page
+
+    case next_cursor do
+      nil -> speeches
+      _cursor -> get!(next_cursor, speeches)
+    end
+  end
+end
+
+AiSpeechPages.get!()
+|> IO.inspect
+```
+
+### Create an AiTranscript
+
+An AiTranscript is the text of a recording you upload in base64. It is transcribed during the call.
+AiTranscript has no delete.
+
+```elixir
+StarkInfra.AiTranscript.create!(
+  %StarkInfra.AiTranscript{
+    audio: "UklGRiQAAABXQVZFZm10IBAAAAABAAEA..."
+  }
+)
+|> IO.inspect
+```
+
+### Query AiTranscripts
+
+You can list your transcripts. The cursor is followed for you until the list ends or the limit is reached.
+
+```elixir
+StarkInfra.AiTranscript.query!(limit: 35)
+|> Enum.to_list
+|> IO.inspect
+```
+
+### Get paged AiTranscripts
+
+To get one page at a time, use page. It returns up to 100 AiTranscripts and the cursor of the next page, which is `nil` on the last one.
+
+```elixir
+defmodule AiTranscriptPages do
+  def get!(cursor \\ nil, transcripts \\ []) do
+    {next_cursor, page} = StarkInfra.AiTranscript.page!(cursor: cursor)
+    transcripts = transcripts ++ page
+
+    case next_cursor do
+      nil -> transcripts
+      _cursor -> get!(next_cursor, transcripts)
+    end
+  end
+end
+
+AiTranscriptPages.get!()
+|> IO.inspect
+```
+
+### Create an AiAgent
+
+An AiAgent is the configuration of an assistant: the model, the instructions, the knowledge it may consult and the
+voice it speaks with. The keys of the metadata schema are yours and are sent exactly as written.
+
+```elixir
+StarkInfra.AiAgent.create!(
+  %StarkInfra.AiAgent{
+    name: "Support assistant",
+    model: "bender-1.0",
+    system_prompt: "Answer in one short sentence.",
+    knowledge_base_ids: ["5155165527080960"],
+    metadata_schema: %{
+      "order_id" => %{"type" => "string", "description" => "Order the customer mentions"}
+    }
+  }
+)
+|> IO.inspect
+```
+
+### Get an AiAgent
+
+Ask for the knowledge bases themselves with expand.
+
+```elixir
+StarkInfra.AiAgent.get!("5155165527080960", expand: ["knowledgeBases"])
+|> IO.inspect
+```
+
+### Query AiAgents
+
+The cursor is followed for you until the list ends or the limit is reached.
+
+```elixir
+StarkInfra.AiAgent.query!(limit: 35, expand: ["knowledgeBases"])
+|> Enum.to_list
+|> IO.inspect
+```
+
+### Get paged AiAgents
+
+To get one page at a time, use page. It returns up to 100 AiAgents and the cursor of the next page, which is `nil` on the last one.
+
+```elixir
+defmodule AiAgentPages do
+  def get!(cursor \\ nil, agents \\ []) do
+    {next_cursor, page} = StarkInfra.AiAgent.page!(cursor: cursor, expand: ["knowledgeBases"])
+    agents = agents ++ page
+
+    case next_cursor do
+      nil -> agents
+      _cursor -> get!(next_cursor, agents)
+    end
+  end
+end
+
+AiAgentPages.get!()
+|> IO.inspect
+```
+
+### Update an AiAgent
+
+The API keeps what you do not send. To clear a value, send an empty one: "" for a text, [] for a list, %{} for the
+metadata schema.
+
+```elixir
+StarkInfra.AiAgent.update!("5155165527080960", name: "Billing assistant", knowledge_base_ids: [])
+|> IO.inspect
+```
+
+### Delete AiAgents
+
+Delete up to 100 agents at once.
+
+```elixir
+StarkInfra.AiAgent.delete!(["5155165527080960", "4545454545454545"])
+|> IO.inspect
+```
+
+### Create an AiChat
+
+An AiChat is one conversation thread with an agent. When you omit the title, the first message generates one.
+The tags help you find the chat later and the context is data about the person on the other side, which the agent
+reads before every reply. The keys of the context are yours and are sent exactly as written.
+
+```elixir
+StarkInfra.AiChat.create!(
+  %StarkInfra.AiChat{
+    agent_id: "5155165527080960",
+    title: "Support chat",
+    tags: ["customer-123", "whatsapp"],
+    context: %{"name" => "Ana", "balance" => 1520.33}
+  }
+)
+|> IO.inspect
+```
+
+### Get an AiChat
+
+```elixir
+StarkInfra.AiChat.get!("5155165527080960", expand: ["agentName"])
+|> IO.inspect
+```
+
+### Query AiChats
+
+You can filter by tags: the chats that have any of them are returned. The cursor is followed for you until the list
+ends or the limit is reached.
+
+```elixir
+StarkInfra.AiChat.query!(
+  tags: ["customer-123"],
+  limit: 35,
+  expand: ["agentName"]
+)
+|> Enum.to_list
+|> IO.inspect
+```
+
+### Get paged AiChats
+
+To get one page at a time, use page. It returns up to 100 AiChats and the cursor of the next page, which is `nil` on the last one.
+
+```elixir
+defmodule AiChatPages do
+  def get!(cursor \\ nil, chats \\ []) do
+    {next_cursor, page} = StarkInfra.AiChat.page!(cursor: cursor, tags: ["customer-123"])
+    chats = chats ++ page
+
+    case next_cursor do
+      nil -> chats
+      _cursor -> get!(next_cursor, chats)
+    end
+  end
+end
+
+AiChatPages.get!()
+|> IO.inspect
+```
+
+### Update an AiChat
+
+The API keeps what you do not send. Tags and context replace the current ones as a whole: send [] or %{} to clear them.
+
+```elixir
+StarkInfra.AiChat.update!(
+  "5155165527080960",
+  title: "Billing chat",
+  tags: ["customer-123", "billing"],
+  context: %{"name" => "Ana", "plan_name" => "gold"}
+)
+|> IO.inspect
+```
+
+### Delete AiChats
+
+Delete up to 100 chats at once, with their messages.
+
+```elixir
+StarkInfra.AiChat.delete!(["5155165527080960", "4545454545454545"])
+|> IO.inspect
+```
+
+### Create an AiMessage
+
+Post what the user said. The call waits for the agent, which takes a few seconds, and returns the user's message
+and the agent's answer, which is sent by "system".
+
+```elixir
+[user_message, answer] = StarkInfra.AiMessage.create!(
+  %StarkInfra.AiMessage{
+    chat_id: "5155165527080960",
+    text: "What is the status of my order 123?"
+  },
+  expand: ["chatName"]
+)
+
+IO.inspect(answer.text)
+IO.inspect(answer.metadata)
+```
+
+### Query AiMessages
+
+You can read the whole history of a chat; the cursor is followed for you. Leave the chat id out to read the history
+of the whole workspace.
+
+```elixir
+StarkInfra.AiMessage.query!(chat_id: "5155165527080960", limit: 35)
+|> Enum.to_list
+|> IO.inspect
+```
+
+To get one page at a time, use page. It returns the cursor of the next page.
+
+```elixir
+{:ok, {cursor, messages}} = StarkInfra.AiMessage.page(chat_id: "5155165527080960", limit: 5)
+IO.inspect(messages)
+
+{:ok, {_cursor, next_messages}} = StarkInfra.AiMessage.page(chat_id: "5155165527080960", limit: 5, cursor: cursor)
+IO.inspect(next_messages)
+```
+
+```elixir
+{:ok, {_cursor, workspace_messages}} = StarkInfra.AiMessage.page(limit: 5)
+IO.inspect(workspace_messages)
 ```
 
 ## Webhook
