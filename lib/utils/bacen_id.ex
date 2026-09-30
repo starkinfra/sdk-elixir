@@ -1,13 +1,6 @@
 defmodule StarkInfra.Utils.BacenId do
-  def create(bank_code) do
-    [bank_code, datetime_to_string(DateTime.utc_now), random_alphanumeric(11)]
-    |> Enum.join("")
-  end
-
-  defp datetime_to_string(datetime) do
-    [datetime.year, datetime.month, datetime.day, datetime.hour, datetime.minute]
-    |> Enum.map(&to_string/1)
-    |> Enum.map(&String.pad_leading(&1, 2, "0"))
+  def create(bank_code, date_format \\ "%Y%m%d%H%M") do
+    [bank_code, Calendar.strftime(DateTime.utc_now, date_format), random_alphanumeric(11)]
     |> Enum.join("")
   end
 

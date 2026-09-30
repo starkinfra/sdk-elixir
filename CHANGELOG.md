@@ -13,6 +13,7 @@ Given a version number MAJOR.MINOR.PATCH, increment:
 
 ## [Unreleased]
 ### Added
+- PixSubscriptionBacenId utility to generate Pix subscription bacenIds
 - Deprecated create pix infraction
 - StaticBrcode resource
 - DynamicBrcode resource
