@@ -85,7 +85,10 @@ ExUnit.start(
     # :business_attachment_log,
     # :business_account_request,
     # :business_account_request_log
-    # :credit_signer
+    # :credit_signer,
+    # :ai_knowledge_base,
+    # :ai,
+    # :ai_boundary
   ]
 )
 
@@ -112,3 +115,5 @@ Code.require_file("./test/utils/individual_identity.exs")
 Code.require_file("./test/utils/business_identity.exs")
 Code.require_file("./test/utils/business_attachment.exs")
 Code.require_file("./test/utils/business_account_request.exs")
+Code.require_file("./test/utils/ai_knowledge_base.exs")
+Code.require_file("./test/utils/ai.exs")
