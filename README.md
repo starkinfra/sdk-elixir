@@ -80,6 +80,14 @@ This SDK version is compatible with the Stark Infra API v2.
     - [BusinessIdentity](#create-businessidentities): Create business identities
     - [BusinessAttachment](#create-businessattachments): Create business attachments
     - [BusinessAccountRequest](#create-businessaccountrequests): Create business account requests
+  - [AI](#ai)
+    - [AiKnowledgeBase](#create-an-aiknowledgebase): Turn a website into knowledge your agents can answer from
+    - [AiVoice](#create-an-aivoice): Clone a voice from a recording
+    - [AiSpeech](#create-an-aispeech): Read a text out loud with a cloned voice
+    - [AiTranscript](#create-an-aitranscript): Turn a recording into text
+    - [AiAgent](#create-an-aiagent): Configure an assistant with a model, instructions, knowledge and a voice
+    - [AiChat](#create-an-aichat): Open a conversation thread with an agent
+    - [AiMessage](#create-an-aimessage): Talk to an agent and read the history
   - [Webhook](#webhook):
     - [Webhook](#create-a-webhook-subscription): Configure your webhook endpoints and subscriptions
   - [Webhook Events](#webhook-events):
@@ -3432,6 +3440,322 @@ You can also get a specific log by its id.
 ```elixir
 StarkInfra.BusinessAccountRequest.Log.get!("5155165527080960")
 |> IO.inspect
+```
+
+## AI
+
+### Create an AiKnowledgeBase
+
+An AiKnowledgeBase turns a website into material an agent can read. Stark Infra crawls the root URL, follows its
+links, converts every page to Markdown and indexes it. The call returns at once with the base in "processing" status.
+
+```elixir
+StarkInfra.AiKnowledgeBase.create!(
+  %StarkInfra.AiKnowledgeBase{
+    name: "Product Documentation",
+    root_url: "https://docs.starkinfra.com",
+    is_recursive: false,
+    tags: ["support", "public"]
+  }
+)
+|> IO.inspect
+```
+
+**Note**: Instead of using AiKnowledgeBase structs, you can also pass the knowledge base in map format
+
+### Get an AiKnowledgeBase
+
+Poll a knowledge base by its id until its status leaves "processing".
+
+```elixir
+StarkInfra.AiKnowledgeBase.get!("5155165527080960")
+|> IO.inspect
+```
+
+### Query AiKnowledgeBases
+
+You can list your knowledge bases, optionally filtered by ids, by a substring of the name or by status.
+This route is not paginated, so there is no limit or cursor.
+
+```elixir
+StarkInfra.AiKnowledgeBase.query!(
+  name: "documentation",
+  status: "success"
+)
+|> Enum.to_list
+|> IO.inspect
+```
+
+### Update an AiKnowledgeBase
+
+Rename a knowledge base, retag it or change whether its crawl is recursive. The root URL cannot be changed.
+
+```elixir
+StarkInfra.AiKnowledgeBase.update!("5155165527080960", name: "Public Documentation", tags: ["support"])
+|> IO.inspect
+```
+
+### List the pages of an AiKnowledgeBase
+
+Get every page the crawler has seen, grouped by host, with the status of each one.
+
+```elixir
+StarkInfra.AiKnowledgeBase.hosts!("5155165527080960")
+|> IO.inspect
+```
+
+### Delete AiKnowledgeBases
+
+Delete up to 100 knowledge bases at once. Agents that still reference a deleted base simply retrieve nothing from it.
+
+```elixir
+StarkInfra.AiKnowledgeBase.delete!(["5155165527080960", "4545454545454545"])
+|> IO.inspect
+```
+
+### Create an AiVoice
+
+An AiVoice is a voice cloned from a recording you upload, sent in base64. Cloning is asynchronous: the voice is
+created in "processing" status and can speak once it reaches "success". A voice cannot be deleted in the Sandbox.
+
+```elixir
+StarkInfra.AiVoice.create!(
+  %StarkInfra.AiVoice{
+    audio: "UklGRiQAAABXQVZFZm10IBAAAAABAAEA...",
+    name: "Helena",
+    description: "Calm voice",
+    language: "portuguese",
+    gender: "female"
+  }
+)
+|> IO.inspect
+```
+
+**Note**: Instead of using AiVoice structs, you can also pass the voice in map format
+
+### Query AiVoices
+
+You can list your voices. This route is not paginated and takes no filters.
+
+```elixir
+StarkInfra.AiVoice.query!()
+|> Enum.to_list
+|> IO.inspect
+```
+
+### Delete AiVoices
+
+Delete up to 100 voices at once.
+
+```elixir
+StarkInfra.AiVoice.delete!(["5155165527080960", "4545454545454545"])
+|> IO.inspect
+```
+
+### Create an AiSpeech
+
+An AiSpeech is one text read out loud by a voice in "success" status. The audio is synthesized during the call
+and comes back in base64. A speech cannot be deleted.
+
+```elixir
+StarkInfra.AiSpeech.create!(
+  %StarkInfra.AiSpeech{
+    voice_id: "5155165527080960",
+    text: "Hello, how can I help you?"
+  }
+)
+|> IO.inspect
+```
+
+### Get an AiSpeech
+
+The audio comes back unless you ask for fields without it.
+
+```elixir
+StarkInfra.AiSpeech.get!(
+  "5155165527080960",
+  fields: [:id, :status, :audio, :voice_name],
+  expand: [:voice_name]
+)
+|> IO.inspect
+```
+
+### Query AiSpeeches
+
+The list leaves the audio out. This route is not paginated, so there is no limit or cursor.
+
+```elixir
+StarkInfra.AiSpeech.query!(fields: [:id, :status])
+|> Enum.to_list
+|> IO.inspect
+```
+
+### Create an AiTranscript
+
+An AiTranscript is the text of a recording you upload in base64. It is transcribed during the call.
+A transcript cannot be deleted.
+
+```elixir
+StarkInfra.AiTranscript.create!(
+  %StarkInfra.AiTranscript{
+    audio: "UklGRiQAAABXQVZFZm10IBAAAAABAAEA..."
+  }
+)
+|> IO.inspect
+```
+
+### Query AiTranscripts
+
+You can list your transcripts. This route is not paginated and takes no filters.
+
+```elixir
+StarkInfra.AiTranscript.query!()
+|> Enum.to_list
+|> IO.inspect
+```
+
+### Create an AiAgent
+
+An AiAgent is the configuration of an assistant: the model, the instructions, the knowledge it may consult and the
+voice it speaks with. The keys of the metadata schema are yours and are sent exactly as written.
+
+```elixir
+StarkInfra.AiAgent.create!(
+  %StarkInfra.AiAgent{
+    name: "Support assistant",
+    model: "bender-1.0",
+    system_prompt: "Answer in one short sentence.",
+    knowledge_base_ids: ["5155165527080960"],
+    metadata_schema: %{
+      "order_id" => %{"type" => "string", "description" => "Order the customer mentions"}
+    }
+  }
+)
+|> IO.inspect
+```
+
+### Get an AiAgent
+
+Ask for the knowledge bases themselves with expand.
+
+```elixir
+StarkInfra.AiAgent.get!("5155165527080960", expand: [:knowledge_bases])
+|> IO.inspect
+```
+
+### Query AiAgents
+
+This route is not paginated, so there is no limit or cursor.
+
+```elixir
+StarkInfra.AiAgent.query!(fields: [:id, :name])
+|> Enum.to_list
+|> IO.inspect
+```
+
+### Update an AiAgent
+
+Only the parameters you give are changed. The API clears the knowledge bases of an agent updated without them, so
+when you do not pass knowledge_base_ids the SDK reads the current ones and sends them back. Pass an empty list to
+clear them on purpose.
+
+```elixir
+StarkInfra.AiAgent.update!("5155165527080960", name: "Billing assistant")
+|> IO.inspect
+```
+
+### Delete AiAgents
+
+Delete up to 100 agents at once.
+
+```elixir
+StarkInfra.AiAgent.delete!(["5155165527080960", "4545454545454545"])
+|> IO.inspect
+```
+
+### Create an AiChat
+
+An AiChat is one conversation thread with an agent. When you omit the title, the first message generates one.
+
+```elixir
+StarkInfra.AiChat.create!(
+  %StarkInfra.AiChat{
+    agent_id: "5155165527080960",
+    title: "Support chat"
+  }
+)
+|> IO.inspect
+```
+
+### Get an AiChat
+
+```elixir
+StarkInfra.AiChat.get!("5155165527080960", expand: [:agent_name])
+|> IO.inspect
+```
+
+### Query AiChats
+
+This route is not paginated, so there is no limit or cursor.
+
+```elixir
+StarkInfra.AiChat.query!(fields: [:id, :title])
+|> Enum.to_list
+|> IO.inspect
+```
+
+### Update an AiChat
+
+```elixir
+StarkInfra.AiChat.update!("5155165527080960", title: "Billing chat")
+|> IO.inspect
+```
+
+### Delete AiChats
+
+Delete up to 100 chats at once, with their messages.
+
+```elixir
+StarkInfra.AiChat.delete!(["5155165527080960", "4545454545454545"])
+|> IO.inspect
+```
+
+### Create an AiMessage
+
+Post what the user said. The call waits for the agent, which takes a few seconds, and returns the user's message
+and the agent's answer, which is sent by "system".
+
+```elixir
+[user_message, answer] = StarkInfra.AiMessage.create!(
+  %StarkInfra.AiMessage{
+    chat_id: "5155165527080960",
+    text: "What is the status of my order 123?"
+  },
+  expand: [:chat_name]
+)
+
+IO.inspect(answer.text)
+IO.inspect(answer.metadata)
+```
+
+### Query AiMessages
+
+You can read the whole history of a chat; the cursor is followed for you.
+
+```elixir
+StarkInfra.AiMessage.query!(chat_id: "5155165527080960", limit: 35)
+|> Enum.to_list
+|> IO.inspect
+```
+
+To get one page at a time, use page. It returns the cursor of the next page.
+
+```elixir
+{:ok, {cursor, messages}} = StarkInfra.AiMessage.page(chat_id: "5155165527080960", limit: 5)
+IO.inspect(messages)
+
+{:ok, {_cursor, next_messages}} = StarkInfra.AiMessage.page(chat_id: "5155165527080960", limit: 5, cursor: cursor)
+IO.inspect(next_messages)
 ```
 
 ## Webhook
