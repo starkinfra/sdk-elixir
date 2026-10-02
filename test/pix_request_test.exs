@@ -139,7 +139,7 @@ defmodule StarkInfraTest.PixRequest do
       receiver_account_type: "checking",
       receiver_name: "Jamie Lamister",
       receiver_tax_id: "34.052.649/0001-78",
-      end_to_end_id: StarkInfra.Utils.EndToEndId.create("35547753")
+      end_to_end_id: StarkInfra.Utils.EndToEndId.create(System.get_env("SANDBOX_BANK_CODE"))
     }
   end
 end
