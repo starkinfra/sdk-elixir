@@ -98,6 +98,7 @@ Given a version number MAJOR.MINOR.PATCH, increment:
 - IssuingBin resource to IssuingProduct
 - settlement parameter to funding_type and client parameter to holder_type of IssuingProduct
 - IssuingAuthorization parse and response to IssuingPurchase.parse and IssuingPurchase.response
+- nominal_amount and amount parameters to conditionally required to CreditNotePreview sub-resource
 ### Fixed
 - query parameters in post requests
 - user option sent as query string in post requests
