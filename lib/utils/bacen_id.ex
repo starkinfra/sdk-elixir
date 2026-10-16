@@ -5,6 +5,6 @@ defmodule StarkInfra.Utils.BacenId do
   end
 
   defp random_alphanumeric(length) do
-    for _ <- 1..length, into: "", do: << Enum.random('0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWYZ') >>
+    for _ <- 1..length, into: "", do: << Enum.random('0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ') >>
   end
 end
