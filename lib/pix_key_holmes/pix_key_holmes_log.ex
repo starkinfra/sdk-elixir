@@ -18,7 +18,7 @@ defmodule StarkInfra.PixKeyHolmes.Log do
   ## Attributes (return-only):
     - `:id` [string]: unique id returned when the log is created. ex: "5656565656565656"
     - `:holmes` [PixKeyHolmes]: PixKeyHolmes entity to which the log refers to.
-    - `:type` [string]: type of the PixKeyHolmes event which triggered the log creation. ex: "created", "solving", "solved", "failed"
+    - `:type` [string]: type of the PixKeyHolmes event which triggered the log creation. ex: "solving", "solved"
     - `:errors` [list of strings]: list of errors linked to this PixKeyHolmes event
     - `:created` [DateTime]: creation datetime for the log. ex: ~U[2020-3-10 10:30:0:0]
   """
@@ -80,7 +80,7 @@ defmodule StarkInfra.PixKeyHolmes.Log do
     - `:limit` [integer, default nil]: maximum number of structs to be retrieved. Unlimited if nil. ex: 35
     - `:after` [Date or string, default nil]: date filter for structs created after specified date. ex: ~D[2020-03-10]
     - `:before` [Date or string, default nil]: date filter for structs created before a specified date. ex: ~D[2020-03-10]
-    - `:types` [list of strings, default nil]: filter retrieved structs by types. ex: ["created", "solving", "solved", "failed"]
+    - `:types` [list of strings, default nil]: filter retrieved structs by types. ex: ["solving", "solved"]
     - `:holmes_ids` [list of strings, default nil]: list of PixKeyHolmes ids to filter retrieved objects. ex: ["5656565656565656", "4545454545454545"]
     - `:user` [Organization/Project, default nil]: Organization or Project struct returned from StarkInfra.project(). Only necessary if default project or organization has not been set in configs.
 
@@ -128,7 +128,7 @@ defmodule StarkInfra.PixKeyHolmes.Log do
     - `:limit` [integer, default 100]: maximum number of structs to be retrieved. Max = 100. ex: 35
     - `:after` [Date or string, default nil]: date filter for structs created after specified date. ex: ~D[2020-03-10]
     - `:before` [Date or string, default nil]: date filter for structs created before a specified date. ex: ~D[2020-03-10]
-    - `:types` [list of strings, default nil]: filter retrieved structs by types. ex: ["created", "solving", "solved", "failed"]
+    - `:types` [list of strings, default nil]: filter retrieved structs by types. ex: ["solving", "solved"]
     - `:holmes_ids` [list of strings, default nil]: list of PixKeyHolmes ids to filter retrieved objects. ex: ["5656565656565656", "4545454545454545"]
     - `:user` [Organization/Project, default nil]: Organization or Project struct returned from StarkInfra.project(). Only necessary if default project or organization has not been set in configs.
 
