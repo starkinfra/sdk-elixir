@@ -106,6 +106,7 @@ Given a version number MAJOR.MINOR.PATCH, increment:
 - amount, expiration, document_id, status, transaction_ids, workspace_id and tax_amount attributes of CreditNote resource not being parsed
 - README headings for PixKey, PixClaim, IssuingEmbossingRequest and Webhook
 - CreditNote.Invoice parsing crash when descriptions or discounts are nil
+- missing uppercase X in the random characters of BacenId, EndToEndId, ReturnId and PixSubscriptionBacenId
 ### Removed
 - IssuingAuthorization resource
 - category parameter of IssuingProduct resource
