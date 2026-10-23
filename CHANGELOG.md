@@ -14,6 +14,7 @@ Given a version number MAJOR.MINOR.PATCH, increment:
 ## [Unreleased]
 ### Added
 - PixSubscriptionBacenId utility to generate Pix subscription bacenIds
+- AiKnowledgeBase, AiVoice, AiSpeech, AiTranscript, AiAgent, AiChat and AiMessage resources
 - Deprecated create pix infraction
 - StaticBrcode resource
 - DynamicBrcode resource
