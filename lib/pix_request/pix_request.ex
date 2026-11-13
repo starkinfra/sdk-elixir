@@ -53,7 +53,10 @@ defmodule StarkInfra.PixRequest do
     - `:tags` [list of strings, default nil]: list of strings for reference when searching for PixRequests. ex: ["employees", "monthly"]
     - `:method` [string, default nil]: execution method for the creation of the Pix. Options: "manual", "dict", "initiator", "dynamicQrcode", "staticQrcode", "payerQrcode", "subscription", "contactless", "staticContactless". For "dict", resolve the receiver's PixKey with PixKey.get/2 first and use its data. For "staticQrcode"/"dynamicQrcode", preview the brcode with BrcodePreview first. For "subscription", pass the pull request's `:end_to_end_id` and a matching `:reconciliation_id`. To close a PixChargeback, map its `reversal_*` fields onto the receiver_* fields, set `:reason` to "fraud" and `:sender_tax_id` to your institution's CNPJ. For Pix Saque/Troco, set `:cash_amount` (<= `:amount`) together with `:cashier_type` and `:cashier_bank_code`. For an initiator-registered payment, pass `:initiator_tax_id` and issue `:end_to_end_id` under the initiator's ISPB.
     - `:priority` [string, default nil]: Pix request processing priority, which selects the message channel used to send it: "high" uses the primary channel and "low" the secondary one. Default is "high". Options: "high", "low"
-    - `:reason` [string, default "customerRequest"]: underlying reason for the payment transaction. Options: "customerRequest", "fraud", "subscriptionFlaw". When reason is "fraud" (e.g. returning funds from a PixChargeback), `:sender_tax_id` must be your institution's organization tax ID (CNPJ).
+    - `:reason` [string, default "customerRequest"]: underlying reason for the payment transaction. Options: "customerRequest", "subscriptionFlaw", "fraud". When reason is "fraud" (returning funds from a PixDispute), `:dispute_id` is required and `:sender_tax_id` must be your institution's organization tax ID (CNPJ).
+
+  ## Parameters (conditionally-required):
+    - `:dispute_id` [string, default nil]: Id of the Pix Dispute being refunded. Required when reason is "fraud" and not allowed with any other reason. The dispute must be one you received and must be awaiting the refund, otherwise the request is refused with invalidDisputeId.
 
   ## Attributes (return-only):
     - `:id` [string]: unique id returned when the PixRequest is created. ex: "5656565656565656"
@@ -107,6 +110,7 @@ defmodule StarkInfra.PixRequest do
     :method,
     :priority,
     :reason,
+    :dispute_id,
     :id,
     :fee,
     :status,
@@ -450,6 +454,7 @@ defmodule StarkInfra.PixRequest do
       method: json[:method],
       priority: json[:priority],
       reason: json[:reason],
+      dispute_id: json[:dispute_id],
       id: json[:id],
       fee: json[:fee],
       status: json[:status],

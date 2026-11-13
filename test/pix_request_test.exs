@@ -10,6 +10,22 @@ defmodule StarkInfraTest.PixRequest do
   end
 
   @tag :pix_request
+  test "create pix request with dispute_id" do
+    request = %StarkInfra.PixRequest{
+      example_pix_request()
+      | end_to_end_id: "E20018183202202161723Y4cqxlfLFcm",
+        reason: "fraud",
+        dispute_id: "5656565656565656"
+    }
+    payload = StarkInfra.Utils.API.api_json(request)
+
+    assert request.reason == "fraud"
+    assert request.dispute_id == "5656565656565656"
+    assert payload["reason"] == "fraud"
+    assert payload["disputeId"] == "5656565656565656"
+  end
+
+  @tag :pix_request
   test "create! pix request" do
     request = StarkInfra.PixRequest.create!([example_pix_request()])
     |> hd()

@@ -13,6 +13,7 @@ Given a version number MAJOR.MINOR.PATCH, increment:
 
 ## [Unreleased]
 ### Added
+- dispute_id attribute to PixRequest resource
 - PixSubscriptionBacenId utility to generate Pix subscription bacenIds
 - Deprecated create pix infraction
 - StaticBrcode resource
