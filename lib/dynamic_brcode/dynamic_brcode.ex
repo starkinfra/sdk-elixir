@@ -266,7 +266,7 @@ defmodule StarkInfra.DynamicBrcode do
     - `:signature` [string]: base-64 digital signature received at response header "Digital-Signature"
 
   ## Options:
-    - `:cache_pid` [PID, default nil]: PID of the process that holds the public key cache, returned on previous parses. If not provided, a new cache process will be generated.
+    - `:cache_pid` [PID, default nil]: PID of an Agent that holds the public key cache. verify does not return one, so create it once with `{:ok, cache_pid} = Agent.start_link(fn -> %{} end)` and pass it on every call to avoid requesting the public key from the API each time. If not provided, a new cache process will be generated and the public key will be requested again.
     - `:user` [Organization/Project, default nil]: Organization or Project struct returned from StarkInfra.project(). Only necessary if default project or organization has not been set in configs.
 
   ## Return:

@@ -2139,6 +2139,19 @@ uuid = StarkInfra.DynamicBrcode.verify!(
 )
 ```
 
+Without a `cache_pid`, every call requests the Stark Infra public key from the API (/GET public-key).
+Since `verify` does not return a `cache_pid`, create one once and pass it on every call to reuse the key:
+
+```elixir
+{:ok, cache_pid} = Agent.start_link(fn -> %{} end) # create it once, e.g. when your application starts
+
+uuid = StarkInfra.DynamicBrcode.verify!(
+  uuid: request.url.get_parameter("uuid"),
+  signature: request.headers["Digital-Signature"],
+  cache_pid: cache_pid
+)
+```
+
 ### Answer to a Due DynamicBrcode read
 
 When a Due DynamicBrcode is read by your user, a GET request containing
