@@ -2579,10 +2579,10 @@ StarkInfra.CreditNote.create!([
     name: "Jamie Lannister",
     tax_id: "012.345.678-90",
     nominal_amount: 100000,
-    scheduled: "2022-04-28",
+    scheduled: Date.add(Date.utc_today(), 1),
     invoices: [
       %StarkInfra.CreditNote.Invoice{
-        due: "2023-06-25",
+        due: Date.add(Date.utc_today(), 30),
         amount: 120000,
         fine: 10,
         interest: 2
@@ -2590,26 +2590,27 @@ StarkInfra.CreditNote.create!([
     ],
     tags: ["test", "testing"],
     payment: %StarkInfra.CreditNote.Transfer{
-      due: "2023-06-25",
-      amount: 120000,
-      fine: 10,
-      interest: 2
-    }
+      bank_code: "00000000",
+      branch_code: "1234",
+      account_number: "129340-1",
+      name: "Jamie Lannister",
+      tax_id: "012.345.678-90"
+    },
+    payment_type: "transfer",
     signers: [
-      %StarkInfra.CreditNote.Transfer{
-        due: "2023-06-25",
-        amount: 120000,
-        fine: 10,
-        interest: 2
+      %StarkInfra.CreditSigner{
+        name: "Jamie Lannister",
+        contact: "jamie.lannister@gmail.com",
+        method: "link"
       }
     ],
     external_id: "my_unique_123",
-    street_line_1: "Av. Paulista, 200", 
-    street_line_2: "10 andar", 
-    district: "Bela Vista", 
-    city: "Sao Paulo", 
-    state_code: "SP", 
-    zip_code: "01310-000", 
+    street_line_1: "Av. Paulista, 200",
+    street_line_2: "10 andar",
+    district: "Bela Vista",
+    city: "Sao Paulo",
+    state_code: "SP",
+    zip_code: "01310-000"
   }
 ]) |> IO.inspect
 ```
