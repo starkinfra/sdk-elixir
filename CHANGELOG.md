@@ -32,7 +32,6 @@ Given a version number MAJOR.MINOR.PATCH, increment:
 - CreditHolmes.Log sub-resource
 - CreditPreview resource
 - CreditPreview.CreditNotePreview sub-resource
-- CreditNote.Signer.resend_token method
 - CreditNote.pdf method
 - CreditNote.payment method
 - IssuingBillingInvoice resource
@@ -94,11 +93,13 @@ Given a version number MAJOR.MINOR.PATCH, increment:
 - BusinessAccountRequest.Owner sub-resource
 - BusinessAccountRequest.Log sub-resource
 - CreditSigner resource
-- signed attribute to CreditNote.Signer sub-resource
 ### Changed
 - IssuingBin resource to IssuingProduct
 - settlement parameter to funding_type and client parameter to holder_type of IssuingProduct
 - IssuingAuthorization parse and response to IssuingPurchase.parse and IssuingPurchase.response
+- CreditNote signers attribute to return CreditSigner structs, with the same fields as CreditNote.Signer
+### Deprecated
+- CreditNote.Signer sub-resource, replaced by CreditSigner resource
 ### Fixed
 - query parameters in post requests
 - user option sent as query string in post requests

@@ -6,7 +6,7 @@ defmodule StarkInfra.CreditNote do
   alias StarkInfra.Utils.Check
   alias StarkInfra.User.Project
   alias StarkInfra.User.Organization
-  alias StarkInfra.CreditNote.Signer
+  alias StarkInfra.CreditSigner
   alias StarkInfra.CreditNote.Invoice
   alias StarkInfra.CreditNote.Transfer
   alias StarkInfra.CreditNote.Rule
@@ -28,7 +28,7 @@ defmodule StarkInfra.CreditNote do
     - `:scheduled` [Date Datetime or string]: Date or datetime of transfer execution. ex: ~D[2020-03-10]
     - `:invoices` [list of up to 100 Invoice structs or maps]: installments to be paid by the borrower. Each invoice takes a required `:amount` (in cents), a required `:due` (greater than or equal to `:scheduled`) and optional `:fine` (default 2.0), `:interest` (default 1.0), `:expiration`, `:descriptions` and `:tags`. All invoices in the same CreditNote must share the same `:fine` and `:interest`. ex: [%{ due: "2023-06-25", amount: 120000, fine: 10, interest: 2}]
     - `:payment` [Transfer struct or map]: payment entity to be created and sent to the credit receiver. Do not include an `:amount` field on this struct/map — the disbursed amount is computed by the API from the invoice schedule. ex: %{ bankCode: "00000000", branchCode: "1234", accountNumber: "129340-1", name: "Jamie Lannister", taxId: "012.345.678-90"}
-    - `:signers` [list of up to 10 Signer structs or maps]: every person or entity that must sign the contract, each with required `:name`, `:contact` and `:method`. Methods: "link" (signing link sent to the contact), "token" (signing token sent to the contact), "server" and "organization" (automatic signatures over URL contacts). Signers registered in your credit profile and the SCD signature are appended automatically.
+    - `:signers` [list of up to 10 CreditSigner structs or maps]: every person or entity that must sign the contract, each with required `:name`, `:contact` and `:method`. Methods: "link" (signing link sent to the contact), "token" (signing token sent to the contact), "server" and "organization" (automatic signatures over URL contacts). Signers registered in your credit profile and the SCD signature are appended automatically.
     - `:external_id` [string]: a string that must be unique among all your CreditNotes, used to avoid resource duplication. ex: “my-internal-id-123456”
     - `:street_line_1` [string]: credit receiver main address. ex: "Av. Paulista, 200"
     - `:street_line_2` [string]: credit receiver address complement. ex: "Apto. 123"
@@ -426,7 +426,7 @@ defmodule StarkInfra.CreditNote do
       nominal_amount: json[:nominal_amount],
       scheduled: json[:scheduled],
       invoices: json[:invoices] |> Enum.map(fn invoice -> API.from_api_json(invoice, &Invoice.resource_maker/1) end),
-      signers: json[:signers] |> Enum.map(fn signer -> API.from_api_json(signer, &Signer.resource_maker/1) end),
+      signers: json[:signers] |> Enum.map(fn signer -> API.from_api_json(signer, &CreditSigner.resource_maker/1) end),
       payment: parse_payment!(json[:payment], json[:payment_type]),
       payment_type: json[:payment_type],
       external_id: json[:external_id],
