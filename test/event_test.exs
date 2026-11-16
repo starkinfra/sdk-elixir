@@ -181,6 +181,17 @@ defmodule StarkInfraTest.WebhookEvent do
     assert error.code == "invalidSignature"
   end
 
+  @tag :event
+  test "parse webhook event with missing signature" do
+    {:error, [error]} =
+      StarkInfra.Event.parse(
+        content: @content,
+        signature: nil
+      )
+
+    assert error.code == "invalidSignature"
+  end
+
   defp wait_for_event(subscription, matches_log, attempts \\ 15) do
     event =
       StarkInfra.Event.query!(after: Date.utc_today(), limit: 100)

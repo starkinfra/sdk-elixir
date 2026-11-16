@@ -179,6 +179,16 @@ defmodule StarkInfraTest.DynamicBrcode do
     end)
   end
 
+  @tag :dynamic_brcode
+  test "verify missing signature dynamic brcode" do
+    {:error, [error]} = StarkInfra.DynamicBrcode.verify(
+      uuid: "4e2eab725ddd495f9c98ffd97440702d",
+      signature: nil
+    )
+
+    assert error.code === "invalidSignature"
+  end
+
   # NOTE: there is no fixture in this repo for a genuinely signed uuid (one actually
   # produced by the Stark Infra private key for a real DynamicBrcode read), so a
   # valid-signature verify test is intentionally omitted, mirroring the sibling

@@ -198,6 +198,20 @@ defmodule StarkInfra.Utils.Parse do
     end
   end
 
+  # a missing Digital-Signature header must be refused like any other invalid signature,
+  # not reach Ecdsa.verify? and raise
+  defp verify_signature(_user, _content, signature, _cache_pid, _counter) when is_nil(signature) do
+    {
+      :error,
+      [
+        %Error{
+          code: "invalidSignature",
+          message: "The provided signature is not valid"
+        }
+      ]
+    }
+  end
+
   defp verify_signature(user, content, signature, cache_pid, _counter) do
     case get_StarkInfra_public_key(user, cache_pid) do
     {:ok, public_key} ->
