@@ -45,6 +45,15 @@ defmodule StarkInfraTest.IssuingToken do
       )
 
     assert !is_nil(token)
+    assert token.method_code == "manual"
+    assert token.activation_code == ""
+    assert token.device_type == "Phone"
+    assert token.device_name == "My phone"
+    assert token.device_serial_number == "2F6D63"
+    assert token.device_os_name == "Android"
+    assert token.device_os_version == "4.4.4"
+    assert token.device_imei == "352099001761481"
+    assert token.wallet_instance_id == "1b24f24a24ba98e27d43e345b532a245e4723d7a9c4f624e"
   end
 
   @tag :issuing_token
@@ -56,6 +65,15 @@ defmodule StarkInfraTest.IssuingToken do
       )
 
     assert !is_nil(token)
+    assert token.method_code == "manual"
+    assert token.activation_code == ""
+    assert token.device_type == "Phone"
+    assert token.device_name == "My phone"
+    assert token.device_serial_number == "2F6D63"
+    assert token.device_os_name == "Android"
+    assert token.device_os_version == "4.4.4"
+    assert token.device_imei == "352099001761481"
+    assert token.wallet_instance_id == "1b24f24a24ba98e27d43e345b532a245e4723d7a9c4f624e"
   end
 
   @tag :issuing_token
