@@ -149,6 +149,7 @@ defmodule StarkInfra.IssuingCard do
     status: binary,
     types: [binary],
     holder_ids: [binary],
+    endings: [binary],
     after: Date.t() | binary,
     before: Date.t() | binary,
     tags: [binary],
@@ -173,6 +174,7 @@ defmodule StarkInfra.IssuingCard do
     status: binary,
     types: [binary],
     holder_ids: [binary],
+    endings: [binary],
     after: Date.t() | binary,
     before: Date.t() | binary,
     tags: [binary],
@@ -212,6 +214,7 @@ defmodule StarkInfra.IssuingCard do
     status: binary,
     types: [binary],
     holder_ids: [binary],
+    endings: [binary],
     after: Date.t() | binary,
     before: Date.t() | binary,
     tags: [binary],
@@ -237,6 +240,7 @@ defmodule StarkInfra.IssuingCard do
     status: binary,
     types: [binary],
     holder_ids: [binary],
+    endings: [binary],
     after: Date.t() | binary,
     before: Date.t() | binary,
     tags: [binary],
@@ -319,6 +323,7 @@ defmodule StarkInfra.IssuingCard do
     status: binary,
     display_name: binary,
     rules: [IssuingRule.t()],
+    pin: binary,
     tags: [binary],
     user: (Organization.t() | Project.t() | nil)
   ) ::
@@ -340,6 +345,7 @@ defmodule StarkInfra.IssuingCard do
     status: binary,
     display_name: binary,
     rules: [IssuingRule.t()],
+    pin: binary,
     tags: [binary],
     user: (Organization.t() | Project.t() | nil)
   ) :: any
