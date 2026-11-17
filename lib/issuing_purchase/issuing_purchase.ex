@@ -471,12 +471,12 @@ defmodule StarkInfra.IssuingPurchase do
   Helps you respond IssuingPurchase authorization requests.
 
   ## Parameters (required):
-    - `:status` [string]: sub-issuer response to the authorization. ex: "accepted" or "denied"
+    - `:status` [string]: sub-issuer response to the authorization. ex: "approved" or "denied"
 
   ## Options
-    - `:amount` [integer, default 0]: amount in cents that was authorized. ex: 1234 (= R$ 12.34)
-    - `:reason` [string, default ""]: denial reason. ex: "other"
-    - `:tags` [list of strings, default []]: tags to filter retrieved object. ex: ["tony", "stark"]
+    - `:amount` [integer, default nil]: amount in cents that was authorized. Left out of the response when not given. ex: 1234 (= R$ 12.34)
+    - `:reason` [string, default nil]: denial reason. Left out of the response when not given. ex: "other"
+    - `:tags` [list of strings, default nil]: tags to filter retrieved object. Left out of the response when not given. ex: ["tony", "stark"]
 
   ## Return:
     - Dumped JSON string that must be returned to us on the IssuingPurchase authorization request
@@ -490,7 +490,7 @@ defmodule StarkInfra.IssuingPurchase do
   def response!(status, options \\ []) do
     options = options ++ [status: status]
     JSON.encode!(%{authorization:
-      Enum.into(options |> Check.enforced_keys([:status]), %{amount: 0, reason: "", tags: []})
+      Enum.into(options |> Check.enforced_keys([:status]), %{})
       |> Enum.filter(fn {_, v} -> v != nil end)
       |> Enum.into(%{})
     })

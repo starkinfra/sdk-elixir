@@ -109,6 +109,7 @@ Given a version number MAJOR.MINOR.PATCH, increment:
 - README headings for PixKey, PixClaim, IssuingEmbossingRequest and Webhook
 - CreditNote.Invoice parsing crash when descriptions or discounts are nil
 - nominal_amount required by CreditNote struct, which prevented creating a CreditNote with only amount
+- IssuingPurchase.response! sending amount 0, an empty reason and empty tags when they were not given
 - missing uppercase X in the random characters of BacenId, EndToEndId, ReturnId and PixSubscriptionBacenId
 ### Removed
 - IssuingAuthorization resource

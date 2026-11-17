@@ -556,7 +556,7 @@ request = listen()  # this is the method you made to get the events posted to yo
 
 send_response(  # you should also implement this method
   StarkInfra.IssuingPurchase.response!(
-      "accepted",
+      "approved",
       amount: authorization.amount,
       tags: ["my-purchase-id/123"]
   )

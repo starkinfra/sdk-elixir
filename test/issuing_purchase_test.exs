@@ -82,6 +82,15 @@ defmodule StarkInfraTest.IssuingPurchase do
   end
 
   @tag :issuing_purchase
+  test "response! sends only the fields given" do
+    approved = StarkInfra.IssuingPurchase.response!("approved") |> StarkInfra.Utils.JSON.decode!()
+    assert approved == %{"authorization" => %{"status" => "approved"}}
+
+    partial = StarkInfra.IssuingPurchase.response!("approved", amount: 5000) |> StarkInfra.Utils.JSON.decode!()
+    assert partial == %{"authorization" => %{"status" => "approved", "amount" => 5000}}
+  end
+
+  @tag :issuing_purchase
   test "parse issuing purchase test" do
     {:ok, {_purchase, cache_pid_1}} = StarkInfra.IssuingPurchase.parse(
       content: @content,
