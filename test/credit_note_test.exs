@@ -155,6 +155,21 @@ defmodule StarkInfraTest.CreditNote do
     assert Enum.all?(credit_note.signers, &match?(%StarkInfra.CreditSigner{}, &1))
   end
 
+  @tag :credit_note
+  test "create credit note with only amount" do
+    # struct!/2 checks @enforce_keys at runtime, so this fails if nominal_amount is still required
+    fields =
+      example_credit_note()
+      |> Map.from_struct()
+      |> Map.delete(:nominal_amount)
+      |> Map.put(:amount, 100000)
+
+    credit_note = StarkInfra.CreditNote.create!([struct!(StarkInfra.CreditNote, fields)]) |> hd
+
+    assert credit_note.amount == 100000
+    assert credit_note.nominal_amount > 0
+  end
+
   def example_credit_note() do
     today = Date.utc_today()
 

@@ -66,7 +66,6 @@ defmodule StarkInfra.CreditNote do
     :template_id,
     :name,
     :tax_id,
-    :nominal_amount,
     :scheduled,
     :invoices,
     :payment,
