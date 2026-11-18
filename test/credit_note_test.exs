@@ -174,7 +174,7 @@ defmodule StarkInfraTest.CreditNote do
     today = Date.utc_today()
 
     %StarkInfra.CreditNote{
-      template_id: "5706627130851328",
+      template_id: existing_template_id(),
       external_id: StarkInfraTest.Utils.Random.random_string(32),
       street_line_1: "Av. Paulista, 200",
       street_line_2: "10 andar",
@@ -223,5 +223,13 @@ defmodule StarkInfraTest.CreditNote do
         }
       ],
     }
+  end
+
+  # Templates are enabled per workspace, so reuse one an existing credit note already uses
+  defp existing_template_id() do
+    StarkInfra.CreditNote.query!(limit: 1)
+    |> Enum.take(1)
+    |> hd()
+    |> Map.fetch!(:template_id)
   end
 end

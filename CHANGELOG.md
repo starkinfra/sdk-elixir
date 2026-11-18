@@ -99,6 +99,7 @@ Given a version number MAJOR.MINOR.PATCH, increment:
 - settlement parameter to funding_type and client parameter to holder_type of IssuingProduct
 - IssuingAuthorization parse and response to IssuingPurchase.parse and IssuingPurchase.response
 - CreditNote signers attribute to return CreditSigner structs, with the same fields as CreditNote.Signer
+- IssuingRule categories, countries and methods attributes to return MerchantCategory, MerchantCountry and CardMethod structs
 ### Deprecated
 - CreditNote.Signer sub-resource, replaced by CreditSigner resource
 ### Fixed
