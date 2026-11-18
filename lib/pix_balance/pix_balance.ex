@@ -37,6 +37,7 @@ defmodule StarkInfra.PixBalance do
     - list of PixBalance struct with updated attributes
   """
   @spec get(
+    before: Date.t() | binary,
     user: Project.t() | Organization.t() | nil
   ) ::
     {:ok, PixBalance.t()} |
@@ -52,6 +53,7 @@ defmodule StarkInfra.PixBalance do
   Same as get(), but it will unwrap the error tuple and raise in case of errors.
   """
   @spec get!(
+    before: Date.t() | binary,
     user: Project.t() | Organization.t() | nil
   ) :: any
   def get!(options \\ []) do

@@ -1,5 +1,9 @@
 defmodule StarkInfra.IssuingRule do
   alias __MODULE__, as: IssuingRule
+  alias StarkInfra.MerchantCategory
+  alias StarkInfra.MerchantCountry
+  alias StarkInfra.CardMethod
+  alias StarkInfra.Utils.API
 
   @moduledoc """
     # IssuingRule struct
@@ -15,9 +19,11 @@ defmodule StarkInfra.IssuingRule do
 
   ## Parameters (optional):
     - `:currency_code` [string, default "BRL"]: code of the currency that the rule amount refers to. ex: "BRL" or "USD"
-    - `:categories` [list of strings, default []]: merchant categories accepted by the rule. ex: ["eatingPlacesRestaurants", "travelAgenciesTourOperators"]
-    - `:countries` [list of strings, default []]: countries accepted by the rule. ex: ["BRA", "USA"]
-    - `:methods` [list of strings, default []]: card purchase methods accepted by the rule. ex: ["chip", "token", "server", "manual", "magstripe", "contactless"]
+    - `:categories` [list of MerchantCategory structs or maps, default []]: merchant categories accepted by the rule. ex: [%StarkInfra.MerchantCategory{code: "fastFoodRestaurants"}]
+    - `:countries` [list of MerchantCountry structs or maps, default []]: countries accepted by the rule. ex: [%StarkInfra.MerchantCountry{code: "BRA"}]
+    - `:methods` [list of CardMethod structs or maps, default []]: card purchase methods accepted by the rule. ex: [%StarkInfra.CardMethod{code: "magstripe"}]
+    - `:schedule` [string, default nil]: days and hours in which the rule is active. Empty when the rule is always active. ex: "every monday, wednesday from 00:00 to 23:59 in America/Sao_Paulo"
+    - `:purposes` [list of strings, default nil]: purchase purposes accepted by the rule. An empty list accepts every purpose. Options: "purchase", "withdrawal", "verification". ex: ["purchase", "verification"]
 
   ## Attributes (expanded return-only):
     - `:counter_amount` [integer]: current rule spent amount. ex: 1000
@@ -42,6 +48,8 @@ defmodule StarkInfra.IssuingRule do
     :categories,
     :countries,
     :methods,
+    :schedule,
+    :purposes,
     :counter_amount,
     :currency_symbol,
     :currency_name
@@ -65,13 +73,20 @@ defmodule StarkInfra.IssuingRule do
       id: json[:id],
       interval: json[:interval],
       name: json[:name],
-      categories: json[:categories],
-      countries: json[:countries],
-      methods: json[:methods],
+      categories: parse_list(json[:categories], &MerchantCategory.resource_maker/1),
+      countries: parse_list(json[:countries], &MerchantCountry.resource_maker/1),
+      methods: parse_list(json[:methods], &CardMethod.resource_maker/1),
+      schedule: json[:schedule],
+      purposes: json[:purposes],
       counter_amount: json[:counter_amount],
       currency_symbol: json[:currency_symbol],
       currency_name: json[:currency_name]
     }
   end
 
+  defp parse_list(nil, _resource_maker), do: nil
+
+  defp parse_list(list, resource_maker) do
+    Enum.map(list, fn json -> API.from_api_json(json, resource_maker) end)
+  end
 end

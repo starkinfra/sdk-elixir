@@ -97,6 +97,27 @@ defmodule StarkInfraTest.WebhookEvent do
   end
 
   @tag :event
+  test "pix-key-holmes event log is parsed as PixKeyHolmes.Log" do
+    # Events are generated only for subscribed webhooks; the url is never reached,
+    # the event is read back through the API with the same json the webhook would carry.
+    webhook = StarkInfra.Webhook.create!(
+      url: "https://sdk-elixir-event-test.invalid/webhook",
+      subscriptions: ["pix-key-holmes"]
+    )
+
+    try do
+      holmes = StarkInfra.PixKeyHolmes.create!([StarkInfraTest.Utils.PixKeyHolmes.generate_example_pix_key_holmes()]) |> hd
+
+      event = wait_for_event("pix-key-holmes", fn log -> log_holmes_id(log) == holmes.id end)
+
+      assert %StarkInfra.PixKeyHolmes.Log{} = event.log
+      assert event.log.holmes.id == holmes.id
+    after
+      StarkInfra.Webhook.delete!(webhook.id)
+    end
+  end
+
+  @tag :event
   test "parse webhook event" do
     {:ok, {_event, cache_pid_1}} =
       StarkInfra.Event.parse(
@@ -159,4 +180,35 @@ defmodule StarkInfraTest.WebhookEvent do
 
     assert error.code == "invalidSignature"
   end
+
+  @tag :event
+  test "parse webhook event with missing signature" do
+    {:error, [error]} =
+      StarkInfra.Event.parse(
+        content: @content,
+        signature: nil
+      )
+
+    assert error.code == "invalidSignature"
+  end
+
+  defp wait_for_event(subscription, matches_log, attempts \\ 15) do
+    event =
+      StarkInfra.Event.query!(after: Date.utc_today(), limit: 100)
+      |> Enum.take(100)
+      |> Enum.find(fn event -> event.subscription == subscription and matches_log.(event.log) end)
+
+    cond do
+      event -> event
+      attempts == 0 -> flunk("no #{subscription} event found for the created resource")
+      true ->
+        Process.sleep(2000)
+        wait_for_event(subscription, matches_log, attempts - 1)
+    end
+  end
+
+  # works for both the parsed struct and the raw map the SDK returned before the fix
+  defp log_holmes_id(%{holmes: %{id: id}}), do: id
+  defp log_holmes_id(%{"holmes" => %{"id" => id}}), do: id
+  defp log_holmes_id(_log), do: nil
 end

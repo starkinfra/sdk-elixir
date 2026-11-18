@@ -32,7 +32,6 @@ Given a version number MAJOR.MINOR.PATCH, increment:
 - CreditHolmes.Log sub-resource
 - CreditPreview resource
 - CreditPreview.CreditNotePreview sub-resource
-- CreditNote.Signer.resend_token method
 - CreditNote.pdf method
 - CreditNote.payment method
 - IssuingBillingInvoice resource
@@ -50,6 +49,7 @@ Given a version number MAJOR.MINOR.PATCH, increment:
 - IssuingStock resource
 - IssuingStock.Log sub-resource
 - IssuingRule missing parameters
+- schedule and purposes attributes to IssuingRule resource
 - PixUser resource
 - PixUser.Statistics sub-resource
 - PixDispute resource
@@ -94,11 +94,14 @@ Given a version number MAJOR.MINOR.PATCH, increment:
 - BusinessAccountRequest.Owner sub-resource
 - BusinessAccountRequest.Log sub-resource
 - CreditSigner resource
-- signed attribute to CreditNote.Signer sub-resource
 ### Changed
 - IssuingBin resource to IssuingProduct
 - settlement parameter to funding_type and client parameter to holder_type of IssuingProduct
 - IssuingAuthorization parse and response to IssuingPurchase.parse and IssuingPurchase.response
+- CreditNote signers attribute to return CreditSigner structs, with the same fields as CreditNote.Signer
+- IssuingRule categories, countries and methods attributes to return MerchantCategory, MerchantCountry and CardMethod structs
+### Deprecated
+- CreditNote.Signer sub-resource, replaced by CreditSigner resource
 ### Fixed
 - query parameters in post requests
 - user option sent as query string in post requests
@@ -107,6 +110,8 @@ Given a version number MAJOR.MINOR.PATCH, increment:
 - amount, expiration, document_id, status, transaction_ids, workspace_id and tax_amount attributes of CreditNote resource not being parsed
 - README headings for PixKey, PixClaim, IssuingEmbossingRequest and Webhook
 - CreditNote.Invoice parsing crash when descriptions or discounts are nil
+- nominal_amount required by CreditNote struct, which prevented creating a CreditNote with only amount
+- IssuingPurchase.response! sending amount 0, an empty reason and empty tags when they were not given
 - missing uppercase X in the random characters of BacenId, EndToEndId, ReturnId and PixSubscriptionBacenId
 ### Removed
 - IssuingAuthorization resource
