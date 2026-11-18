@@ -49,6 +49,7 @@ Given a version number MAJOR.MINOR.PATCH, increment:
 - IssuingStock resource
 - IssuingStock.Log sub-resource
 - IssuingRule missing parameters
+- schedule and purposes attributes to IssuingRule resource
 - PixUser resource
 - PixUser.Statistics sub-resource
 - PixDispute resource

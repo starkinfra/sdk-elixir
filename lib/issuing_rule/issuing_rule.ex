@@ -18,6 +18,8 @@ defmodule StarkInfra.IssuingRule do
     - `:categories` [list of strings, default []]: merchant categories accepted by the rule. ex: ["eatingPlacesRestaurants", "travelAgenciesTourOperators"]
     - `:countries` [list of strings, default []]: countries accepted by the rule. ex: ["BRA", "USA"]
     - `:methods` [list of strings, default []]: card purchase methods accepted by the rule. ex: ["chip", "token", "server", "manual", "magstripe", "contactless"]
+    - `:schedule` [string, default nil]: days and hours in which the rule is active. Empty when the rule is always active. ex: "every monday, wednesday from 00:00 to 23:59 in America/Sao_Paulo"
+    - `:purposes` [list of strings, default nil]: purchase purposes accepted by the rule. An empty list accepts every purpose. Options: "purchase", "withdrawal", "verification". ex: ["purchase", "verification"]
 
   ## Attributes (expanded return-only):
     - `:counter_amount` [integer]: current rule spent amount. ex: 1000
@@ -42,6 +44,8 @@ defmodule StarkInfra.IssuingRule do
     :categories,
     :countries,
     :methods,
+    :schedule,
+    :purposes,
     :counter_amount,
     :currency_symbol,
     :currency_name
@@ -68,6 +72,8 @@ defmodule StarkInfra.IssuingRule do
       categories: json[:categories],
       countries: json[:countries],
       methods: json[:methods],
+      schedule: json[:schedule],
+      purposes: json[:purposes],
       counter_amount: json[:counter_amount],
       currency_symbol: json[:currency_symbol],
       currency_name: json[:currency_name]
