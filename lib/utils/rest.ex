@@ -155,6 +155,28 @@ defmodule StarkInfra.Utils.Rest do
   end
   end
 
+  def patch_multi({resource_name, resource_maker}, entities, options) do
+  user = options[:user]
+
+  case Request.fetch(
+    :patch,
+    "#{API.endpoint(resource_name)}",
+    payload: prepare_payload(resource_name, entities),
+    query: Enum.into(options, %{}) |> Map.delete(:user) |> API.cast_json_to_api_format(),
+    user: user
+  ) do
+    {:ok, response} -> {:ok, process_response(resource_name, resource_maker, response)}
+    {:error, errors} -> {:error, errors}
+  end
+  end
+
+  def patch_multi!({resource_name, resource_maker}, entities, options) do
+  case patch_multi({resource_name, resource_maker}, entities, options) do
+    {:ok, entities} -> entities
+    {:error, errors} -> raise API.errors_to_string(errors)
+  end
+  end
+
   def post_single({resource_name, resource_maker}, entity, options) do
   user = options[:user]
 
