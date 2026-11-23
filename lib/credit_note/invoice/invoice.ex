@@ -16,7 +16,7 @@ defmodule StarkInfra.CreditNote.Invoice do
 
   ## Parameters (required):
     - `:amount` [integer]: Invoice value in cents. Minimum = 0 (any value will be accepted). ex: 1234 (= R$ 12.34)
-    - `:due` [DateTime, Date or string, default now + 2 days]: Invoice due date in UTC ISO format. ex: ~U[2021-03-26 19:32:35.418698Z] for immediate invoices and ~D[2020-10-28] for scheduled invoices
+    - `:due` [DateTime, Date or string]: Invoice due date in UTC ISO format. Must be greater than or equal to the CreditNote's `:scheduled` datetime. ex: ~U[2021-03-26 19:32:35.418698Z] for immediate invoices and ~D[2020-10-28] for scheduled invoices
 
   ## Parameters (optional):
     - `:expiration` [integer, default 59 days]: time interval in seconds between due date and expiration date. ex 123456789

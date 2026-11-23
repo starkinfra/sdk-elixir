@@ -134,7 +134,7 @@ defmodule StarkInfra.PixKeyHolmes do
     - `:limit` [integer, default nil]: maximum number of structs to be retrieved. Unlimited if nil. ex: 35
     - `:after` [Date or string, default nil]: date filter for structs created after a specified date. ex: ~D[2020-03-10]
     - `:before` [Date or string, default nil]: date filter for structs created before a specified date. ex: ~D[2020-03-10]
-    - `:status` [list of strings, default nil]: filter for status of retrieved structs. Options: ["created", "solving", "solved", "failed"]
+    - `:status` [list of strings, default nil]: filter for status of retrieved structs. Options: ["solving", "solved"]
     - `:tags` [list of strings, default nil]: tags to filter retrieved structs. ex: ["employees", "monthly"]
     - `:ids` [list of strings, default nil]: list of ids to filter retrieved structs. ex: ["5656565656565656", "4545454545454545"]
     - `:user` [Organization/Project, default nil]: Organization or Project struct returned from StarkInfra.project(). Only necessary if default project or organization has not been set in configs.
@@ -188,7 +188,7 @@ defmodule StarkInfra.PixKeyHolmes do
     - `:limit` [integer, default 100]: maximum number of structs to be retrieved. Max = 100. ex: 35
     - `:after` [Date or string, default nil]: date filter for structs created after a specified date. ex: ~D[2020-03-10]
     - `:before` [Date or string, default nil]: date filter for structs created before a specified date. ex: ~D[2020-03-10]
-    - `:status` [list of strings, default nil]: filter for status of retrieved structs. Options: ["created", "solving", "solved", "failed"]
+    - `:status` [list of strings, default nil]: filter for status of retrieved structs. Options: ["solving", "solved"]
     - `:tags` [list of strings, default nil]: tags to filter retrieved structs. ex: ["employees", "monthly"]
     - `:ids` [list of strings, default nil]: list of ids to filter retrieved structs. ex: ["5656565656565656", "4545454545454545"]
     - `:user` [Organization/Project, default nil]: Organization or Project struct returned from StarkInfra.project(). Only necessary if default project or organization has not been set in configs.

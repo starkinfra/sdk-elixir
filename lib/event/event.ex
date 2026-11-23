@@ -11,6 +11,7 @@ defmodule StarkInfra.Event do
   alias StarkInfra.IssuingCard.Log, as: IssuingCard
   alias StarkInfra.IssuingInvoice.Log, as: IssuingInvoice
   alias StarkInfra.IssuingPurchase.Log, as: IssuingPurchase
+  alias StarkInfra.IssuingToken.Log, as: IssuingToken
   alias StarkInfra.PixKey.Log, as: PixKey
   alias StarkInfra.PixClaim.Log, as: PixClaim
   alias StarkInfra.CreditNote.Log, as: CreditNote
@@ -21,6 +22,8 @@ defmodule StarkInfra.Event do
   alias StarkInfra.PixInfraction.Log, as: PixInfraction
   alias StarkInfra.PixPullRequest.Log, as: PixPullRequest
   alias StarkInfra.PixPullSubscription.Log, as: PixPullSubscription
+  alias StarkInfra.PixKeyHolmes.Log, as: PixKeyHolmes
+  alias StarkInfra.PixInternalTransactionReport.Log, as: PixInternalTransactionReport
   alias StarkInfra.BusinessIdentity.Log, as: BusinessIdentity
 
   @moduledoc """
@@ -326,9 +329,12 @@ defmodule StarkInfra.Event do
       "pix-dispute" -> &PixDispute.resource_maker/1
       "pix-pull-request" -> &PixPullRequest.resource_maker/1
       "pix-pull-subscription" -> &PixPullSubscription.resource_maker/1
+      "pix-key-holmes" -> &PixKeyHolmes.resource_maker/1
+      "pix-internal-transaction-report" -> &PixInternalTransactionReport.resource_maker/1
       "issuing-card" -> &IssuingCard.resource_maker/1
       "issuing-invoice" -> &IssuingInvoice.resource_maker/1
       "issuing-purchase" -> &IssuingPurchase.resource_maker/1
+      "issuing-token" -> &IssuingToken.resource_maker/1
       "business-identity" -> &BusinessIdentity.resource_maker/1
     end
   end

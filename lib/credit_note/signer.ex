@@ -8,7 +8,11 @@ defmodule StarkInfra.CreditNote.Signer do
 
   @moduledoc """
   Groups Signer related functions
+
+  Deprecated: use StarkInfra.CreditSigner instead. CreditNote signers are now returned as
+  StarkInfra.CreditSigner structs, and this module will be removed in a future version.
   """
+  @moduledoc deprecated: "Use StarkInfra.CreditSigner instead"
 
   @doc """
   CreditNote signer's information.
@@ -49,6 +53,7 @@ defmodule StarkInfra.CreditNote.Signer do
   ## Return:
     - Signer struct with updated attributes
   """
+  @deprecated "Use StarkInfra.CreditSigner.resend_token/2 instead"
   @spec resend_token(
     binary,
     user: Project.t() | Organization.t() | nil
@@ -62,6 +67,7 @@ defmodule StarkInfra.CreditNote.Signer do
   @doc """
   Same as resend_token(), but it will unwrap the error tuple and raise in case of errors.
   """
+  @deprecated "Use StarkInfra.CreditSigner.resend_token!/2 instead"
   @spec resend_token!(
     binary,
     user: Project.t() | Organization.t() | nil

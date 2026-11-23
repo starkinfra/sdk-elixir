@@ -32,6 +32,18 @@ defmodule StarkInfra.IssuingToken do
     - `:tags` [list of strings]: tags associated with the token. ex: ["employees", "monthly"]
     - `:created` [DateTime]: creation datetime for the IssuingToken. ex: ~U[2020-3-10 10:30:0:0]
     - `:updated` [DateTime]: latest update datetime for the IssuingToken. ex: ~U[2020-3-10 10:30:0:0]
+
+  ## Attributes (authorization request only):
+  Filled only when the IssuingToken comes from parse() of a tokenization or activation request; nil in get, query and page.
+    - `:activation_code` [string]: activation code received through the bank app or sms. ex: "481632"
+    - `:method_code` [string]: provisioning method. Options: "app", "token", "manual", "server" or "browser"
+    - `:device_type` [string]: device type used for tokenization. ex: "Phone"
+    - `:device_name` [string]: device name used for tokenization. ex: "My phone"
+    - `:device_serial_number` [string]: device serial number used for tokenization. ex: "2F6D63"
+    - `:device_os_name` [string]: device operating system name used for tokenization. ex: "Android"
+    - `:device_os_version` [string]: device operating system version used for tokenization. ex: "4.4.4"
+    - `:device_imei` [string]: device imei used for tokenization. ex: "352099001761481"
+    - `:wallet_instance_id` [string]: unique id of the wallet app in the current device. ex: "71583be4777eb89aaf0345eebeb82594f096615ed17862d0"
   """
   @enforce_keys [
     :id,
@@ -59,7 +71,16 @@ defmodule StarkInfra.IssuingToken do
     :status,
     :tags,
     :created,
-    :updated
+    :updated,
+    :activation_code,
+    :method_code,
+    :device_type,
+    :device_name,
+    :device_serial_number,
+    :device_os_name,
+    :device_os_version,
+    :device_imei,
+    :wallet_instance_id
   ]
 
   @type t() :: %__MODULE__{}
@@ -473,7 +494,16 @@ defmodule StarkInfra.IssuingToken do
       status: json[:status],
       tags: json[:tags],
       created: json[:created] |> Check.datetime(),
-      updated: json[:updated] |> Check.datetime()
+      updated: json[:updated] |> Check.datetime(),
+      activation_code: json[:activation_code],
+      method_code: json[:method_code],
+      device_type: json[:device_type],
+      device_name: json[:device_name],
+      device_serial_number: json[:device_serial_number],
+      device_os_name: json[:device_os_name],
+      device_os_version: json[:device_os_version],
+      device_imei: json[:device_imei],
+      wallet_instance_id: json[:wallet_instance_id]
     }
   end
 end

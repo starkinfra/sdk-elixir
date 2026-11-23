@@ -19,12 +19,14 @@ defmodule StarkInfra.MerchantCategory do
     - `:type` [string]: category's type, which defines an entire group of merchant codes. Options: "unknown", "pets", "food", "fuel", "retail", "health", "hotels", "leisure", "services", "clothing", "gambling", "airlines", "carRental", "education", "groceries", "financial", "government", "organizations", "transportation".
     - `:name` [string]: category's name. ex: "Fast food restaurants"
     - `:number` [string]: category's number. ex: "5814"
+    - `:group` [string]: category's group. ex: "pets", "food"
   """
   defstruct [
     :code,
     :type,
     :name,
-    :number
+    :number,
+    :group
   ]
 
   @type t() :: %__MODULE__{}
@@ -80,7 +82,8 @@ defmodule StarkInfra.MerchantCategory do
       code: json[:code],
       type: json[:type],
       name: json[:name],
-      number: json[:number]
+      number: json[:number],
+      group: json[:group]
     }
   end
 end

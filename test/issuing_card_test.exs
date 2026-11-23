@@ -62,6 +62,31 @@ defmodule StarkInfraTest.IssuingCard do
   end
 
   @tag :issuing_card
+  test "create issuing card with rule schedule, purposes, categories, countries and methods" do
+    rule = %StarkInfra.IssuingRule{
+      amount: 900000,
+      currency_code: "BRL",
+      interval: "week",
+      name: "Example Rule",
+      schedule: "every monday, wednesday from 00:00 to 23:59 in America/Sao_Paulo",
+      purposes: ["purchase", "verification"],
+      categories: [%StarkInfra.MerchantCategory{code: "fastFoodRestaurants"}],
+      countries: [%StarkInfra.MerchantCountry{code: "BRA"}],
+      methods: [%StarkInfra.CardMethod{code: "token"}]
+    }
+    example = %{example_issuing_card() | rules: [rule]}
+
+    card = StarkInfra.IssuingCard.create!([example], expand: ["rules"]) |> hd
+
+    [created_rule] = card.rules
+    assert created_rule.schedule == rule.schedule
+    assert created_rule.purposes == rule.purposes
+    assert [%StarkInfra.MerchantCategory{code: "fastFoodRestaurants"}] = created_rule.categories
+    assert [%StarkInfra.MerchantCountry{code: "BRA"}] = created_rule.countries
+    assert [%StarkInfra.CardMethod{code: "token"}] = created_rule.methods
+  end
+
+  @tag :issuing_card
   test "update issuing card test" do
     issuing_card = StarkInfra.IssuingCard.create!([example_issuing_card()])
     issuing_card = issuing_card |> Enum.take(1) |> hd
