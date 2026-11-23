@@ -179,9 +179,34 @@ defmodule StarkInfraTest.DynamicBrcode do
     end)
   end
 
-  # NOTE: there is no fixture in this repo for a genuinely signed uuid (one actually
-  # produced by the Stark Infra private key for a real DynamicBrcode read), so a
-  # valid-signature verify test is intentionally omitted, mirroring the sibling
-  # PixRequest.parse tests which only cover the wrong/malformed error paths plus one
-  # hardcoded valid pair that we do not have an equivalent for here.
+  @tag :dynamic_brcode
+  test "verify missing signature dynamic brcode" do
+    {:error, [error]} = StarkInfra.DynamicBrcode.verify(
+      uuid: "4e2eab725ddd495f9c98ffd97440702d",
+      signature: nil
+    )
+
+    assert error.code === "invalidSignature"
+  end
+
+  # signed uuid shared by the Python, Node, PHP, Go and Clojure SDK tests
+  @tag :dynamic_brcode
+  test "verify valid signature dynamic brcode" do
+    {:ok, uuid} = StarkInfra.DynamicBrcode.verify(
+      uuid: "21f174ab942843eb90837a5c3135dfd6",
+      signature: "MEYCIQC+Ks0M54DPLEbHIi0JrMiWbBFMRETe/U2vy3gTiid3rAIhANMmOaxT03nx2bsdo+vg6EMhWGzdphh90uBH9PY2gJdd"
+    )
+
+    assert uuid == "21f174ab942843eb90837a5c3135dfd6"
+  end
+
+  @tag :dynamic_brcode
+  test "verify! valid signature dynamic brcode" do
+    uuid = StarkInfra.DynamicBrcode.verify!(
+      uuid: "21f174ab942843eb90837a5c3135dfd6",
+      signature: "MEYCIQC+Ks0M54DPLEbHIi0JrMiWbBFMRETe/U2vy3gTiid3rAIhANMmOaxT03nx2bsdo+vg6EMhWGzdphh90uBH9PY2gJdd"
+    )
+
+    assert uuid == "21f174ab942843eb90837a5c3135dfd6"
+  end
 end

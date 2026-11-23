@@ -20,7 +20,7 @@ defmodule StarkInfra.CreditPreview.CreditNotePreview do
     - `:tax_id` [string]: credit receiver's tax ID (CPF or CNPJ). ex: "20.018.183/0001-80"
 
   ## Parameters (conditionally required):
-    - `:invoices` [list of Invoice structs, default nil]: list of Invoice structs to be created and sent to the credit receiver. Required only when `:type` is "custom". ex: [%StarkInfra.CreditNote.Invoice{}, %StarkInfra.CreditNote.Invoice{}]
+    - `:invoices` [list of Invoice structs, default nil]: list of Invoice structs to be created and sent to the credit receiver. Required only when `:type` is "custom". Each invoice requires `:amount` and `:due`, which must be greater than or equal to `:scheduled`. ex: [%StarkInfra.CreditNote.Invoice{amount: 120000, due: "2023-06-25"}, %StarkInfra.CreditNote.Invoice{amount: 120000, due: "2023-07-25"}]
     - `:nominal_interest` [float, default nil]: yearly nominal interest rate of the credit note, in percentage. Required for "sac", "price", "american" and "bullet". ex: 12.5
     - `:initial_due` [Date, DateTime or string, default nil]: date of the first invoice. Required for "sac", "price", "american" and "bullet". ex: ~D[2020-3-10]
     - `:count` [integer, default nil]: quantity of invoices for payment. Required for "sac", "price" and "american". ex: 12

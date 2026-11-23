@@ -44,6 +44,23 @@ defmodule StarkInfraTest.IndividualAccountAttachment do
   end
 
   @tag :individual_account_attachment
+  test "create individual account attachment from map", %{user_opts: user_opts} do
+    account_request_id = create_account_request_id(user_opts)
+
+    attachment_map =
+      Fixture.generate_example_individual_account_attachment(account_request_id)
+      |> Map.from_struct()
+
+    {:ok, attachments} = StarkInfra.IndividualAccountAttachment.create(
+      [attachment_map],
+      user_opts
+    )
+
+    attachment = attachments |> hd
+    assert !is_nil(attachment.id)
+  end
+
+  @tag :individual_account_attachment
   test "get individual account attachment", %{user_opts: user_opts} do
     account_request_id = create_account_request_id(user_opts)
 

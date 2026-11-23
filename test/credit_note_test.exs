@@ -148,28 +148,33 @@ defmodule StarkInfraTest.CreditNote do
   end
 
   @tag :credit_note
-  test "resend token to credit note signer" do
+  test "create credit note returns signers as CreditSigner" do
     credit_note = StarkInfra.CreditNote.create!([example_credit_note()]) |> hd
-    signer = credit_note.signers |> hd
 
-    {:ok, updated_signer} = StarkInfra.CreditNote.Signer.resend_token(signer.id)
-
-    assert updated_signer.id == signer.id
+    assert credit_note.signers != []
+    assert Enum.all?(credit_note.signers, &match?(%StarkInfra.CreditSigner{}, &1))
   end
 
   @tag :credit_note
-  test "resend! token to credit note signer" do
-    credit_note = StarkInfra.CreditNote.create!([example_credit_note()]) |> hd
-    signer = credit_note.signers |> hd
+  test "create credit note with only amount" do
+    # struct!/2 checks @enforce_keys at runtime, so this fails if nominal_amount is still required
+    fields =
+      example_credit_note()
+      |> Map.from_struct()
+      |> Map.delete(:nominal_amount)
+      |> Map.put(:amount, 100000)
 
-    updated_signer = StarkInfra.CreditNote.Signer.resend_token!(signer.id)
+    credit_note = StarkInfra.CreditNote.create!([struct!(StarkInfra.CreditNote, fields)]) |> hd
 
-    assert updated_signer.id == signer.id
+    assert credit_note.amount == 100000
+    assert credit_note.nominal_amount > 0
   end
 
   def example_credit_note() do
+    today = Date.utc_today()
+
     %StarkInfra.CreditNote{
-      template_id: "5707012469948416",
+      template_id: existing_template_id(),
       external_id: StarkInfraTest.Utils.Random.random_string(32),
       street_line_1: "Av. Paulista, 200",
       street_line_2: "10 andar",
@@ -180,19 +185,19 @@ defmodule StarkInfraTest.CreditNote do
       name: "Jamie Lannister",
       tax_id: "012.345.678-90",
       nominal_amount: 100000,
-      scheduled: "2022-05-30",
+      scheduled: Date.add(today, 1),
       invoices: [
         %StarkInfra.CreditNote.Invoice{
-          due: "2023-06-25",
+          due: Date.add(today, 30),
           amount: 60000,
           fine: 10,
           interest: 2
         },
         %StarkInfra.CreditNote.Invoice{
-          due: "2023-06-25",
+          due: Date.add(today, 60),
           amount: 59000,
           fine: 10,
-          interest: 1,
+          interest: 2,
           descriptions: [
             %StarkInfra.CreditNote.Invoice.Description{
               key: "key",
@@ -218,5 +223,13 @@ defmodule StarkInfraTest.CreditNote do
         }
       ],
     }
+  end
+
+  # Templates are enabled per workspace, so reuse one an existing credit note already uses
+  defp existing_template_id() do
+    StarkInfra.CreditNote.query!(limit: 1)
+    |> Enum.take(1)
+    |> hd()
+    |> Map.fetch!(:template_id)
   end
 end

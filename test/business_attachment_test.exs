@@ -32,6 +32,21 @@ defmodule StarkInfraTest.BusinessAttachment do
   end
 
   @tag :business_attachment
+  test "create business attachment from map" do
+    # raw file bytes plus content_type, so the SDK must build the base64 data url itself
+    attachment_map =
+      StarkInfraTest.Utils.BusinessAttachment.generate_example_business_attachment(business_identity_id())
+      |> Map.from_struct()
+      |> Map.put(:content, Base.decode64!("JVBERi0xLjQ="))
+      |> Map.put(:content_type, "application/pdf")
+
+    {:ok, attachments} = StarkInfra.BusinessAttachment.create([attachment_map])
+
+    attachment = attachments |> hd
+    assert !is_nil(attachment.id)
+  end
+
+  @tag :business_attachment
   test "get a business attachment" do
     created =
       StarkInfra.BusinessAttachment.create!([

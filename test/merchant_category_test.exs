@@ -19,6 +19,7 @@ defmodule StarkInfraTest.MerchantCategory do
   test "query merchant category with search" do
     categories = StarkInfra.MerchantCategory.query!(search: "food") |> Enum.take(10)
     assert categories != [], "no MerchantCategory found for search food"
+    assert Enum.all?(categories, &is_binary(&1.group))
   end
 
   @tag :merchant_category

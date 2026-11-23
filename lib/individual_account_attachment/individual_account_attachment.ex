@@ -313,6 +313,13 @@ defmodule StarkInfra.IndividualAccountAttachment do
     %{attachment | content: "data:#{content_type};base64,#{Base.encode64(content)}", content_type: nil}
   end
 
+  defp encode_content(%{content: content, content_type: content_type} = attachment)
+    when is_binary(content) and is_binary(content_type) do
+    attachment
+    |> Map.put(:content, "data:#{content_type};base64,#{Base.encode64(content)}")
+    |> Map.delete(:content_type)
+  end
+
   defp encode_content(attachment) do
     attachment
   end
