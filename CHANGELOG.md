@@ -13,6 +13,7 @@ Given a version number MAJOR.MINOR.PATCH, increment:
 
 ## [Unreleased]
 ### Added
+- template_replacements parameter to CreditNote, as a CreditNote.TemplateReplacements struct or a map
 - IssuingCard.update_multi and update_multi! functions, to update several cards in one request (PATCH /v2/issuing-card), through a patch_multi in the SDK's Rest module
 - holder_name, holder_tax_id and holder_external_id parameters to IssuingCard.update, to assign a holder to a pending card
 - dispute_id attribute to PixRequest resource
