@@ -13,6 +13,8 @@ Given a version number MAJOR.MINOR.PATCH, increment:
 
 ## [Unreleased]
 ### Added
+- IssuingCard.update_multi and update_multi! functions, to update several cards in one request (PATCH /v2/issuing-card), through a patch_multi in the SDK's Rest module
+- holder_name, holder_tax_id and holder_external_id parameters to IssuingCard.update, to assign a holder to a pending card
 - dispute_id attribute to PixRequest resource
 - PixSubscriptionBacenId utility to generate Pix subscription bacenIds
 - Deprecated create pix infraction
@@ -95,6 +97,7 @@ Given a version number MAJOR.MINOR.PATCH, increment:
 - BusinessAccountRequest.Log sub-resource
 - CreditSigner resource
 ### Changed
+- holder_name, holder_tax_id and holder_external_id are no longer enforced keys of the IssuingCard struct, so a physical card can be created without a holder
 - IssuingBin resource to IssuingProduct
 - settlement parameter to funding_type and client parameter to holder_type of IssuingProduct
 - IssuingAuthorization parse and response to IssuingPurchase.parse and IssuingPurchase.response
