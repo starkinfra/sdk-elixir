@@ -2682,10 +2682,17 @@ StarkInfra.CreditNote.create!([
     district: "Bela Vista",
     city: "Sao Paulo",
     state_code: "SP",
-    zip_code: "01310-000"
+    zip_code: "01310-000",
+    template_replacements: StarkInfra.CreditNote.TemplateReplacements.new(%{
+      guarantor_name: "Jon Snow",
+      guarantor_tax_id: "012.345.678-90",
+      guarantor_address: "Av. Paulista, 200 - Bela Vista - Sao Paulo, SP"
+    })
   }
 ]) |> IO.inspect
 ```
+
+**Note**: `template_replacements` is optional and its keys depend on your contract template. Pass a `StarkInfra.CreditNote.TemplateReplacements` struct (built with `TemplateReplacements.new/1`) or a plain map: both send the same request. Write the keys in snake_case, as atoms or strings: they are sent in camelCase (`guarantor_name` becomes `guarantorName`). Keys already in camelCase are sent as written. Keys with nil values are not sent. Returned CreditNotes carry a `TemplateReplacements` struct with the string keys as the API sent them, in camelCase, readable as `note.template_replacements["guarantorName"]`.
 
 **Note**: Instead of using CreditNote structs, you can also pass each CreditNote element in map format
 

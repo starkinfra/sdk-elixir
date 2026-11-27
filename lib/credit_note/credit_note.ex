@@ -10,6 +10,7 @@ defmodule StarkInfra.CreditNote do
   alias StarkInfra.CreditNote.Invoice
   alias StarkInfra.CreditNote.Transfer
   alias StarkInfra.CreditNote.Rule
+  alias StarkInfra.CreditNote.TemplateReplacements
 
   @moduledoc """
   Groups CreditNote related functions
@@ -45,6 +46,7 @@ defmodule StarkInfra.CreditNote do
   ## Parameters (optional):
     - `:rebate_amount` [integer, default 0]: credit analysis fee deducted from lent amount. ex: 11234 (= R$ 112.34)
     - `:rules` [list of Rule structs or maps, default nil]: list of rules modifying the credit note behavior, as %{key: ..., value: ...} maps or StarkInfra.CreditNote.Rule structs. Currently available key: "invoiceCreationMode", with values "scheduled" (default — each installment invoice is issued a few days before its due date), "instant" (all invoices are issued as soon as the note is disbursed) or "never" (invoices are not issued automatically).
+    - `:template_replacements` [TemplateReplacements struct or map, default nil]: values that fill the placeholders of the contract template, as a StarkInfra.CreditNote.TemplateReplacements struct or a map of placeholder name to value (both send the same request). The keys depend on the template. Write them in snake_case, as atoms or strings: they are sent in camelCase (`guarantor_name` is sent as `guarantorName`). Keys with nil values are not sent. A returned CreditNote carries a TemplateReplacements struct with the string keys as the API sent them, in camelCase, readable as `note.template_replacements["guarantorName"]`. ex: %{guarantor_name: "Jon Snow", guarantor_tax_id: "012.345.678-90", guarantor_address: "Av. Paulista, 200 - Bela Vista - Sao Paulo, SP"}
     - `:tags` [list of strings, default []]: list of strings for reference when searching for CreditNotes. ex: [\"employees\", \"monthly\"]
 
   ## Attributes (return-only):
@@ -97,6 +99,7 @@ defmodule StarkInfra.CreditNote do
     :payment_type,
     :rebate_amount,
     :rules,
+    :template_replacements,
     :tags,
     :id,
     :interest,
@@ -439,6 +442,7 @@ defmodule StarkInfra.CreditNote do
       nominal_interest: json[:nominal_interest],
       rebate_amount: json[:rebate_amount],
       rules: json[:rules] && Enum.map(json[:rules], fn rule -> API.from_api_json(rule, &Rule.resource_maker/1) end),
+      template_replacements: TemplateReplacements.resource_maker(json[:template_replacements]),
       tags: json[:tags],
       debtor_workspace_id: json[:debtor_workspace_id],
       created: json[:created] |> Check.datetime(),

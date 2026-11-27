@@ -170,6 +170,25 @@ defmodule StarkInfraTest.CreditNote do
     assert credit_note.nominal_amount > 0
   end
 
+  @tag :credit_note
+  test "create credit note with template replacements" do
+    # Runs against the sandbox with the rest of the suite: SANDBOX_TEMPLATE_ID must be a template with the nomeAvalista, taxIdAvalista and enderecoAvalista placeholders
+    credit_note =
+      struct!(
+        example_credit_note(),
+        template_replacements: %{
+          nome_avalista: "Jon Snow",
+          tax_id_avalista: "012.345.678-90",
+          endereco_avalista: "Av. Paulista, 200 - Bela Vista - Sao Paulo, SP"
+        },
+        tags: ["sdk-test"]
+      )
+
+    created = StarkInfra.CreditNote.create!([credit_note]) |> hd
+
+    assert created.template_replacements["nomeAvalista"] == "Jon Snow"
+  end
+
   def example_credit_note() do
     today = Date.utc_today()
 
@@ -218,18 +237,24 @@ defmodule StarkInfraTest.CreditNote do
       signers: [
         %{
           name: "Jamie Lannister",
-          contact: "jamie.lannister@gmail.com",
+          contact: "jamie.lannister@invaliddomain.com",
           method: "link"
         }
       ],
     }
   end
 
-  # Templates are enabled per workspace, so reuse one an existing credit note already uses
+  # Templates are enabled per workspace: SANDBOX_TEMPLATE_ID wins, otherwise reuse one an existing credit note already uses
   defp existing_template_id() do
-    StarkInfra.CreditNote.query!(limit: 1)
-    |> Enum.take(1)
-    |> hd()
-    |> Map.fetch!(:template_id)
+    case System.get_env("SANDBOX_TEMPLATE_ID") do
+      id when id in [nil, ""] ->
+        StarkInfra.CreditNote.query!(limit: 1)
+        |> Enum.take(1)
+        |> hd()
+        |> Map.fetch!(:template_id)
+
+      id ->
+        id
+    end
   end
 end
